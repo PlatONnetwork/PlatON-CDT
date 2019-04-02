@@ -1,0 +1,6 @@
+[submodule "libraries/boost"]
+	path = libraries/boost
+	url = https://github.com/PlatONnetwork/boost.git
+[submodule "libraries/rapidjson"]
+	path = libraries/rapidjson
+	url = https://github.com/PlatONnetwork/rapidjson.git
