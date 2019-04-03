@@ -15,7 +15,7 @@ file(GLOB STRING_SOURCES "musl/src/string/*.c")
 file(GLOB THREAD_SOURCES "musl/src/thread/*.c") #only for __lock __unlock
 set(INTERNAL_SOURCES musl/src/internal/floatscan.c musl/src/internal/intscan.c musl/src/internal/shgetc.c musl/src/internal/libc.c)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -allow-sse -ffreestanding -nostdlib -nostdlibinc -fno-threadsafe-statics -fno-rtti -fno-exceptions -w")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -emit-llvm -D_XOPEN_SOURCE=700 -Wno-everything -ffreestanding -fno-threadsafe-statics -fno-rtti -fno-exceptions -w")
 
 file(GLOB HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/musl/include/*.h"

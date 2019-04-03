@@ -10,17 +10,19 @@ FOREACH(FN ${SRC_FILENAMES})
    LIST(APPEND SRC_FILES "libcxx/src/${FN}")
 ENDFOREACH(FN)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -ffreestanding -nostdlib -nostdlibinc -fno-threadsafe-statics -fno-rtti -fno-exceptions -w")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -emit-llvm -Wno-everything -ffreestanding -fno-threadsafe-statics -fno-rtti -fno-exceptions -w")
 
-add_library(c++
-            ${SRC_FILES})
+add_library(c++ ${SRC_FILES})
+
+include_directories(SYSTEM
+  ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/include)
 
 target_include_directories(c++
                            PUBLIC
-                           ${CMAKE_SOURCE_DIR}/libc/musl/include
-                           ${CMAKE_SOURCE_DIR}/libc/musl/src/internal
-                           ${CMAKE_SOURCE_DIR}/libc/musl/src/crypt
-                           ${CMAKE_SOURCE_DIR}/libc/musl/arch/eos
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/include
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/src/internal
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/src/crypt
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/arch/platon
                            ${CMAKE_CURRENT_SOURCE_DIR}/libcxx/include)
 
 target_link_libraries(c++ c)
