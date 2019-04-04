@@ -8,11 +8,8 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
-#include "boost/dll/runtime_symbol_info.hpp"
-
 #include "platon/utils.hpp"
 
-#define ONLY_LD 1
 #include "options.hpp"
 
 const std::string kCompilerName = "platon-cpp";
@@ -94,8 +91,7 @@ int main(int argc, const char** argv) {
       new_opts.emplace_back(" --export _Z4mainiPPc ");
     }
 
-    // TODO: replace wasm-ld with platon-ld
-    if (!platon::cdt::runtime::exec_subprogram("wasm-ld", new_opts)) {
+    if (!platon::cdt::runtime::exec_subprogram("platon-ld", new_opts)) {
       for (const auto& output : outputs) {
         llvm::sys::fs::remove(output);
       }
