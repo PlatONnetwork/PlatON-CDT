@@ -7,12 +7,16 @@ include_directories(${LLVM_INCLUDE_DIRS})
 link_libraries(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
-macro(add_tool name)
-  set(LLVM_LINK_COMPOENTS support)
+set(Boost_USE_STATIC_LIBS ON)  # only find static libs
+find_package(Boost REQUIRED)
 
+include_directories(${Boost_INCLUDE_DIRS})
+link_libraries(${Boost_LIBRARY_DIRS})
+
+macro(add_tool name)
   include_directories(include)
 
-  add_executable(${name} ${CMAKE_CURRENT_SOURCE_DIR}/${name}.cpp)
+  add_executable(${name} ${CMAKE_BINARY_DIR}/${name}.cpp)
   set_property(TARGET ${name} PROPERTY CXX_STANDARD 14)
   target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include ${LLVM_INCLUDE_DIRS})
   target_link_libraries(${name}
@@ -41,3 +45,4 @@ endmacro()
 add_subdirectory(cpp)
 add_subdirectory(ld)
 add_subdirectory(init)
+add_subdirectory(abi)
