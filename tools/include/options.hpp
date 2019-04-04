@@ -22,14 +22,29 @@ static llvm::cl::OptionCategory PlatonLdToolCategory("ld options");
 static llvm::cl::OptionCategory PlatonCompilerToolCategory("compiler options");
 #endif
 
+// ld options
+#ifdef ONLY_LD
+static llvm::cl::list<std::string> L_opt(
+    "L", llvm::cl::desc("Add directory to library search path"),
+    llvm::cl::cat(LD_CAT), llvm::cl::Prefix, llvm::cl::ZeroOrMore);
+static llvm::cl::list<std::string> l_opt(
+    "l", llvm::cl::desc("Root name of library to link"), llvm::cl::cat(LD_CAT),
+    llvm::cl::Prefix, llvm::cl::ZeroOrMore);
+static llvm::cl::list<std::string> export_opt(
+    "export", llvm::cl::desc("Force a symbol to be exported"),
+    llvm::cl::cat(LD_CAT), llvm::cl::Prefix, llvm::cl::ZeroOrMore);
+#endif
+
 static llvm::cl::opt<std::string> o_opt(
     "o", llvm::cl::desc("Write output to <file>"), llvm::cl::cat(LD_CAT));
 static llvm::cl::list<std::string> input_filename_opt(
     llvm::cl::Positional, llvm::cl::desc("<input file> ..."),
     llvm::cl::cat(LD_CAT), llvm::cl::OneOrMore);
+#ifndef ONLY_LD
 static llvm::cl::opt<bool> abigen_opt("abigen",
                                       llvm::cl::desc("Generate abi file"),
                                       llvm::cl::cat(LD_CAT));
+#endif
 
 struct Options {
   std::string output_filename;
@@ -83,6 +98,7 @@ static Options CreateOptions() {
   GetLdOptDefaults(opts.ld_opts);
 #endif
 
+#ifndef ONLY_LD
   if (abigen_opt) {
     opts.abigen = true;
     opts.abigen_opts.emplace_back("-extra-arg=std=c++14");
@@ -95,6 +111,7 @@ static Options CreateOptions() {
     opts.abigen_opts.emplace_back("-extra-arg=-I" +
                                   platon::cdt::utils::where() + "/../include");
   }
+#endif
 
 #ifdef ONLY_LD
   opts.ld_opts.emplace_back("-L" + platon::cdt::utils::where() + "/../lib");
@@ -112,9 +129,13 @@ static Options CreateOptions() {
   opts.compiler_opts.emplace_back("-c");
 
   for (const auto& f : input_filename_opt) {
+#ifdef ONLY_LD
+    opts.ld_opts.push_back(f);
+#endif
     opts.inputs.push_back(f);
   }
 
+#ifndef ONLY_LD
   if (abigen_opt && opts.inputs.size() > 0) {
     opts.abigen_opts.push_back(opts.inputs[0]);
     llvm::SmallString<256> fn = llvm::sys::path::filename(opts.inputs[0]);
@@ -124,6 +145,19 @@ static Options CreateOptions() {
         platon::cdt::utils::pwd() + "/" + std::string(fn.str()) + ".exports";
     opts.abigen_opts.emplace_back("-outpath=" + platon::cdt::utils::pwd());
   }
+#endif
+
+#ifdef ONLY_LD
+  for (const auto& opt : l_opt) {
+    opts.ld_opts.emplace_back("-l" + opt);
+  }
+  for (const auto& opt : L_opt) {
+    opts.ld_opts.emplace_back("-L" + opt);
+  }
+  for (const auto& opt : export_opt) {
+    opts.ld_opts.emplace_back("--export " + opt);
+  }
+#endif
 
   if (o_opt.empty()) {
 #ifndef ONLY_LD
