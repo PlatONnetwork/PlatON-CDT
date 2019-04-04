@@ -26,7 +26,7 @@ int main(int argc, const char** argv) {
 
   cl::SetVersionPrinter([](llvm::raw_ostream& os) {
     os << kCompilerName << " version "
-       << "${VERSIN_FULL}"
+       << "${VERSION_FULL}"
        << "\n";
   });
   cl::ParseCommandLineOptions(
