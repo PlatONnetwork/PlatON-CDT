@@ -84,3 +84,7 @@ target_link_libraries(platon-abigen
 
   add_custom_command(TARGET platon-abigen POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin)
   add_custom_command(TARGET platon-abigen POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:platon-abigen> ${CMAKE_BINARY_DIR}/bin)
+
+  install(FILES ${CMAKE_BINARY_DIR}/bin/platon-abigen
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+    PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
