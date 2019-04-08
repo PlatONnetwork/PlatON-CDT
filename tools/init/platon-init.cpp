@@ -79,7 +79,8 @@ int main(int argc, const char** argv) {
       "project", llvm::cl::desc("output project name"), llvm::cl::Required,
       llvm::cl::cat(cat));
   llvm::cl::opt<std::string> output_dir(
-      "path", llvm::cl::desc("directory to place the project"));
+      "path", llvm::cl::desc("directory to place the project"),
+      llvm::cl::cat(cat));
 
   llvm::cl::ParseCommandLineOptions(argc, argv, std::string("platon-proj"));
   try {
