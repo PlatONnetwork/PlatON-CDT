@@ -4,3 +4,7 @@
 [submodule "libraries/rapidjson"]
 	path = libraries/rapidjson
 	url = https://github.com/PlatONnetwork/rapidjson.git
+[submodule "platon_llvm"]
+	path = platon_llvm
+	url = https://github.com/PlatONnetwork/llvm.git
+	branch = platon
