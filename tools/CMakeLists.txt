@@ -3,7 +3,6 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-message(STATUS "llvm include ${LLVM_INCLUDE_DIRS}")
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${LLVM_SRCDIR}/tools/clang/include)
 include_directories(${LLVM_BINDIR}/tools/clang/include)
@@ -13,13 +12,11 @@ link_libraries(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
 set(Boost_USE_STATIC_LIBS ON)  # only find static libs
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem log random thread)
 
 include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${Boost_LIBRARY_DIRS})
 
-message(STATUS "boost ${Boost_VERSION}")
-message(STATUS "boost dir ${Boost_INCLUDE_DIRS}")
 macro(add_tool name)
   set(LLVM_LINK_COMPONENTS support)
   include_directories(include)
@@ -43,7 +40,7 @@ macro(add_tool name)
     LLVMSupport
     LLVMDemangle
 
-    libboost_filesystem.a
+    ${Boost_LIBRARIES}
     )
 
   add_custom_command(TARGET ${name} POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin)
