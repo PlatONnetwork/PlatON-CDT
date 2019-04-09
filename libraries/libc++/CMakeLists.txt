@@ -27,7 +27,7 @@ target_include_directories(c++
 
 target_link_libraries(c++ c)
 
-add_custom_command(TARGET c++ POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/lib)
-add_custom_command( TARGET c++ POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:c++> ${CMAKE_BINARY_DIR}/lib/ )
+add_custom_command(TARGET c++ POST_BUILD COMMAND mkdir -p ${BINARY_DIR}/lib)
+add_custom_command( TARGET c++ POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:c++> ${BINARY_DIR}/lib/ )
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/libcxx/include/ DESTINATION ${CMAKE_BINARY_DIR}/include/libcxx)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/libcxx/include/ DESTINATION ${BINARY_DIR}/include/libcxx)

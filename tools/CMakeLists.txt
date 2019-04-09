@@ -3,7 +3,12 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
+message(STATUS "llvm include ${LLVM_INCLUDE_DIRS}")
 include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(${LLVM_SRCDIR}/tools/clang/include)
+include_directories(${LLVM_BINDIR}/tools/clang/include)
+include_directories(${LLVM_SRCDIR}/include)
+include_directories(${LLVM_BINDIR}/include)
 link_libraries(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
@@ -13,12 +18,15 @@ find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${Boost_LIBRARY_DIRS})
 
+message(STATUS "boost ${Boost_VERSION}")
+message(STATUS "boost dir ${Boost_INCLUDE_DIRS}")
 macro(add_tool name)
+  set(LLVM_LINK_COMPONENTS support)
   include_directories(include)
 
   add_executable(${name} ${CMAKE_BINARY_DIR}/${name}.cpp)
   set_property(TARGET ${name} PROPERTY CXX_STANDARD 14)
-  target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include ${LLVM_INCLUDE_DIRS})
+  target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_SOURCE_DIR}/platon_llvm/tools/clang/include ${LLVM_INCLUDE_DIR})
   target_link_libraries(${name}
     LLVMipo
     LLVMScalarOpts
@@ -40,9 +48,6 @@ macro(add_tool name)
 
   add_custom_command(TARGET ${name} POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin)
   add_custom_command(TARGET ${name} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${name}> ${CMAKE_BINARY_DIR}/bin)
-  install(FILES ${CMAKE_BINARY_DIR}/bin/${name}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-    PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endmacro()
 
 add_subdirectory(cpp)
