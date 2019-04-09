@@ -71,13 +71,8 @@ target_link_libraries(platon-abigen
   ${LLVM_LIBRARY_DIRS}/libLLVMSupport.a
   ${LLVM_LIBRARY_DIRS}/libLLVMDemangle.a
   ${LLVM_LIBRARY_DIRS}/libLLVMBinaryFormat.a
-    
-  libboost_filesystem.a
-  libboost_system.a
-  libboost_log.a
-  libboost_log_setup.a
-  libboost_thread.a
-  libboost_random.a
+
+  ${Boost_LIBRARIES}
 
   ${SYSTEM_LIB}
   )
