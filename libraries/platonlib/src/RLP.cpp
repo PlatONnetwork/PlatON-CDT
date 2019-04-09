@@ -15,6 +15,7 @@
 	along with cpp-ethereum.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
 #include "platon/RLP.h"
 
 namespace platon {
@@ -330,6 +331,7 @@ void RLPStream::pushCount(size_t _count, byte _base)
     pushInt(_count, br);
 }
 }
+*/
 
 //static void streamOut(std::ostream& _out, dev::RLP const& _d, unsigned _depth = 0)
 //{
