@@ -13,5 +13,13 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
    message(WARNING "CMAKE_INSTALL_PREFIX is explicitly set to /usr/local. This is not recommanded.")
 endif()
 
-add_subdirectory(libraries)
-add_subdirectory(tools)
+include(GNUInstallDirs)
+
+#add_subdirectory(libraries)
+#add_subdirectory(tools)
+include(CMakeModules/LLVMExternalProject.txt)
+include(CMakeModules/BoostExternalProject.txt)
+include(CMakeModules/ToolsExternalProject.txt)
+include(CMakeModules/LibrariesExternalProject.txt)
+
+include(CMakeModules/InstallCDT.cmake)

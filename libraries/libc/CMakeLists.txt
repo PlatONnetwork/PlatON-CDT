@@ -50,9 +50,9 @@ target_include_directories(c
   ${CMAKE_CURRENT_SOURCE_DIR}/../platonlib/include
   ${CMAKE_SOURCE_DIR})
 
-add_custom_command(TARGET c POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/lib)
-add_custom_command(TARGET c POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:c> ${CMAKE_BINARY_DIR}/lib)
+add_custom_command(TARGET c POST_BUILD COMMAND mkdir -p ${BINARY_DIR}/lib)
+add_custom_command(TARGET c POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:c> ${BINARY_DIR}/lib)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/musl/include/ DESTINATION ${CMAKE_BINARY_DIR}/include/libc/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/musl/src/internal/ DESTINATION ${CMAKE_BINARY_DIR}/include/libc/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/musl/arch/platon/ DESTINATION ${CMAKE_BINARY_DIR}/include/libc/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/musl/include/ DESTINATION ${BINARY_DIR}/include/libc/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/musl/src/internal/ DESTINATION ${BINARY_DIR}/include/libc/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/musl/arch/platon/ DESTINATION ${BINARY_DIR}/include/libc/)
