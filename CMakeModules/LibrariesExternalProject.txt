@@ -1,0 +1,17 @@
+include(ExternalProject)
+find_package(Git REQUIRED)
+include(GNUInstallDirs)
+
+set(LLVM_BINDIR ${CMAKE_BINARY_DIR}/platon_llvm/bin)
+ExternalProject_Add(
+  PlatonWasmLibs
+  CMAKE_ARGS -DBINARY_DIR=${CMAKE_BINARY_DIR} -DCMAKE_C_COMPILER=${LLVM_BINDIR}/clang-7 -DCMAKE_CXX_COMPILER=${LLVM_BINDIR}/clang++ -DCMAKE_AR=${LLVM_BINDIR}/llvm-ar -DCMAKE_RANLIB=${LLVM_BINDIR}/llvm-ranlib
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/libraries"
+  BINARY_DIR "${CMAKE_BINARY_DIR}/libraries"
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  TEST_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_ALWAYS 1
+  DEPENDS PlatonLLVM
+  )
