@@ -5,10 +5,12 @@ contract writing for the PlatON platform.
 
 ## Build
 
-#### Required
+### Required
 
 - GCC 5.4+ or Clang 4.0+
-- cmake 3.5+
+- CMake 3.5+
+- Git
+- Python
 
 ### Ubuntu 
 
@@ -34,6 +36,28 @@ cd PlatON-CDT
 mkdir build
 cmake .. -DCMAKE_INSTALL_PREFIX=/you/path
 make && make install
+```
+
+### Windows
+
+**Required:** MinGW
+
+**NOTES:** _MinGW and CMake must be installed in a directory without space._
+
+- **Get Source Code**
+
+```shell
+git clone https://github.com/PlatONnetwork/PlatON-CDT.git
+cd PlatON-CDT
+git submodule update --init --recursive
+```
+- **Build Code**
+
+``` sh
+cd PlatON-CDT
+mkdir build
+cmake .. -DCMAKE_INSTALL_PREFIX=/you/path -DCMAKE_MAKE_PROGRAM=mingw32-cmake
+mingw32-cmake && mingw32-cmake install
 ```
 
 ## Usage

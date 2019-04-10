@@ -12,6 +12,12 @@
 
 #include "options.hpp"
 
+#if defined(__WIN32) || defined(__WIN32__) || defined(WIN32)
+#define CLANG "clang"
+#else
+#define CLANG "clang-7"
+#endif
+
 const std::string kCompilerName = "platon-cpp";
 
 using namespace llvm;
@@ -19,7 +25,7 @@ using namespace llvm;
 int main(int argc, const char** argv) {
   for (auto i = 0; i < argc; i++) {
     if (argv[i] == std::string("-v")) {
-      platon::cdt::runtime::exec_subprogram("clang-7", {"-v"});
+      platon::cdt::runtime::exec_subprogram(CLANG, {"-v"});
       return 0;
     }
   }
@@ -64,7 +70,7 @@ int main(int argc, const char** argv) {
       new_opts.insert(new_opts.begin(), "-o " + output);
       outputs.push_back(output);
 
-      if (!platon::cdt::runtime::exec_subprogram("clang-7", new_opts)) {
+      if (!platon::cdt::runtime::exec_subprogram(CLANG, new_opts)) {
         llvm::sys::fs::remove(tmp_file);
         return -1;
       }
