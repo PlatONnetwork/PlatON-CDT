@@ -15,8 +15,11 @@ endif()
 
 include(GNUInstallDirs)
 
-#add_subdirectory(libraries)
-#add_subdirectory(tools)
+set(BIN_SUFFIX)
+if (WIN32)
+  set(BIN_SUFFIX .exe)
+endif()
+
 include(CMakeModules/LLVMExternalProject.txt)
 include(CMakeModules/BoostExternalProject.txt)
 include(CMakeModules/ToolsExternalProject.txt)
