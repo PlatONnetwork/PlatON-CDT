@@ -56,8 +56,8 @@ git submodule update --init --recursive
 ``` sh
 cd PlatON-CDT
 mkdir build
-cmake .. -DCMAKE_INSTALL_PREFIX=/you/path -DCMAKE_MAKE_PROGRAM=mingw32-cmake
-mingw32-cmake && mingw32-cmake install
+cmake -G "MinGW Makefiles" .. -DCMAKE_INSTALL_PREFIX=/you/path -DCMAKE_MAKE_PROGRAM=mingw32-make
+mingw32-make && mingw32-make install
 ```
 
 ## Usage
