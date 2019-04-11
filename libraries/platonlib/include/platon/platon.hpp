@@ -13,3 +13,4 @@
 #include "platon/db/map.hpp"
 #include "platon/storagetype.hpp"
 #include "platon/deployedcontract.hpp"
+#include "platon/name.hpp"
