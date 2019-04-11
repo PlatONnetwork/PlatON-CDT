@@ -59,7 +59,7 @@ struct Options {
 };
 
 static void GetCompilerOptDefaults(std::vector<std::string>& opts) {
-  opts.emplace_back("-std=c++14");
+  opts.emplace_back("-std=c++1z");
   opts.emplace_back("-emit-llvm");
   opts.emplace_back("-O3");
   opts.emplace_back("--target=wasm32");
