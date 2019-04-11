@@ -144,6 +144,8 @@ static Options CreateOptions() {
     opts.exports_filename =
         platon::cdt::utils::pwd() + "/" + std::string(fn.str()) + ".exports";
     opts.abigen_opts.emplace_back("-outpath=" + platon::cdt::utils::pwd());
+    opts.abigen_opts.emplace_back("--");
+    opts.abigen_opts.emplace_back("-w");
   }
 #endif
 

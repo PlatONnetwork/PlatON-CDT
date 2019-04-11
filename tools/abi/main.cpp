@@ -268,9 +268,7 @@ void prepareFile(const string &filename) {
     cur = fs.tellg();
   }
 
-  if (!replaceText.empty()) {
-    cout << "have abi need replace" << endl;
-  } else {
+  if (replaceText.empty()) {
     return;
   };
   fs.close();
@@ -316,7 +314,6 @@ int main(int argc, const char **argv) {
       throw Exception() << ErrStr("create dir failed:")
                         << ErrStr(strerror(errno));
     }
-    cout << "tmp dir in :" << randomDir.string() << endl;
 
     if (verbose) {
       if (logPath.empty()) {
