@@ -1,3 +1,7 @@
+![logo](./docs/images/platon-cdt-logo.png)
+
+[中文](./README_cn.md)
+
 # PlatON-CDT (Contract Development Toolkit)
 
 PlatON-CDT is a toolchain for WebAssembly(WASM) and set of tools to faciliate
