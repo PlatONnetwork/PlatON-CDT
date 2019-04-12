@@ -23,7 +23,7 @@ contract writing for the PlatON platform.
 - **Install Dependencies**
 
 ``` shell
-sudo apt install libz-dev libtinfo-dev
+sudo apt install build-essential cmake libz-dev libtinfo-dev
 ```
 
 - **Get Source Code**
