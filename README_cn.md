@@ -22,7 +22,7 @@
 - 安装依赖
 
 ```sh
-sudo apt install libz-dev libtinfo-dev
+sudo apt install build-essential cmake libz-dev libtinfo-dev
 ```
 
 - 获取源码
