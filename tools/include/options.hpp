@@ -59,7 +59,7 @@ struct Options {
 };
 
 static void GetCompilerOptDefaults(std::vector<std::string>& opts) {
-  opts.emplace_back("-std=c++1z");
+  opts.emplace_back("-std=c++17");
   opts.emplace_back("-emit-llvm");
   opts.emplace_back("-O3");
   opts.emplace_back("--target=wasm32");
@@ -101,9 +101,10 @@ static Options CreateOptions() {
 #ifndef ONLY_LD
   if (abigen_opt) {
     opts.abigen = true;
-    opts.abigen_opts.emplace_back("-extra-arg=std=c++14");
+    opts.abigen_opts.emplace_back("-extra-arg=-std=c++17");
     opts.abigen_opts.emplace_back("-extra-arg=--target=wasm32");
     opts.abigen_opts.emplace_back("-extra-arg=-w");
+    opts.abigen_opts.emplace_back("-extra-arg=-I.");
     opts.abigen_opts.emplace_back(
         "-extra-arg=-I" + platon::cdt::utils::where() + "/../include/libcxx");
     opts.abigen_opts.emplace_back(
@@ -117,6 +118,7 @@ static Options CreateOptions() {
   opts.ld_opts.emplace_back("-L" + platon::cdt::utils::where() + "/../lib");
 #endif
 
+  opts.compiler_opts.emplace_back("-I.");
   opts.compiler_opts.emplace_back("-I" + platon::cdt::utils::where() +
                                   "/../include/libcxx");
   opts.compiler_opts.emplace_back("-I" + platon::cdt::utils::where() +
