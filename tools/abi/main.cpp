@@ -26,6 +26,8 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
 
 #include "AbiDef.h"
 #include "AbiGenerator.h"
@@ -152,7 +154,7 @@ void createJsonAbi(const ABIDef &abiDef, const ContractDef &contractDef,
 void createExportsFile(const ABIDef &abiDef, const string &srcFile,
                        const string &destPath, fs::path &randomDir) {
   fs::path current = fs::current_path();
-  fs::path outPath;
+  fs::path outPath(destPath);
 
   if (destPath == "." || destPath == "" || destPath == "./") {
     outPath = current;
@@ -231,8 +233,11 @@ void createContractFile(fs::path &randomDir, const string &srcPath,
   srcStream.close();
 
   LOGDEBUG << "swap src::" << srcPath << " tmp::" << tmpFile.string();
-  fs::remove(srcPath);
-  fs::copy_file(tmpFile, srcPath);
+  //fs::remove(srcPath);
+  llvm::SmallString<64> res;
+  llvm::sys::path::system_temp_directory(true, res);
+  std::string dst(std::string(res.c_str()) + "/" + filename);
+  fs::copy_file(tmpFile, dst, fs::copy_option::overwrite_if_exists);
 }
 void prepareFile(const string &filename) {
   fstream fs(filename);
@@ -305,7 +310,9 @@ int main(int argc, const char **argv) {
 
     tooling::ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-    fs::path randomDir("/tmp/");
+    llvm::SmallString<64> res;
+    llvm::sys::path::system_temp_directory(true, res);
+    fs::path randomDir(std::string(res.c_str()));
     randomDir = randomDir /
                 randomString(20)
                     .c_str();  // "57298a3ci7d0g504ha00";// randomString(20);
@@ -366,7 +373,7 @@ int main(int argc, const char **argv) {
         fs::path(op.getSourcePathList()[0]).filename().string();
 
     createJsonAbi(abiDef, contractDef, srcFilename, outpath, randomDir);
-    createExportsFile(abiDef, srcFilename, outpath, randomDir);
+    createExportsFile(abiDef, srcFilename, std::string(res.c_str()), randomDir);
 
     ABI initAbi;
     initAbi.methodName = "init";
