@@ -104,7 +104,7 @@ static Options CreateOptions() {
     opts.abigen_opts.emplace_back("-extra-arg=-std=c++17");
     opts.abigen_opts.emplace_back("-extra-arg=--target=wasm32");
     opts.abigen_opts.emplace_back("-extra-arg=-w");
-    opts.abigen_opts.emplace_back("-extra-arg=-I.");
+    opts.abigen_opts.emplace_back("-extra-arg=-I" + platon::cdt::utils::pwd());
     opts.abigen_opts.emplace_back(
         "-extra-arg=-I" + platon::cdt::utils::where() + "/../include/libcxx");
     opts.abigen_opts.emplace_back(
@@ -118,7 +118,7 @@ static Options CreateOptions() {
   opts.ld_opts.emplace_back("-L" + platon::cdt::utils::where() + "/../lib");
 #endif
 
-  opts.compiler_opts.emplace_back("-I.");
+  opts.compiler_opts.emplace_back("-I" + platon::cdt::utils::pwd());
   opts.compiler_opts.emplace_back("-I" + platon::cdt::utils::where() +
                                   "/../include/libcxx");
   opts.compiler_opts.emplace_back("-I" + platon::cdt::utils::where() +
@@ -143,8 +143,10 @@ static Options CreateOptions() {
     llvm::SmallString<256> fn = llvm::sys::path::filename(opts.inputs[0]);
     opts.abi_filename =
         platon::cdt::utils::pwd() + "/" + std::string(fn.str()) + ".abi.json";
+    llvm::SmallString<64> res;
+    llvm::sys::path::system_temp_directory(true, res);
     opts.exports_filename =
-        platon::cdt::utils::pwd() + "/" + std::string(fn.str()) + ".exports";
+        std::string(res.c_str()) + "/" + std::string(fn.str()) + ".exports";
     opts.abigen_opts.emplace_back("-outpath=" + platon::cdt::utils::pwd());
     opts.abigen_opts.emplace_back("--");
     opts.abigen_opts.emplace_back("-w");
