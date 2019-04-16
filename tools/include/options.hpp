@@ -44,6 +44,9 @@ static llvm::cl::list<std::string> input_filename_opt(
 static llvm::cl::opt<bool> abigen_opt("abigen",
                                       llvm::cl::desc("Generate abi file"),
                                       llvm::cl::cat(LD_CAT));
+static llvm::cl::opt<std::string> abigen_output_opt(
+    "abigen_output", llvm::cl::desc("ABIGEN output"),
+    llvm::cl::cat(PlatonCompilerToolCategory));
 #endif
 
 struct Options {
@@ -140,14 +143,18 @@ static Options CreateOptions() {
 #ifndef ONLY_LD
   if (abigen_opt && opts.inputs.size() > 0) {
     opts.abigen_opts.push_back(opts.inputs[0]);
+    std::string abigen_output = abigen_output_opt;
+    if (abigen_output_opt.empty()) {
+      abigen_output = ".";
+    }
     llvm::SmallString<256> fn = llvm::sys::path::filename(opts.inputs[0]);
     opts.abi_filename =
-        platon::cdt::utils::pwd() + "/" + std::string(fn.str()) + ".abi.json";
+        abigen_output + "/" + std::string(fn.str()) + ".abi.json";
     llvm::SmallString<64> res;
     llvm::sys::path::system_temp_directory(true, res);
     opts.exports_filename =
         std::string(res.c_str()) + "/" + std::string(fn.str()) + ".exports";
-    opts.abigen_opts.emplace_back("-outpath=" + platon::cdt::utils::pwd());
+    opts.abigen_opts.emplace_back("-outpath=" + abigen_output);
     opts.abigen_opts.emplace_back("--");
     opts.abigen_opts.emplace_back("-w");
   }

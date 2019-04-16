@@ -113,7 +113,7 @@ void createJsonAbi(const ABIDef &abiDef, const ContractDef &contractDef,
                    const string &srcFile, const string &destPath,
                    fs::path &randomDir) {
   fs::path current = fs::current_path();
-  fs::path outPath;
+  fs::path outPath(destPath);
 
   if (destPath == "." || destPath == "" || destPath == "./") {
     outPath = current;
