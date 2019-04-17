@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -28,6 +29,14 @@ int main(int argc, const char** argv) {
   llvm::cl::ParseCommandLineOptions(argc, argv,
                                     kLdName + " (WebAssembly linker)");
   auto opts = CreateOptions();
+
+  if (!opts.export_file.empty()) {
+    std::fstream fs(opts.export_file);
+    std::string line;
+    while (std::getline(fs, line)) {
+      opts.ld_opts.emplace_back("--export " + line);
+    }
+  }
 
   if (!platon::cdt::runtime::exec_subprogram("wasm-ld", opts.ld_opts)) {
     return -1;
