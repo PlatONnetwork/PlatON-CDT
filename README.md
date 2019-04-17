@@ -44,7 +44,7 @@ make && make install
 
 ### Windows
 
-**Required:** MinGW
+**Required:** [MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z)
 
 **NOTES:** _MinGW and CMake must be installed in a directory without space._
 
