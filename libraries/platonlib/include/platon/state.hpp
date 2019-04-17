@@ -32,7 +32,7 @@ namespace platon {
      * @param number Block height
      * @return h256 Block hash
      */
-    h256 blockHash(int64_t number){
+    inline h256 blockHash(int64_t number){
         byte hash[32];
         ::blockHash(number, hash);
         return h256(hash, sizeof(hash));
@@ -43,7 +43,7 @@ namespace platon {
      * 
      * @return h160 
      */
-    h160 coinbase(){
+    inline h160 coinbase(){
         byte hash[20];
         ::coinbase(hash);
         return h160(hash, sizeof(hash));
@@ -54,7 +54,7 @@ namespace platon {
      * 
      * @return u256 balance
      */
-    u256 balance() {
+    inline u256 balance() {
         byte amount[32];
         ::balance(amount);
         return fromBigEndian<u256>(amount);
@@ -65,7 +65,7 @@ namespace platon {
      * 
      * @return h160 
      */
-    h160 origin(){
+    inline h160 origin(){
         byte hash[20];
         ::origin(hash);
         return h160(hash, sizeof(hash));
@@ -76,7 +76,7 @@ namespace platon {
      * 
      * @return h160 
      */
-    h160 caller(){
+    inline h160 caller(){
         byte hash[20];
         ::caller(hash);
         return h160(hash, sizeof(hash));
@@ -87,7 +87,7 @@ namespace platon {
      * 
      * @return u256 
      */
-    u256 callValue() {
+    inline u256 callValue() {
         byte val[32];
         ::callValue(val);
         return fromBigEndian<u256>(val);
@@ -98,7 +98,7 @@ namespace platon {
      * 
      * @return h160 
      */
-    h160 address(){
+    inline h160 address(){
         byte hash[20];
         ::address(hash);
         return h160(hash, sizeof(hash));
@@ -110,7 +110,7 @@ namespace platon {
      * @param data Binary data
      * @return h256 
      */
-    h256 sha3(bytes & data) {
+    inline h256 sha3(bytes & data) {
         byte hash[32];
         ::sha3(data.data(), data.size(), hash, sizeof(hash));
         return h256(hash, sizeof(hash));
@@ -122,7 +122,7 @@ namespace platon {
      * @param data String
      * @return h256 
      */
-    h256 sha3(const std::string &data) {
+    inline h256 sha3(const std::string &data) {
         byte hash[32];
         ::sha3((const byte*)data.data(), data.length(), hash, sizeof(hash));
         return h256(hash, sizeof(hash));
@@ -136,7 +136,7 @@ namespace platon {
      * @param len Length
      * @return h256 
      */
-    h256 sha3(const byte *data, size_t len) {
+    inline h256 sha3(const byte *data, size_t len) {
         byte hash[32];
         ::sha3(data, len, hash, sizeof(hash));
         return h256(hash, sizeof(hash));
@@ -149,7 +149,7 @@ namespace platon {
      * @param amount Amount
      * @return int64_t 0 success non-zero failure
      */
-    int64_t callTransfer(const Address& to, u256 amount) {
+    inline int64_t callTransfer(const Address& to, u256 amount) {
         bytes bs(32);
         toBigEndian(amount, bs);
         return ::callTransfer(to.data(), to.size(), bs.data());

@@ -722,13 +722,13 @@ template <class ... _Ts> bytes rlpList(_Ts ... _ts)
 }
 
 /// The empty string in RLP format.
-extern bytes RLPNull;
+//extern bytes RLPNull;
 
 /// The empty list in RLP format.
-extern bytes RLPEmptyList;
+//extern bytes RLPEmptyList;
 
-bytes RLPNull = rlp("");
-bytes RLPEmptyList = rlpList();
+//bytes RLPNull = rlp("");
+//bytes RLPEmptyList = rlpList();
 
 /// Human readable version of RLP.
 //std::ostream& operator<<(std::ostream& _out, dev::RLP const& _d);
