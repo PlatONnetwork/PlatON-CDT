@@ -82,7 +82,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num uint64_t type
      */
-    void event(RLPStream &stream, uint64_t num) {
+    inline void event(RLPStream &stream, uint64_t num) {
         stream << num;
     }
 
@@ -92,7 +92,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num uint32_t type
      */
-    void event(RLPStream &stream, uint32_t num) {
+    inline void event(RLPStream &stream, uint32_t num) {
         stream << num;
     }
 
@@ -102,7 +102,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num uint16_t type
      */
-    void event(RLPStream &stream, uint16_t num) {
+    inline void event(RLPStream &stream, uint16_t num) {
         stream << num;
     }
 
@@ -112,7 +112,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num uint8_t type
      */
-    void event(RLPStream &stream, uint8_t num) {
+    inline void event(RLPStream &stream, uint8_t num) {
         stream << num;
     }
 
@@ -122,7 +122,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num int64_t type
      */
-    void event(RLPStream &stream, int64_t num) {
+    inline void event(RLPStream &stream, int64_t num) {
         stream << (uint64_t)num;
     }
 
@@ -132,7 +132,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num int32_t type
      */
-    void event(RLPStream &stream, int32_t num) {
+    inline void event(RLPStream &stream, int32_t num) {
         stream << (uint64_t)num;
     }
 
@@ -142,7 +142,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num int16_t type
      */
-    void event(RLPStream &stream, int16_t num) {
+    inline void event(RLPStream &stream, int16_t num) {
         stream << (uint64_t)num;
     }
 
@@ -152,7 +152,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num int8_t type
      */
-    void event(RLPStream &stream, int8_t num) {
+    inline void event(RLPStream &stream, int8_t num) {
         stream << (uint64_t)num;
     }
 
@@ -162,7 +162,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num std::string type
      */
-    void event(RLPStream &stream, const std::string &s){
+    inline void event(RLPStream &stream, const std::string &s){
         stream << s;
     }
 
@@ -172,7 +172,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num const char* type
      */
-    void event(RLPStream &stream, const char* topic) {
+    inline void event(RLPStream &stream, const char* topic) {
         stream << topic;
     }
 
@@ -182,7 +182,7 @@ namespace platon {
      * @param stream RLP stream
      * @param num char* type
      */
-    void event(RLPStream &stream, char* topic) {
+    inline void event(RLPStream &stream, char* topic) {
         stream << topic;
     }
 
@@ -191,7 +191,7 @@ namespace platon {
      * 
      * @param stream 
      */
-    void event(RLPStream &stream){
+    inline void event(RLPStream &stream){
 
     }
 
@@ -205,7 +205,7 @@ namespace platon {
      * @param args Variable parameter
      */
     template<typename Arg, typename... Args>
-    void event(RLPStream &stream, Arg &&a, Args &&... args) {
+    inline void event(RLPStream &stream, Arg &&a, Args &&... args) {
         event(stream, a);
         event(stream, args...);
     }
@@ -218,7 +218,7 @@ namespace platon {
      * @param args Event parameter
      */
     template<typename... Args>
-    void emitEvent(const std::string &topic, Args &&... args) {
+    inline void emitEvent(const std::string &topic, Args &&... args) {
         bytes data;
         RLPStream stream(sizeof...(args));
         event(stream, args...);

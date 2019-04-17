@@ -61,7 +61,7 @@ namespace platon {
      * @param _i A hex character.
      * @return -1 if `_i` is not a hex character, otherwise returns the corresponding decimal integer.
      */
-    int fromHexChar(char _i) noexcept {
+    inline int fromHexChar(char _i) noexcept {
         if (_i >= '0' && _i <= '9')
             return _i - '0';
         if (_i >= 'a' && _i <= 'f')
@@ -76,7 +76,7 @@ namespace platon {
      * @param _s Hex string.
      * @return The bytes represented by the hexadecimal string s.
      */
-    bytes fromHex(std::string const& _s)
+    inline bytes fromHex(std::string const& _s)
     {
         unsigned s = (_s.size() >= 2 && _s[0] == '0' && _s[1] == 'x') ? 2 : 0;
         std::vector<uint8_t> ret;
@@ -121,7 +121,7 @@ namespace platon {
      * @return Hex string.
      */
     template <class Iterator>
-    std::string toHex(Iterator _it, Iterator _end, std::string const& _prefix) {
+    inline std::string toHex(Iterator _it, Iterator _end, std::string const& _prefix) {
         typedef std::iterator_traits<Iterator> traits;
         static_assert(sizeof(typename traits::value_type) == 1, "toHex needs byte-sized element type");
 
@@ -143,7 +143,8 @@ namespace platon {
      * @return Hex string.
      * @example toHex("A\x69") == "4169"
      */
-    template <class T> std::string toHex(T const& _data) {
+    template <class T>
+    inline std::string toHex(T const& _data) {
         return toHex(_data.begin(), _data.end(), "");
     }
 

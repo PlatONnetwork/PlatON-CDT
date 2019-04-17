@@ -1,3 +1,4 @@
+#pragma once
 #include "platon/contract.hpp"
 #include "platon/print.hpp"
 #include "platon/print.h"
