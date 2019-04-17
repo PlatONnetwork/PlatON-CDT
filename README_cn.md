@@ -44,7 +44,7 @@ make && make install
 
 ### Windows
 
-Windows下编译需要先安装MinGW, 且安装路径不能含有空格(即: 不能安装在"Program
+Windows下编译需要先安装[MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z), 且安装路径不能含有空格(即: 不能安装在"Program
 Files"或"Program Files(x86)目录"), 否则编译失败.
 
 - 获取源码
