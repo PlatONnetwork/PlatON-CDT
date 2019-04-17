@@ -25,9 +25,9 @@
 #include "clang/Sema/Sema.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
-#include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "AbiDef.h"
 #include "AbiGenerator.h"
@@ -60,14 +60,13 @@ static cl::opt<std::string> logLevel("log-level",
 static cl::opt<bool> verbose("verbose", cl::desc("log on-off, default = true"),
                              cl::cat(abiGeneratorOptions), cl::init(true));
 
-static cl::opt<std::string> abiJsonName(
-    "abi-name", cl::desc("abi json filename, defalut = destination filename"),
+static cl::opt<std::string> abigen_output_opt(
+    "abigen_output", cl::desc("ABIGEN output, default = ./<filename>.abi.json"),
     cl::cat(abiGeneratorOptions));
 
-static cl::opt<std::string> outpath("outpath",
-                                    cl::desc("outpath, default = ./"),
-                                    cl::cat(abiGeneratorOptions),
-                                    cl::init("./"));
+static cl::opt<std::string> exports_output_opt("exports_output",
+                                               cl::desc("exports output"),
+                                               cl::cat(abiGeneratorOptions));
 
 std::unique_ptr<tooling::FrontendActionFactory> CreateFindMacroFactory(
     ContractDef &contractDef, vector<string> &actions) {
@@ -115,14 +114,13 @@ void createJsonAbi(const ABIDef &abiDef, const ContractDef &contractDef,
   fs::path current = fs::current_path();
   fs::path outPath(destPath);
 
-  if (destPath == "." || destPath == "" || destPath == "./") {
-    outPath = current;
-  }
-
   if (srcFile.empty()) {
     throw Exception() << ErrStr("src name is empty");
   }
   string fileName = srcFile + ".abi.json";
+  if (destPath.empty()) {
+    outPath = current / fileName;
+  }
   fs::path tmpFile = randomDir / fileName;
 
   LOGERROR << "random:[" << randomDir.string() << "] fileName:" << fileName;
@@ -137,18 +135,8 @@ void createJsonAbi(const ABIDef &abiDef, const ContractDef &contractDef,
   outputJsonABI(abiDef, contractDef, fs);
   fs.close();
 
-  fs::path oldFile(outPath);
-  if (fs::exists(oldFile / fileName)) {
-    oldFile = oldFile / fileName;
-    LOGDEBUG << "swap old::" << oldFile.string()
-             << " tmp::" << tmpFile.string();
-    fs::remove(oldFile);
-    fs::copy_file(tmpFile, oldFile);
-  } else {
-    outPath = outPath / fileName;
-    LOGDEBUG << "copy ::" << tmpFile.string() << " to ::" << outPath.string();
-    fs::copy_file(tmpFile, outPath);
-  }
+  LOGDEBUG << "copy ::" << tmpFile.string() << " to ::" << outPath.string();
+  fs::copy_file(tmpFile, outPath, fs::copy_option::overwrite_if_exists);
 }
 
 void createExportsFile(const ABIDef &abiDef, const string &srcFile,
@@ -156,14 +144,13 @@ void createExportsFile(const ABIDef &abiDef, const string &srcFile,
   fs::path current = fs::current_path();
   fs::path outPath(destPath);
 
-  if (destPath == "." || destPath == "" || destPath == "./") {
-    outPath = current;
-  }
-
   if (srcFile.empty()) {
     throw Exception() << ErrStr("src name is empty");
   }
   string fileName = srcFile + ".exports";
+  if (destPath.empty()) {
+    outPath = current / fileName;
+  }
   fs::path tmpFile = randomDir / fileName;
 
   LOGERROR << "random:[" << randomDir.string() << "] fileName:" << fileName;
@@ -182,18 +169,8 @@ void createExportsFile(const ABIDef &abiDef, const string &srcFile,
   }
   fs.close();
 
-  fs::path oldFile(outPath);
-  if (fs::exists(oldFile / fileName)) {
-    oldFile = oldFile / fileName;
-    LOGDEBUG << "swap old::" << oldFile.string()
-             << " tmp::" << tmpFile.string();
-    fs::remove(oldFile);
-    fs::copy_file(tmpFile, oldFile);
-  } else {
-    outPath = outPath / fileName;
-    LOGDEBUG << "copy ::" << tmpFile.string() << " to ::" << outPath.string();
-    fs::copy_file(tmpFile, outPath);
-  }
+  LOGDEBUG << "copy ::" << tmpFile.string() << " to ::" << outPath.string();
+  fs::copy_file(tmpFile, outPath, fs::copy_option::overwrite_if_exists);
 }
 
 void createContractFile(fs::path &randomDir, const string &srcPath,
@@ -233,7 +210,7 @@ void createContractFile(fs::path &randomDir, const string &srcPath,
   srcStream.close();
 
   LOGDEBUG << "swap src::" << srcPath << " tmp::" << tmpFile.string();
-  //fs::remove(srcPath);
+  // fs::remove(srcPath);
   llvm::SmallString<64> res;
   llvm::sys::path::system_temp_directory(true, res);
   std::string dst(std::string(res.c_str()) + "/" + filename);
@@ -304,7 +281,8 @@ int main(int argc, const char **argv) {
     tooling::CommonOptionsParser op(argc, argv, abiGeneratorOptions);
 
     if (op.getSourcePathList().size() > 1) {
-      throw Exception() << ErrStr("only one contract file");
+      //throw Exception() << ErrStr("only one contract file");
+      return -1;
     }
     prepareFile(op.getSourcePathList()[0]);
 
@@ -336,7 +314,8 @@ int main(int argc, const char **argv) {
     int result = Tool.run(CreateFindMacroFactory(contractDef, action).get());
 
     if (result != 0 || contractDef.name.empty()) {
-      throw Exception() << ErrStr("find macro PLATON_ABI failed");
+      //throw Exception() << ErrStr("find macro PLATON_ABI failed");
+      return -1;
     }
 
     LOGDEBUG << "result:" << result << "contract fullname:["
@@ -350,7 +329,8 @@ int main(int argc, const char **argv) {
     result = Tool.run(createFactory(contractDef.name, action, abiDef).get());
 
     if (result != 0) {
-      throw Exception() << ErrStr("find contract abi defined failed");
+      //throw Exception() << ErrStr("find contract abi defined failed");
+      return -1;
     }
 
     LOGINFO << "find method success"
@@ -372,8 +352,9 @@ int main(int argc, const char **argv) {
     string srcFilename =
         fs::path(op.getSourcePathList()[0]).filename().string();
 
-    createJsonAbi(abiDef, contractDef, srcFilename, outpath, randomDir);
-    createExportsFile(abiDef, srcFilename, std::string(res.c_str()), randomDir);
+    createJsonAbi(abiDef, contractDef, srcFilename, abigen_output_opt,
+                  randomDir);
+    createExportsFile(abiDef, srcFilename, exports_output_opt, randomDir);
 
     ABI initAbi;
     initAbi.methodName = "init";

@@ -13,23 +13,59 @@
 
 class Project final {
  public:
-  Project(const std::string& project_name, const std::string& path)
-      : project_name_(project_name), path_(path) {
+  Project(const std::string& project_name, const std::string& path, bool bare)
+      : project_name_(project_name), path_(path), bare_(bare) {
     llvm::sys::fs::create_directory(path_);
+    if (!bare) {
+      llvm::sys::fs::create_directory(path_ + "/src");
+      llvm::sys::fs::create_directory(path_ + "/include");
+      llvm::sys::fs::create_directory(path_ + "/build");
+    }
   }
 
   ~Project() = default;
 
   void WriteCpp() {
     std::ofstream cpp_out;
-    cpp_out.open(path_ + "/" + project_name_ + ".cpp");
-    cpp_out << ReplaceName(kCpp);
+    if (bare_) {
+      cpp_out.open(path_ + "/" + project_name_ + ".cpp");
+    } else {
+      cpp_out.open(path_ + "/src/" + project_name_ + ".cpp");
+    }
+    cpp_out << ReplaceIncludeType(ReplaceName(kCpp));
+  }
+
+  void WriteHpp() {
+    std::ofstream hpp_out;
+    if (bare_) {
+      hpp_out.open(path_ + "/" + project_name_ + ".hpp");
+    } else {
+      hpp_out.open(path_ + "/include/" + project_name_ + ".hpp");
+    }
+    hpp_out << ReplaceName(kHpp);
+  }
+
+  void WriteCMake() {
+    if (!bare_) {
+      std::ofstream cmake_out(path_ + "/src/CMakeLists.txt");
+      cmake_out << ReplaceName(kCMake);
+    }
+  }
+
+  void WriteCMakeExtern() {
+    if (!bare_) {
+      std::ofstream cmake_out(path_ + "/CMakeLists.txt");
+      cmake_out << ReplaceName(kCMakeExtern);
+    }
   }
 
   void WriteReadme() {
-    std::ofstream readme_out;
-    readme_out.open(path_ + "/README.txt");
-    readme_out << ReplaceName(kReadme);
+    std::ofstream readme_out(path_ + "/README.txt");
+    if (bare_) {
+      readme_out << ReplaceName(kReadme);
+    } else {
+      readme_out << ReplaceName(kReadmeCMake);
+    }
   }
 
  private:
@@ -45,21 +81,76 @@ class Project final {
     return ss.str();
   }
 
+  std::string ReplaceIncludeType(const std::string& in) {
+    std::stringstream ss;
+    for (char c : in) {
+      if ((c == '<' || c == '>') && bare_) {
+        ss << '"';
+      } else {
+        ss << c;
+      }
+    }
+    return ss.str();
+  }
+
   std::string project_name_;
   std::string path_;
+  bool bare_;
 
   const std::string kCpp =
+      "#include <@.hpp>\n"
+      "CONSTANT void @::hello(const char* name) {\n"
+      "  println(\"hello\", name);\n"
+      "}\n\n";
+
+  const std::string kHpp =
       "#include <platon/platon.hpp>\n"
       "using namespace platon;\n\n"
       "class @ : public Contract {\n"
-      " public:\n"
+      " public: \n"
       "  virtual void init() override {}\n\n"
-      "  [[platon::constant]]\n"
-      "  void hello(const char* name) {\n"
-      "    println(\"hello\", name);\n"
-      "  }\n"
+      "  CONSTANT void hello(const char* name);\n"
       "};\n\n"
       "PLATON_ABI(@, hello);\n\n";
+
+  const std::string kCMake =
+      "project(@)\n\n"
+      "find_package(platon.cdt)\n\n"
+      "add_contract(@ @ @.cpp)\n"
+      "target_include_directories(@ PUBLIC ${CMAKE_SOURCE_DIR}/../include)\n";
+
+  const std::string kCMakeExtern =
+      "include(ExternalProject)\n"
+      "# if no cdt root is given use default path\n"
+      "if (PLATON_CDT_ROOT STREQUAL \"\" OR NOT PLATON_CDT_ROOT)\n"
+      "  find_package(platon.cdt)\n"
+      "endif()\n\n"
+      "ExternalProject_Add(\n"
+      "  @_project\n"
+      "  SOURCE_DIR ${CMAKE_SOURCE_DIR}/src\n"
+      "  BINARY_DIR ${CMAKE_BINARY_DIR}/@\n"
+      "  CMAKE_ARGS "
+      "-DCMAKE_TOOLCHAIN_FILE=${PLATON_CDT_ROOT}/lib/cmake/platon.cdt/"
+      "PlatonWasmToolchain.cmake\n"
+      "  UPDATE_COMMAND \"\"\n"
+      "  PATCH_COMMAND \"\"\n"
+      "  TEST_COMMAND \"\"\n"
+      "  INSTALL_COMMAND \"\"\n"
+      "  BUILD_ALWAYS 1\n"
+      ")";
+
+  const std::string kReadmeCMake =
+      "--- @ Porject ---\n\n"
+      " - How to Build\n"
+      "   - cd to 'build' directory\n"
+      "   - run the command 'cmake ..'\n"
+      "   - run the command 'make' \n\n"
+      " - After build - \n"
+      "   - The built smart contract is under the '@' directory in the 'build' "
+      "directory\n"
+      "   - You can then use 'ctool' to deploy contract\n\n"
+      " - Additions to CMake should be done to CMakeLists.tx in the './src' "
+      "directory and not in the top level CMakeLists.txt";
 
   const std::string kReadme =
       "--- @ Project ---\n\n"
@@ -75,6 +166,11 @@ int main(int argc, const char** argv) {
   llvm::cl::OptionCategory cat("platon-init",
                                "generates an platon smart contract project");
 
+  llvm::cl::opt<bool> bare_opt(
+      "bare",
+      llvm::cl::desc(
+          "produces only a skeleton smart contract without CMake support"),
+      llvm::cl::cat(cat));
   llvm::cl::opt<std::string> project_name(
       "project", llvm::cl::desc("output project name"), llvm::cl::Required,
       llvm::cl::cat(cat));
@@ -103,8 +199,11 @@ int main(int argc, const char** argv) {
     }
     path += "/" + project_name;
 
-    Project project(project_name, path);
+    Project project(project_name, path, bare_opt);
     project.WriteCpp();
+    project.WriteHpp();
+    project.WriteCMake();
+    project.WriteCMakeExtern();
     project.WriteReadme();
   } catch (std::exception& e) {
     std::cout << e.what() << "\n";

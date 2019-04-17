@@ -33,6 +33,10 @@ static llvm::cl::list<std::string> l_opt(
 static llvm::cl::list<std::string> export_opt(
     "export", llvm::cl::desc("Force a symbol to be exported"),
     llvm::cl::cat(LD_CAT), llvm::cl::Prefix, llvm::cl::ZeroOrMore);
+static llvm::cl::opt<std::string> export_file_opt(
+  "export-file",
+  llvm::cl::desc("Export symbols list in <file>"),
+  llvm::cl::cat(LD_CAT));
 #endif
 
 static llvm::cl::opt<std::string> o_opt(
@@ -41,11 +45,21 @@ static llvm::cl::list<std::string> input_filename_opt(
     llvm::cl::Positional, llvm::cl::desc("<input file> ..."),
     llvm::cl::cat(LD_CAT), llvm::cl::OneOrMore);
 #ifndef ONLY_LD
+static llvm::cl::opt<bool> c_opt(
+    "c", llvm::cl::desc("Only run preprocess, compile, and assemble steps"),
+    llvm::cl::cat(PlatonCompilerToolCategory));
+static llvm::cl::list<std::string> I_opt(
+    "I", llvm::cl::desc("Add directory to include search path"),
+    llvm::cl::cat(PlatonCompilerToolCategory), llvm::cl::Prefix,
+    llvm::cl::ZeroOrMore);
 static llvm::cl::opt<bool> abigen_opt("abigen",
                                       llvm::cl::desc("Generate abi file"),
                                       llvm::cl::cat(LD_CAT));
 static llvm::cl::opt<std::string> abigen_output_opt(
     "abigen_output", llvm::cl::desc("ABIGEN output"),
+    llvm::cl::cat(PlatonCompilerToolCategory));
+static llvm::cl::opt<std::string> exports_output_opt(
+    "exports_output", llvm::cl::desc("exports output"),
     llvm::cl::cat(PlatonCompilerToolCategory));
 #endif
 
@@ -59,6 +73,7 @@ struct Options {
   std::vector<std::string> abigen_opts;
   std::string abi_filename;
   std::string exports_filename;
+  std::string export_file;
 };
 
 static void GetCompilerOptDefaults(std::vector<std::string>& opts) {
@@ -102,6 +117,7 @@ static Options CreateOptions() {
 #endif
 
 #ifndef ONLY_LD
+  opts.abigen = false;
   if (abigen_opt) {
     opts.abigen = true;
     opts.abigen_opts.emplace_back("-extra-arg=-std=c++17");
@@ -114,6 +130,16 @@ static Options CreateOptions() {
         "-extra-arg=-I" + platon::cdt::utils::where() + "/../include/libc");
     opts.abigen_opts.emplace_back("-extra-arg=-I" +
                                   platon::cdt::utils::where() + "/../include");
+  }
+
+  if (c_opt) {
+    opts.link = false;
+    opts.compiler_opts.emplace_back("-c");
+  }
+
+  for (auto inc_dir : I_opt) {
+    opts.compiler_opts.emplace_back("-I" + inc_dir);
+    opts.abigen_opts.emplace_back("-extra-arg=-I" + inc_dir);
   }
 #endif
 
@@ -144,17 +170,21 @@ static Options CreateOptions() {
   if (abigen_opt && opts.inputs.size() > 0) {
     opts.abigen_opts.push_back(opts.inputs[0]);
     std::string abigen_output = abigen_output_opt;
-    if (abigen_output_opt.empty()) {
-      abigen_output = ".";
-    }
     llvm::SmallString<256> fn = llvm::sys::path::filename(opts.inputs[0]);
-    opts.abi_filename =
-        abigen_output + "/" + std::string(fn.str()) + ".abi.json";
+    if (abigen_output_opt.empty()) {
+      abigen_output = "./" + std::string(fn.str()) + ".abi.json";
+    }
+    opts.abi_filename = abigen_output;
     llvm::SmallString<64> res;
     llvm::sys::path::system_temp_directory(true, res);
-    opts.exports_filename =
-        std::string(res.c_str()) + "/" + std::string(fn.str()) + ".exports";
-    opts.abigen_opts.emplace_back("-outpath=" + abigen_output);
+    std::string exports_output = exports_output_opt;
+    if (exports_output_opt.empty()) {
+      exports_output =
+          std::string(res.c_str()) + "/" + std::string(fn.str()) + ".exports";
+    }
+    opts.exports_filename = exports_output;
+    opts.abigen_opts.emplace_back("-abigen_output=" + abigen_output);
+    opts.abigen_opts.emplace_back("-exports_output=" + exports_output);
     opts.abigen_opts.emplace_back("--");
     opts.abigen_opts.emplace_back("-w");
   }
@@ -170,6 +200,7 @@ static Options CreateOptions() {
   for (const auto& opt : export_opt) {
     opts.ld_opts.emplace_back("--export " + opt);
   }
+  opts.export_file = export_file_opt;
 #endif
 
   if (o_opt.empty()) {
