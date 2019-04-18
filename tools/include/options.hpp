@@ -95,7 +95,6 @@ static void GetCompilerOptDefaults(std::vector<std::string>& opts) {
   opts.emplace_back("-fmodules-ts");
   opts.emplace_back("-DBOOST_DISABLE_ASSERTS");
   opts.emplace_back("-DBOOST_EXCEPTION_DISABLE");
-  opts.emplace_back("-DWASM_COMPILE");
   opts.emplace_back("-DRAPIDJSON_64BIT=1");
 }
 
