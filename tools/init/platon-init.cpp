@@ -128,7 +128,14 @@ class Project final {
 
   const std::string kCMake =
       "project(@)\n\n"
-      "find_package(platon.cdt)\n\n"
+      "if (PLATON_CDT_ROOT STREQUAL \"\" OR NOT PLATON_CDT_ROOT)\n"
+      "  find_package(platon.cdt)\n"
+      "else()\n"
+      "  list(APPEND CMAKE_MODULE_PATH "
+      "${PLATON_CDT_ROOT}/lib/cmake/platon.cdt)\n"
+      "  include(PlatonWasmToolchain)\n"
+      "  include(PlatonCDTMacros)\n"
+      "endif()\n\n"
       "add_contract(@ @ @.cpp @_abi.cpp)\n"
       "target_include_directories(@ PUBLIC ${CMAKE_SOURCE_DIR}/../include)\n";
 
