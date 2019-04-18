@@ -65,7 +65,6 @@ namespace platon {
         printi(num);
     }
 
-#ifdef WASM_COMPILE
     /**
     * Prints 32 bit signed integer
     *
@@ -75,7 +74,7 @@ namespace platon {
     inline void print( int32_t num ) {
         printi(num);
     }
-#endif
+
     /**
     * Prints 64 bit signed integer
     *
@@ -96,7 +95,7 @@ namespace platon {
     inline void print( unsigned int num ) {
         printui(num);
     }
-#ifdef WASM_COMPILE
+
     /**
     * Prints 32 bit unsigned integer
     *
@@ -106,7 +105,7 @@ namespace platon {
     inline void print( uint32_t num ) {
         printui(num);
     }
-#endif
+
     /**
     * Prints 64 bit unsigned integer
     *
