@@ -61,6 +61,10 @@ static llvm::cl::opt<std::string> abigen_output_opt(
 static llvm::cl::opt<std::string> exports_output_opt(
     "exports_output", llvm::cl::desc("exports output"),
     llvm::cl::cat(PlatonCompilerToolCategory));
+static llvm::cl::opt<std::string> abidef_output_opt(
+  "abidef_output",
+  llvm::cl::desc("abi define output"),
+  llvm::cl::cat(PlatonCompilerToolCategory));
 #endif
 
 struct Options {
@@ -74,6 +78,7 @@ struct Options {
   std::string abi_filename;
   std::string exports_filename;
   std::string export_file;
+  std::string abidef_output;
 };
 
 static void GetCompilerOptDefaults(std::vector<std::string>& opts) {
@@ -185,6 +190,7 @@ static Options CreateOptions() {
     opts.exports_filename = exports_output;
     opts.abigen_opts.emplace_back("-abigen_output=" + abigen_output);
     opts.abigen_opts.emplace_back("-exports_output=" + exports_output);
+    opts.abigen_opts.emplace_back("-abidef_output=" + abidef_output_opt);
     opts.abigen_opts.emplace_back("--");
     opts.abigen_opts.emplace_back("-w");
   }
