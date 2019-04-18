@@ -144,7 +144,7 @@ class Project final {
       "  BINARY_DIR ${CMAKE_BINARY_DIR}/@\n"
       "  CMAKE_ARGS "
       "-DCMAKE_TOOLCHAIN_FILE=${PLATON_CDT_ROOT}/lib/cmake/platon.cdt/"
-      "PlatonWasmToolchain.cmake\n"
+      "PlatonWasmToolchain.cmake -DPLATON_CDT_ROOT=${PLATON_CDT_ROOT}\n"
       "  UPDATE_COMMAND \"\"\n"
       "  PATCH_COMMAND \"\"\n"
       "  TEST_COMMAND \"\"\n"
@@ -174,7 +174,7 @@ class Project final {
 int main(int argc, const char** argv) {
   llvm::cl::SetVersionPrinter([](llvm::raw_ostream& os) {
     os << "platon-init version "
-       << "${VERSION_FULL}" << '\n';
+       << "@VERSION_FULL@" << '\n';
   });
   llvm::cl::OptionCategory cat("platon-init",
                                "generates an platon smart contract project");
