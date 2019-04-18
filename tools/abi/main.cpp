@@ -68,6 +68,10 @@ static cl::opt<std::string> exports_output_opt("exports_output",
                                                cl::desc("exports output"),
                                                cl::cat(abiGeneratorOptions));
 
+static cl::opt<std::string> abidef_output_opt("abidef_output",
+                                              cl::desc("abi define output"),
+                                              cl::cat(abiGeneratorOptions));
+
 std::unique_ptr<tooling::FrontendActionFactory> CreateFindMacroFactory(
     ContractDef &contractDef, vector<string> &actions) {
   struct FrontendMacroActionFactory : public tooling::FrontendActionFactory {
@@ -174,15 +178,25 @@ void createExportsFile(const ABIDef &abiDef, const string &srcFile,
 }
 
 void createContractFile(fs::path &randomDir, const string &srcPath,
-                        const string &filename, const string &externC) {
-  fs::path tmpFile = randomDir / filename;
+                        const string &filename, const string &externC,
+                        const std::string &abidef_output) {
+  std::string abidef_filename(filename);
+  if (!abidef_output.empty()) {
+    llvm::SmallString<256> fn = llvm::sys::path::filename(abidef_output);
+    abidef_filename = std::string(fn.str());
+  }
+  fs::path tmpFile = randomDir / abidef_filename;
   std::ofstream tmpStream(tmpFile.string().c_str());
   if (!tmpStream.is_open()) {
     throw Exception() << ErrStr("tmp src file is not open:")
                       << ErrStr(strerror(errno));
   }
 
-  std::ifstream srcStream(srcPath);
+  std::string src(srcPath);
+  if (!abidef_output.empty()) {
+    src = abidef_output;
+  }
+  std::ifstream srcStream(src);
 
   if (!srcStream.is_open()) {
     throw Exception() << ErrStr("src is not open:") << ErrStr(strerror(errno));
@@ -213,7 +227,7 @@ void createContractFile(fs::path &randomDir, const string &srcPath,
   // fs::remove(srcPath);
   llvm::SmallString<64> res;
   llvm::sys::path::system_temp_directory(true, res);
-  std::string dst(std::string(res.c_str()) + "/" + filename);
+  std::string dst(std::string(res.c_str()) + "/" + abidef_filename);
   fs::copy_file(tmpFile, dst, fs::copy_option::overwrite_if_exists);
 }
 void prepareFile(const string &filename) {
@@ -281,7 +295,7 @@ int main(int argc, const char **argv) {
     tooling::CommonOptionsParser op(argc, argv, abiGeneratorOptions);
 
     if (op.getSourcePathList().size() > 1) {
-      //throw Exception() << ErrStr("only one contract file");
+      // throw Exception() << ErrStr("only one contract file");
       return -1;
     }
     prepareFile(op.getSourcePathList()[0]);
@@ -314,7 +328,7 @@ int main(int argc, const char **argv) {
     int result = Tool.run(CreateFindMacroFactory(contractDef, action).get());
 
     if (result != 0 || contractDef.name.empty()) {
-      //throw Exception() << ErrStr("find macro PLATON_ABI failed");
+      // throw Exception() << ErrStr("find macro PLATON_ABI failed");
       return -1;
     }
 
@@ -329,7 +343,7 @@ int main(int argc, const char **argv) {
     result = Tool.run(createFactory(contractDef.name, action, abiDef).get());
 
     if (result != 0) {
-      //throw Exception() << ErrStr("find contract abi defined failed");
+      // throw Exception() << ErrStr("find contract abi defined failed");
       return -1;
     }
 
@@ -364,7 +378,7 @@ int main(int argc, const char **argv) {
     string externC = generateAbiCPlusPlus(contractDef, abiDef);
 
     createContractFile(randomDir, op.getSourcePathList()[0], srcFilename,
-                       externC);
+                       externC, abidef_output_opt);
 
   } catch (Exception e) {
     cerr << *boost::get_error_info<ErrStr>(e) << endl;

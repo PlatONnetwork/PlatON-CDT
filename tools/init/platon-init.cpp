@@ -35,6 +35,13 @@ class Project final {
     cpp_out << ReplaceIncludeType(ReplaceName(kCpp));
   }
 
+  void WriteAbiCpp() {
+    if (!bare_) {
+      std::ofstream abi_cpp_out(path_ + "/src/" + project_name_ + "_abi.cpp");
+      abi_cpp_out << ReplaceName(kAbiCpp);
+    }
+  }
+
   void WriteHpp() {
     std::ofstream hpp_out;
     if (bare_) {
@@ -103,7 +110,12 @@ class Project final {
       "  println(\"hello\", name);\n"
       "}\n\n";
 
+  const std::string kAbiCpp =
+      "// This file auto generated, do not modify it!!!\n"
+      "#include <@.hpp>\n\n";
+
   const std::string kHpp =
+      "#pragma once\n"
       "#include <platon/platon.hpp>\n"
       "using namespace platon;\n\n"
       "class @ : public Contract {\n"
@@ -111,12 +123,13 @@ class Project final {
       "  virtual void init() override {}\n\n"
       "  CONSTANT void hello(const char* name);\n"
       "};\n\n"
+      "// You must define ABI here.\n"
       "PLATON_ABI(@, hello);\n\n";
 
   const std::string kCMake =
       "project(@)\n\n"
       "find_package(platon.cdt)\n\n"
-      "add_contract(@ @ @.cpp)\n"
+      "add_contract(@ @ @.cpp @_abi.cpp)\n"
       "target_include_directories(@ PUBLIC ${CMAKE_SOURCE_DIR}/../include)\n";
 
   const std::string kCMakeExtern =
@@ -201,6 +214,7 @@ int main(int argc, const char** argv) {
 
     Project project(project_name, path, bare_opt);
     project.WriteCpp();
+    project.WriteAbiCpp();
     project.WriteHpp();
     project.WriteCMake();
     project.WriteCMakeExtern();
