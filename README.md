@@ -66,15 +66,41 @@ mingw32-make && mingw32-make install
 
 ## Usage
 
-- **Initial A Project**
+### Singleton Contract
+
+- Init a project
 
 ``` sh
-platon-init -project example
+platon-init -project example -bare
 ```
 
-- **Build**
+- Build contract
 
 ``` sh
 cd example
 platon-cpp -o example.wasm example.cpp -abigen
 ```
+
+### CMake Project
+
+- Init CMake project
+
+``` sh
+platon-init -project cmake_example
+```
+
+- Build contract
+  * Linux
+  ```
+  cd cmake_example/build
+  cmake ..
+  ```
+  * Windows
+  ```sh
+  cd cmake_example/build
+  cmake .. -G "MinGW Makefiles" -DPLATON_CDT_ROOT=<cdt_install_dir>
+  ```
+  
+      **Required:**
+      * [MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z)
+      * CMake 3.5 or higher

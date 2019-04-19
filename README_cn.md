@@ -68,10 +68,12 @@ mingw32-make && mingw32-make install
 
 在使用PlatON-CDT之前必须将PlatON-CDT编译生成的执行文件路径加到PATH环境变量中.
 
+### 单文件项目
+
 - 初始化项目
 
 ``` sh
-platon-init -project example 
+platon-init -project example -bare
 ```
 
 - 编译WASM文件
@@ -80,3 +82,27 @@ platon-init -project example
 cd example
 platon-cpp -o example.wasm example.cpp -abigen
 ```
+
+### CMake项目
+
+- 初始化项目
+
+```sh
+platon-init -project cmake_example 
+```
+
+- 编译
+  
+  * Linux
+  ```
+  cd cmake_example/build
+  cmake ..
+  ```
+  * Windows
+  ```sh
+  cd cmake_example/build
+  cmake .. -G "MinGW Makefiles" -DPLATON_CDT_ROOT=<cdt_install_dir>
+  ```
+      **编译依赖:**
+      * [MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z)
+      * CMake 3.5 or higher
