@@ -8,7 +8,6 @@ namespace platon {
     class Contract {
         public:
             Contract(){}
-            virtual void init(){}
     };
 }
 
