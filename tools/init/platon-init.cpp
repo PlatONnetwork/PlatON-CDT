@@ -105,7 +105,8 @@ class Project final {
   bool bare_;
 
   const std::string kCpp =
-      "#include <@.hpp>\n"
+      "#include <@.hpp>\n\n"
+      "void @::init() {}\n\n"
       "CONSTANT void @::hello(const char* name) {\n"
       "  println(\"hello\", name);\n"
       "}\n\n";
@@ -120,10 +121,11 @@ class Project final {
       "using namespace platon;\n\n"
       "class @ : public Contract {\n"
       " public: \n"
-      "  virtual void init() override {}\n\n"
+      "  void init();\n\n"
       "  CONSTANT void hello(const char* name);\n"
       "};\n\n"
       "// You must define ABI here.\n"
+      "PLATON_ABI(@, init);\n"
       "PLATON_ABI(@, hello);\n\n";
 
   const std::string kCMake =

@@ -167,7 +167,6 @@ void createExportsFile(const ABIDef &abiDef, const string &srcFile,
     throw Exception() << ErrStr("fs is not open:") << ErrStr(strerror(errno));
   }
 
-  fs << "init" << std::endl;
   for (size_t i = 0; i < abiDef.abis.size(); i++) {
     fs << abiDef.abis[i].methodName << std::endl;
   }
@@ -369,11 +368,6 @@ int main(int argc, const char **argv) {
     createJsonAbi(abiDef, contractDef, srcFilename, abigen_output_opt,
                   randomDir);
     createExportsFile(abiDef, srcFilename, exports_output_opt, randomDir);
-
-    ABI initAbi;
-    initAbi.methodName = "init";
-    initAbi.returnType.realTypeName = "void";
-    abiDef.abis.push_back(initAbi);
 
     string externC = generateAbiCPlusPlus(contractDef, abiDef);
 
