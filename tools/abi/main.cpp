@@ -348,8 +348,12 @@ int main(int argc, const char **argv) {
 
     LOGINFO << "find method success"
             << "find abi size:" << abiDef.abis.size();
+    bool foundInit = false;
     for (size_t i = 0; i < abiDef.abis.size(); ++i) {
       LOGDEBUG << "methodName:" << abiDef.abis[i].methodName << " args:(";
+      if (abiDef.abis[i].methodName == "init") {
+        foundInit = true;
+      }
       for (size_t j = 0; j < abiDef.abis[i].args.size(); ++j) {
         LOGDEBUG << "name:" << abiDef.abis[i].args[j]
                  << ", typeName:" << abiDef.abis[i].types[j].typeName
@@ -358,6 +362,14 @@ int main(int argc, const char **argv) {
       LOGDEBUG << ")";
       LOGDEBUG << "return typeName:" << abiDef.abis[i].returnType.typeName
                << " realTypeName:" << abiDef.abis[i].returnType.realTypeName;
+    }
+
+    if (!foundInit) {
+      std::cerr
+          << "ERROR: <platon-abigen> `init` function not found!!! Please use "
+             "`PLATON_ABI` declare it."
+          << std::endl;
+      return -1;
     }
 
     LOGDEBUG << "start create abi json";
