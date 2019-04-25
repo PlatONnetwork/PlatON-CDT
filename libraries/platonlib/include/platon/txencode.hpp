@@ -77,7 +77,6 @@ namespace platon {
         stream.append(ref);
     }
 
-#ifdef WASM_COMPILE
     /**
      * @brief Specified type encoding
      * 
@@ -90,7 +89,6 @@ namespace platon {
         bytesConstRef ref((byte*)&d, sizeof(d));
         stream.append(ref);
     }
-#endif
 
     /**
      * @brief Specified type encoding
