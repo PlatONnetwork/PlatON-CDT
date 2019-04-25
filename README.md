@@ -66,7 +66,7 @@ mingw32-make && mingw32-make install
 
 ## Usage
 
-### Singleton Contract
+### Skeleton Smart Contract Without CMake Support
 
 - Init a project
 
@@ -81,7 +81,7 @@ cd example
 platon-cpp -o example.wasm example.cpp -abigen
 ```
 
-### CMake Project
+### Skeleton Smart Contract With CMake Support
 
 - Init CMake project
 
