@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
-set(VERSION_PATCH 7)
+set(VERSION_PATCH 8)
 
 set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
@@ -45,3 +45,9 @@ configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/PlatonWasmToolchain.cmake.in ${C
 include(CMakeModules/LibrariesExternalProject.txt)
 
 include(CMakeModules/InstallCDT.cmake)
+
+include(CMakeModules/TestsExternalProject.txt)
+
+include(CTest)
+enable_testing()
+add_subdirectory(tests)
