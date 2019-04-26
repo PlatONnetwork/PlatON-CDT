@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include <stdint.h>
+
 
 /**
  * @defgroup varint Variable Length Integer Type
