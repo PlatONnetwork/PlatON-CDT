@@ -52,6 +52,7 @@ DATASTREAM_CASE(map, SINGLE(std::map<int, std::string>),
                 SINGLE({{1, "apple"}, {2, "cat"}, {3, "panda"}}))
 DATASTREAM_CASE(tuple, SINGLE(std::tuple<std::string, std::string, double>),
                 SINGLE({"1", "ghs", 5.341}))
+DATASTREAM_CASE(deque, SINGLE(std::deque<int>), SINGLE({1, 2, 3}));
 DATASTREAM_CASE(StaticArray, StaticArray, SINGLE({{10, 20}}))
 DATASTREAM_CASE(Pair, Pair, SINGLE({1, 1.23456}));
 DATASTREAM_CASE(FixedHash, SINGLE(platon::FixedHash<5>),

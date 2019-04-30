@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 #include <tuple>
-
+#include <deque>
 
 #include <boost/pfr.hpp>
 
@@ -386,6 +386,46 @@ namespace platon {
             ds >> i;
         return ds;
     }
+
+    /**
+     * Serialize a std::deque into a stream
+     *
+     * @brief Serialize an std::queue
+     * @param ds - The stream to write
+     * @param v - The value to serialize
+     * @tparam DS - Type of DataStream
+     * @tparam T - Type of the object contained in the std::deque
+     * @return DS& - Reference to the DataStream
+     */
+    template <typename DS, typename T>
+    DS& operator << (DS& ds, const std::deque<T>& v) {
+        ds << unsigned_int(v.size());
+        for (auto elem : v) {
+            ds << elem;
+        }
+        return ds;
+    }
+
+    /**
+     * Deserialize an std::deque from a stream
+     *
+     * @brief Deserialize an std::deque
+     * @param ds - The stream to read
+     * @param v - The destination for deserialized value
+     * @tparam DS - Type of DataStream buffer
+     * @tparam T - Type of the object contained in the std::deque
+     * @return DS& - Reference to the DataStream
+     */
+     template <typename DS, typename T>
+     DS& operator >> (DS& ds, std::deque<T>& v) {
+         unsigned_int s;
+         ds >> s;
+         v.resize(s.value);
+         for (auto& elem : v) {
+             ds >> elem;
+         }
+         return ds;
+     }
 
     /**
      *  Serialize a u256 type into a stream

@@ -11,6 +11,7 @@
 #include <set>
 #include <map>
 #include <tuple>
+#include <deque>
 #include "platon/storage.hpp"
 
 namespace platon {
@@ -170,11 +171,12 @@ namespace platon {
     template <const char *name, typename... Types>
     using Tuple = class StorageType<name, std::tuple<Types...>>;
 
+    template <const char *name,  typename T>
+    using Deque = class StorageType<name, std::deque<T>>;
+
 //    template <const char *name,  typename T>
 //    using Queue = class StorageType<name, std::queue<T>>;
 //
-//    template <const char *name,  typename T>
-//    using Deque = class StorageType<name, std::deque<T>>;
 //
 //    template <const char *name,  typename T>
 //    using Stack = class StorageType<name, std::stack<T>>;
