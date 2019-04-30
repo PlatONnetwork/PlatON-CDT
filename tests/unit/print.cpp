@@ -211,6 +211,16 @@ TEST_CASE(test, print){
         ASSERT(test::getLog() == "d3adb33f");
     }
 
+    {
+        LOG_TEST logTest;
+        print(true);
+        ASSERT(test::getLog() == "true");
+
+        logTest = LOG_TEST();
+        print(false);
+        ASSERT(test::getLog() == "false");
+    }
+
 }
 
 UNITTEST_MAIN() {
