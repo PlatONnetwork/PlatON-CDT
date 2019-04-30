@@ -24,6 +24,14 @@ TEST_CASE(test, print){
         LOG_TEST logTest;
         prints(l.c_str());
         ASSERT(test::getLog() == "hello");
+
+        logTest = LOG_TEST();
+        print(l);
+        ASSERT(test::getLog() == "hello");
+
+        logTest = LOG_TEST();
+        print(l.c_str());
+        ASSERT(test::getLog() == "hello");
     }
 
     {
@@ -37,12 +45,20 @@ TEST_CASE(test, print){
         int64_t i = -99999999998;
         printi(i);
         ASSERT(test::getLog() == "-99999999998");
+
+        logTest = LOG_TEST();
+        print(i);
+        ASSERT(test::getLog() == "-99999999998");
     }
 
     {
         LOG_TEST logTest;
         uint64_t i = 99999999998;
         printui(i);
+        ASSERT(test::getLog() == "99999999998");
+
+        logTest = LOG_TEST();
+        print(i);
         ASSERT(test::getLog() == "99999999998");
     }
 
@@ -52,12 +68,20 @@ TEST_CASE(test, print){
         int128_t i = 1;
         printi128(&i);
         ASSERT(test::getLog() == "1");
+
+        logTest = LOG_TEST();
+        print(i);
+        ASSERT(test::getLog() == "1");
     }
 
     {
         LOG_TEST logTest;
         int128_t i = 0;
         printi128(&i);
+        ASSERT(test::getLog() == "0");
+
+        logTest = LOG_TEST();
+        print(i);
         ASSERT(test::getLog() == "0");
     }
 
@@ -66,12 +90,20 @@ TEST_CASE(test, print){
         __int128 i = std::numeric_limits<__int128>::lowest();
         printi128(&i);
         ASSERT(test::getLog() == "-170141183460469231731687303715884105728");
+
+        logTest = LOG_TEST();
+        print(i);
+        ASSERT(test::getLog() == "-170141183460469231731687303715884105728");
     }
 
     {
         LOG_TEST logTest;
         __int128 i = -1234567890;
         printi128(&i);
+        ASSERT(test::getLog() == "-1234567890");
+
+        logTest = LOG_TEST();
+        print(i);
         ASSERT(test::getLog() == "-1234567890");
     }
 
@@ -81,6 +113,10 @@ TEST_CASE(test, print){
         unsigned __int128 i = std::numeric_limits<unsigned __int128>::max();
         printui128(&i);
         ASSERT(test::getLog() == "340282366920938463463374607431768211455");
+
+        logTest = LOG_TEST();
+        print(i);
+        ASSERT(test::getLog() == "340282366920938463463374607431768211455");
     }
 
     {
@@ -88,12 +124,20 @@ TEST_CASE(test, print){
         unsigned __int128 i = 0;
         printui128(&i);
         ASSERT(test::getLog() == "0");
+
+        logTest = LOG_TEST();
+        print(i);
+        ASSERT(test::getLog() == "0");
     }
 
     {
         LOG_TEST logTest;
         unsigned __int128 i = 1234567890;
         printui128(&i);
+        ASSERT(test::getLog() == "1234567890");
+
+        logTest = LOG_TEST();
+        print(i);
         ASSERT(test::getLog() == "1234567890");
     }
 

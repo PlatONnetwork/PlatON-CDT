@@ -29,111 +29,48 @@ namespace platon {
     }
 
     /**
-     * @brief Print string
-     * 
-     * @param s Printable string
+     * Prints 8-128 bit signed integer
+     *
+     * @brief Prints 8-128 bit signed integer
+     * @param num to be printed
      */
-    inline void print( const std::string& s) {
-        prints_l( s.c_str(), s.size() );
+    template <typename T, std::enable_if_t<std::is_integral<std::decay_t<T>>::value &&
+                                           std::is_signed<std::decay_t<T>>::value, int> = 0>
+    inline void print(T num) {
+        if constexpr(std::is_same<T, int128_t>::value) {
+            printi128(&num);
+        } else if constexpr(std::is_same<T, char>::value) {
+            prints_l(&num, 1);
+        } else {
+            printi(num);
+        }
     }
 
     /**
-     * @brief Print string
-     * 
-     * @param s Printable string
+     * Prints 8-128 bit unsigned integer
+     *
+     * @brief Prints 8-128 bit unsinged integer
+     * @param num to be printed
      */
-    inline void print( std::string& s) {
-        prints_l( s.c_str(), s.size() );
+    template <typename T, std::enable_if_t<std::is_integral<std::decay_t<T>>::value &&
+                                           !std::is_signed<std::decay_t<T>>::value, int> = 0>
+    inline void print(T num) {
+        if constexpr(std::is_same<T, uint128_t>::value) {
+            printui128(&num);
+        } else if constexpr(std::is_same<T, bool>::value) {
+            prints(num ? "true" : "false");
+        } else {
+            printui(num);
+        }
     }
 
-    /**
-     * @brief Print characters
-     * 
-     * @param c Printable characters
-     */
-    inline void print( const char c ) {
-        prints_l( &c, 1 );
-    }
-
-    /**
-    * Prints signed integer
-    *
-    * @brief Prints signed integer as a 64 bit signed integer
-    * @param num to be printed
-    */
-    inline void print( int num ) {
-        printi(num);
-    }
-
-    /**
-    * Prints 32 bit signed integer
-    *
-    * @brief Prints 32 bit signed integer as a 64 bit signed integer
-    * @param num to be printed
-    */
-    inline void print( int32_t num ) {
-        printi(num);
-    }
-
-    /**
-    * Prints 64 bit signed integer
-    *
-    * @brief Prints 64 bit signed integer as a 64 bit signed integer
-    * @param num to be printed
-    */
-    inline void print( int64_t num ) {
-        printi(num);
-    }
-
-
-    /**
-    * Prints unsigned integer
-    *
-    * @brief Prints unsigned integer as a 64 bit unsigned integer
-    * @param num to be printed
-    */
-    inline void print( unsigned int num ) {
-        printui(num);
-    }
-
-    /**
-    * Prints 32 bit unsigned integer
-    *
-    * @brief Prints 32 bit unsigned integer as a 64 bit unsigned integer
-    * @param num to be printed
-    */
-    inline void print( uint32_t num ) {
-        printui(num);
-    }
-
-    /**
-    * Prints 64 bit unsigned integer
-    *
-    * @brief Prints 64 bit unsigned integer as a 64 bit unsigned integer
-    * @param num to be printed
-    */
-    inline void print( uint64_t num ) {
-        printui(num);
-    }
-
-    /**
-    * Prints 128 bit signed integer
-    *
-    * @brief Prints 128 bit signed integer
-    * @param num to be printed
-    */
-    inline void print( int128_t num ) {
-        printi128(&num);
-    }
-
-    /**
-    * Prints 128 bit unsigned integer
-    *
-    * @brief Prints 128 bit unsigned integer
-    * @param num to be printed
-    */
-    inline void print( uint128_t num ) {
-        printui128(&num);
+    template <typename T, std::enable_if_t<!std::is_integral<std::decay_t<T>>::value, int> = 0>
+    inline void print(T&& t) {
+        if constexpr(std::is_same<std::decay_t<T>, std::string>::value) {
+            prints_l(t.c_str(), t.size());
+        } else if constexpr(std::is_same<std::decay_t<T>, char*>::value) {
+            prints(t);
+        }
     }
 
     /**
@@ -145,7 +82,6 @@ namespace platon {
     inline void print(u256 num) {
         print(num.convert_to<std::string>());
     }
-
 
     /**
     * Prints single-precision floating point number
@@ -172,53 +108,6 @@ namespace platon {
     inline void print( long double num ) { printqf( &num ); }
 
     inline void print(){}
-
-    /**
-    * Prints fixed_key as a hexidecimal string
-    *
-    * @brief Prints fixed_key as a hexidecimal string
-    * @param val to be printed
-    */
-    // template<size_t Size>
-    // inline void print( const fixed_key<Size>& val ) {
-        // auto arr = val.extract_as_byte_array();
-        // prints("0x");
-        // printhex(static_cast<const void*>(arr.data()), arr.size());
-    // }
-
-    /**
-    * Prints fixed_key as a hexidecimal string
-    *
-    * @brief Prints fixed_key as a hexidecimal string
-    * @param val to be printed
-    */
-    // template<size_t Size>
-    // inline void print( fixed_key<Size>& val ) {
-        // print(static_cast<const fixed_key<Size>&>(val));
-    // }
-
-
-    /**
-    * Prints bool
-    *
-    * @brief Prints bool
-    * @param val to be printed
-    */
-    inline void print( bool val ) {
-        prints(val?"true":"false");
-    }
-
-    /**
-    * Prints class object
-    *
-    * @brief Prints class object
-    * @param t to be printed
-    * @pre T must implements print() function
-    */
-    // template<typename T>
-    // inline void print( T&& t ) {
-        // t.print();
-    // }
 
     /**
     * Prints null terminated string
@@ -289,7 +178,7 @@ namespace platon {
         *  @param args - The other values to be printed
         *
         *  Example:
-    *
+        *
         *  @code
         *  const char *s = "Hello World!";
         *  uint64_t unsigned_64_bit_int = 1e+18;
@@ -301,17 +190,16 @@ namespace platon {
         */
     template<typename Arg, typename... Args>
     void print( Arg&& a, Args&&... args ) {
-        print(a);
+        print(std::forward<Arg>(a));
         print(' ');
-        print(args...);
+        print(std::forward<Args>(args)...);
     }
 
     template<typename Arg, typename... Args>
     void println( Arg&& a, Args&&... args ) {
-        print(a, args...);
+        print(std::forward<Arg>(a), std::forward<Args>(args)...);
         print('\n');
     }
-
 
     /**
     * Simulate C++ style streams
