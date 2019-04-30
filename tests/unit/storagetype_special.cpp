@@ -381,5 +381,5 @@ UNITTEST_MAIN() {
   RUN_TEST(testStorage, map);
   RUN_TEST(testStorage, array);
   RUN_TEST(testStorage, tuple);
-  //RUN_TEST(testStorage, deque);
+  RUN_TEST(testStorage, deque);
 }
