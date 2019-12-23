@@ -21,7 +21,7 @@ struct Pair {
   bool operator==(const Pair &p) const {
     return a == p.a && std::abs(d - p.d) < 1e-20;
   }
-  PLATON_SERIALIZE(Pair, (a)(d));
+  PLATON_SERIALIZE_OLD(Pair, (a)(d));
 };
 
 struct StaticArray {
@@ -29,7 +29,7 @@ struct StaticArray {
   bool operator==(const StaticArray &o) const {
     return a[0] == o.a[0] && a[1] == o.a[1];
   }
-  PLATON_SERIALIZE(StaticArray, (a));
+  PLATON_SERIALIZE_OLD(StaticArray, (a));
 };
 
 DATASTREAM_CASE(bool_true, bool, true)

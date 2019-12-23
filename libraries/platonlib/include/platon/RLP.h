@@ -67,22 +67,7 @@ namespace platon
         RLP() {}
 
         /// Construct a node of value given in the bytes.
-        explicit RLP(bytesConstRef _d, Strictness _s = VeryStrict) : m_data(_d) {
-            if ((_s & FailIfTooBig) && actualSize() < _d.size())
-            {
-                if (_s & ThrowOnFail)
-                    platonThrow("over size rlp");
-                else
-                    m_data.reset();
-            }
-            if ((_s & FailIfTooSmall) && actualSize() > _d.size())
-            {
-                if (_s & ThrowOnFail)
-                    platonThrow("under size rlp");
-                else
-                    m_data.reset();
-            }
-        }
+        explicit RLP(bytesConstRef _d, Strictness _s = VeryStrict);
 
         /// Construct a node of value given in the bytes.
         explicit RLP(bytes const& _d, Strictness _s = VeryStrict): RLP(&_d, _s) {}
@@ -112,31 +97,7 @@ namespace platon
         bool isList() const { return !isNull() && m_data[0] >= c_rlpListStart; }
 
         /// Integer value. Must not have a leading zero.
-        bool isInt() const {
-            if (isNull())
-                return false;
-            requireGood();
-            byte n = m_data[0];
-            if (n < c_rlpDataImmLenStart)
-                return !!n;
-            else if (n == c_rlpDataImmLenStart)
-                return true;
-            else if (n <= c_rlpDataIndLenZero)
-            {
-                if (m_data.size() <= 1)
-                    platonThrow("bad rlp");
-                return m_data[1] != 0;
-            }
-            else if (n < c_rlpListStart)
-            {
-                if (m_data.size() <= size_t(1 + n - c_rlpDataIndLenZero))
-                    platonThrow("bad rlp");
-                return m_data[1 + n - c_rlpDataIndLenZero] != 0;
-            }
-            else
-                return false;
-            return false;
-        }
+        bool isInt() const;
 
         /// @returns the number of items in the list, or zero if it isn't a list.
         size_t itemCount() const { return isList() ? items() : 0; }
@@ -163,21 +124,7 @@ namespace platon
         /// Subscript operator.
         /// @returns the list item @a _i if isList() and @a _i < listItems(), or RLP() otherwise.
         /// @note if used to access items in ascending order, this is efficient.
-        RLP operator[](size_t _i) const {
-            if (_i < m_lastIndex)
-            {
-                m_lastEnd = sizeAsEncoded(payload());
-                m_lastItem = payload().cropped(0, m_lastEnd);
-                m_lastIndex = 0;
-            }
-            for (; m_lastIndex < _i && m_lastItem.size(); ++m_lastIndex)
-            {
-                m_lastItem = payload().cropped(m_lastEnd);
-                m_lastItem = m_lastItem.cropped(0, sizeAsEncoded(m_lastItem));
-                m_lastEnd += m_lastItem.size();
-            }
-            return RLP(m_lastItem, int(ThrowOnFail) | int(FailIfTooSmall));
-        }
+        RLP operator[](size_t _i) const;
 
         using element_type = RLP;
 
@@ -190,17 +137,7 @@ namespace platon
             using value_type = RLP;
             using element_type = RLP;
 
-            iterator& operator++() {
-                if (m_remaining)
-                {
-                    m_currentItem.retarget(m_currentItem.next().data(), m_remaining);
-                    m_currentItem = m_currentItem.cropped(0, sizeAsEncoded(m_currentItem));
-                    m_remaining -= std::min<size_t>(m_remaining, m_currentItem.size());
-                }
-                else
-                    m_currentItem.retarget(m_currentItem.next().data(), 0);
-                return *this;
-            }
+            iterator& operator++();
             iterator operator++(int) { auto ret = *this; operator++(); return ret; }
             RLP operator*() const { return RLP(m_currentItem); }
             bool operator==(iterator const& _cmp) const { return m_currentItem == _cmp.m_currentItem; }
@@ -208,19 +145,7 @@ namespace platon
 
         private:
             iterator() {}
-            iterator(RLP const& _parent, bool _begin) {
-                if (_begin && _parent.isList())
-                {
-                    auto pl = _parent.payload();
-                    m_currentItem = pl.cropped(0, sizeAsEncoded(pl));
-                    m_remaining = pl.size() - m_currentItem.size();
-                }
-                else
-                {
-                    m_currentItem = _parent.data().cropped(_parent.data().size());
-                    m_remaining = 0;
-                }
-            }
+            iterator(RLP const& _parent, bool _begin);
 
             size_t m_remaining = 0;
             bytesConstRef m_currentItem;
@@ -386,33 +311,13 @@ namespace platon
 
         /// @returns the theoretical size of this item as encoded in the data.
         /// @note Under normal circumstances, is equivalent to m_data.size() - use that unless you know it won't work.
-        size_t actualSize() const {
-            if (isNull())
-                return 0;
-            if (isSingleByte())
-                return 1;
-            if (isData() || isList())
-                return payloadOffset() + length();
-            return 0;
-        }
-
+        size_t actualSize() const;
     private:
         /// Disable construction from rvalue
         explicit RLP(bytes const&&) {}
 
         /// Throws if is non-canonical data (i.e. single byte done in two bytes that could be done in one).
-        void requireGood() const {
-            if (isNull())
-                platonThrow("bad rlp");
-            byte n = m_data[0];
-            if (n != c_rlpDataImmLenStart + 1)
-                return;
-            if (m_data.size() < 2)
-                platonThrow("bad rlp");
-            if (m_data[1] < c_rlpDataImmLenStart)
-                platonThrow("bad rlp");
-        }
-
+        void requireGood() const;
         /// Single-byte data payload.
         bool isSingleByte() const { return !isNull() && m_data[0] < c_rlpDataImmLenStart; }
 
@@ -420,78 +325,13 @@ namespace platon
         unsigned lengthSize() const { if (isData() && m_data[0] > c_rlpDataIndLenZero) return m_data[0] - c_rlpDataIndLenZero; if (isList() && m_data[0] > c_rlpListIndLenZero) return m_data[0] - c_rlpListIndLenZero; return 0; }
 
         /// @returns the size in bytes of the payload, as given by the RLP as opposed to as inferred from m_data.
-        size_t length() const {
-            if (isNull())
-                return 0;
-            requireGood();
-            size_t ret = 0;
-            byte const n = m_data[0];
-            if (n < c_rlpDataImmLenStart)
-                return 1;
-            else if (n <= c_rlpDataIndLenZero)
-                return n - c_rlpDataImmLenStart;
-            else if (n < c_rlpListStart)
-            {
-                if (m_data.size() <= size_t(n - c_rlpDataIndLenZero))
-                    platonThrow("bad rlp");
-                if (m_data.size() > 1)
-                    if (m_data[1] == 0)
-                        platonThrow("bad rlp");
-                unsigned lengthSize = n - c_rlpDataIndLenZero;
-                if (lengthSize > sizeof(ret))
-                    // We did not check, but would most probably not fit in our memory.
-                    platonThrow("under size rlp");
-                // No leading zeroes.
-                if (!m_data[1])
-                    platonThrow("bad rlp");
-                for (unsigned i = 0; i < lengthSize; ++i)
-                    ret = (ret << 8) | m_data[i + 1];
-                // Must be greater than the limit.
-                if (ret < c_rlpListStart - c_rlpDataImmLenStart - c_rlpMaxLengthBytes)
-                    platonThrow("bad rlp");
-            }
-            else if (n <= c_rlpListIndLenZero)
-                return n - c_rlpListStart;
-            else
-            {
-                unsigned lengthSize = n - c_rlpListIndLenZero;
-                if (m_data.size() <= lengthSize)
-                    platonThrow("bad rlp");
-                if (m_data.size() > 1)
-                    if (m_data[1] == 0)
-                        platonThrow("bad rlp");
-                if (lengthSize > sizeof(ret))
-                    // We did not check, but would most probably not fit in our memory.
-                    platonThrow("under size rlp");
-                if (!m_data[1])
-                    platonThrow("bad rlp");
-                for (unsigned i = 0; i < lengthSize; ++i)
-                    ret = (ret << 8) | m_data[i + 1];
-                if (ret < 0x100 - c_rlpListStart - c_rlpMaxLengthBytes)
-                    platonThrow("bad rlp");
-            }
-            // We have to be able to add payloadOffset to length without overflow.
-            // This rejects roughly 4GB-sized RLPs on some platforms.
-            if (ret >= std::numeric_limits<size_t>::max() - 0x100)
-                platonThrow("under size rlp");
-            return ret;
-        }
+        size_t length() const;
 
         /// @returns the number of bytes into the data that the payload starts.
         size_t payloadOffset() const { return isSingleByte() ? 0 : (1 + lengthSize()); }
 
         /// @returns the number of data items.
-        size_t items() const {
-            if (isList())
-            {
-                bytesConstRef d = payload();
-                size_t i = 0;
-                for (; d.size(); ++i)
-                    d = d.cropped(sizeAsEncoded(d));
-                return i;
-            }
-            return 0;
-        }
+        size_t items() const;
 
         /// @returns the size encoded into the RLP in @a _data and throws if _data is too short.
         static size_t sizeAsEncoded(bytesConstRef _data) { return RLP(_data, int(ThrowOnFail) | int(FailIfTooSmall)).actualSize(); }
@@ -523,6 +363,10 @@ template <class T, size_t N> struct Converter<std::array<T, N>> { static std::ar
 
 template <class T> inline T RLP::convert(int _flags) const { return Converter<T>::convert(*this, _flags); }
 
+template <class T> void fetch(RLP& rlp, T &value){
+    value = T(rlp);
+}
+
 /**
  * @brief Class for writing to an RLP bytestream.
  */
@@ -541,48 +385,8 @@ public:
     RLPStream& append(unsigned _s) { return append(bigint(_s)); }
     RLPStream& append(u160 _s) { return append(bigint(_s)); }
     RLPStream& append(u256 _s) { return append(bigint(_s)); }
-    RLPStream& append(bigint _i) {
-        if (!_i)
-            m_out.push_back(c_rlpDataImmLenStart);
-        else if (_i < c_rlpDataImmLenStart)
-            m_out.push_back((byte)_i);
-        else
-        {
-            unsigned br = bytesRequired(_i);
-            if (br < c_rlpDataImmLenCount)
-                m_out.push_back((byte)(br + c_rlpDataImmLenStart));
-            else
-            {
-                auto brbr = bytesRequired(br);
-                if (c_rlpDataIndLenZero + brbr > 0xff)
-                    platonThrow("Number too large for RLP");
-                m_out.push_back((byte)(c_rlpDataIndLenZero + brbr));
-                pushInt(br, brbr);
-            }
-            pushInt(_i, br);
-        }
-        noteAppended();
-        return *this;
-    }
-    RLPStream& append(bytesConstRef _s, bool _compact = false) {
-        size_t s = _s.size();
-        byte const* d = _s.data();
-        if (_compact)
-            for (size_t i = 0; i < _s.size() && !*d; ++i, --s, ++d) {}
-
-        if (s == 1 && *d < c_rlpDataImmLenStart)
-            m_out.push_back(*d);
-        else
-        {
-            if (s < c_rlpDataImmLenCount)
-                m_out.push_back((byte)(s + c_rlpDataImmLenStart));
-            else
-                pushCount(s, c_rlpDataIndLenZero);
-            appendRaw(bytesConstRef(d, s), 0);
-        }
-        noteAppended();
-        return *this;
-    }
+    RLPStream& append(bigint _i);
+    RLPStream& append(bytesConstRef _s, bool _compact = false);
     RLPStream& append(bytes const& _s) { return append(bytesConstRef(&_s)); }
     RLPStream& append(std::string const& _s) { return append(bytesConstRef(_s)); }
     RLPStream& append(char const* _s) { return append(std::string(_s)); }
@@ -600,31 +404,13 @@ public:
     template <class T, class U> RLPStream& append(std::pair<T, U> const& _s) { appendList(2); append(_s.first); append(_s.second); return *this; }
 
     /// Appends a list.
-    RLPStream& appendList(size_t _items) {
-        //	cdebug << "appendList(" << _items << ")";
-        if (_items)
-            m_listStack.push_back(std::make_pair(_items, m_out.size()));
-        else
-            appendList(bytes());
-        return *this;
-    }
-    RLPStream& appendList(bytesConstRef _rlp) {
-        if (_rlp.size() < c_rlpListImmLenCount)
-            m_out.push_back((byte)(_rlp.size() + c_rlpListStart));
-        else
-            pushCount(_rlp.size(), c_rlpListIndLenZero);
-        appendRaw(_rlp, 1);
-        return *this;
-    }
+    RLPStream& appendList(size_t _items);
+    RLPStream& appendList(bytesConstRef _rlp);
     RLPStream& appendList(bytes const& _rlp) { return appendList(&_rlp); }
     RLPStream& appendList(RLPStream const& _s) { return appendList(&_s.out()); }
 
     /// Appends raw (pre-serialised) RLP data. Use with caution.
-    RLPStream& appendRaw(bytesConstRef _s, size_t _itemCount = 1) {
-        m_out.insert(m_out.end(), _s.begin(), _s.end());
-        noteAppended(_itemCount);
-        return *this;
-    }
+    RLPStream& appendRaw(bytesConstRef _s, size_t _itemCount = 1);
     RLPStream& appendRaw(bytes const& _rlp, size_t _itemCount = 1) { return appendRaw(&_rlp, _itemCount); }
 
     /// Shift operators for appending data items.
@@ -643,53 +429,11 @@ public:
     void swapOut(bytes& _dest) { if(!m_listStack.empty()) platonThrow("listStack is not empty"); swap(m_out, _dest); }
 
 private:
-    void noteAppended(size_t _itemCount = 1) {
-        if (!_itemCount)
-            return;
-    //	cdebug << "noteAppended(" << _itemCount << ")";
-        while (m_listStack.size())
-        {
-            if (m_listStack.back().first < _itemCount)
-                platonThrow("itemCount too large");
-            m_listStack.back().first -= _itemCount;
-            if (m_listStack.back().first)
-                break;
-            else
-            {
-                auto p = m_listStack.back().second;
-                m_listStack.pop_back();
-                size_t s = m_out.size() - p;		// list size
-                auto brs = bytesRequired(s);
-                unsigned encodeSize = s < c_rlpListImmLenCount ? 1 : (1 + brs);
-    //			cdebug << "s: " << s << ", p: " << p << ", m_out.size(): " << m_out.size() << ", encodeSize: " << encodeSize << " (br: " << brs << ")";
-                auto os = m_out.size();
-                m_out.resize(os + encodeSize);
-                memmove(m_out.data() + p + encodeSize, m_out.data() + p, os - p);
-                if (s < c_rlpListImmLenCount)
-                    m_out[p] = (byte)(c_rlpListStart + s);
-                else if (c_rlpListIndLenZero + brs <= 0xff)
-                {
-                    m_out[p] = (byte)(c_rlpListIndLenZero + brs);
-                    byte* b = &(m_out[p + brs]);
-                    for (; s; s >>= 8)
-                        *(b--) = (byte)s;
-                }
-                else
-                    platonThrow("itemCount too large for RLP");
-            }
-            _itemCount = 1;	// for all following iterations, we've effectively appended a single item only since we completed a list.
-        }
-    }
+    void noteAppended(size_t _itemCount = 1);
 
     /// Push the node-type byte (using @a _base) along with the item count @a _count.
     /// @arg _count is number of characters for strings, data-bytes for ints, or items for lists.
-    void pushCount(size_t _count, byte _base) {
-        auto br = bytesRequired(_count);
-        if (int(br) + _base > 0xff)
-            platonThrow("Count too large for RLP");
-        m_out.push_back((byte)(br + _base));	// max 8 bytes.
-        pushInt(_count, br);
-    }
+    void pushCount(size_t _count, byte _base);
 
     /// Push an integer as a raw big-endian byte-stream.
     template <class _T> void pushInt(_T _i, size_t _br)

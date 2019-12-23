@@ -119,7 +119,7 @@ namespace platon {
              * 
              * @param name_ 
              */
-            PLATON_SERIALIZE(KeyWrapper, (name_)(key_))
+            PLATON_SERIALIZE_OLD(KeyWrapper, (name_)(key_))
         private:
             const std::string &name_;
             const Key& key_;

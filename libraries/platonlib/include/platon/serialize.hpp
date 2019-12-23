@@ -4,7 +4,7 @@
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
-#define PLATON_REFLECT_MEMBER_OP( r, OP, elem ) \
+#define PLATON_REFLECT_MEMBER_OP_OLD( r, OP, elem ) \
   OP t.elem
 
 /**
@@ -28,14 +28,14 @@
  *  @param TYPE - the class to have its serialization and deserialization defined
  *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
  */
-#define PLATON_SERIALIZE( TYPE,  MEMBERS ) \
+#define PLATON_SERIALIZE_OLD( TYPE,  MEMBERS ) \
  template<typename DS> \
  friend DS& operator << ( DS& ds, const TYPE& t ){ \
-    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP, <<, MEMBERS );\
+    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OLD, <<, MEMBERS );\
  }\
  template<typename DS> \
  friend DS& operator >> ( DS& ds, TYPE& t ){ \
-    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP, >>, MEMBERS );\
+    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OLD, >>, MEMBERS );\
  }
 
 /**
@@ -49,15 +49,15 @@
  *  @param BASE - a sequence of base class names (basea)(baseb)(basec)
  *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
  */
-#define PLATON_SERIALIZE_DERIVED( TYPE, BASE, MEMBERS ) \
+#define PLATON_SERIALIZE_DERIVED_OLD( TYPE, BASE, MEMBERS ) \
  template<typename DS> \
  friend DS& operator << ( DS& ds, const TYPE& t ){ \
     ds << static_cast<const BASE&>(t); \
-    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP, <<, MEMBERS );\
+    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OLD, <<, MEMBERS );\
  }\
  template<typename DS> \
  friend DS& operator >> ( DS& ds, TYPE& t ){ \
     ds >> static_cast<BASE&>(t); \
-    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP, >>, MEMBERS );\
+    return ds BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OLD, >>, MEMBERS );\
  }
 ///@} serializecpp
