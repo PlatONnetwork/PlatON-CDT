@@ -14,8 +14,8 @@
 
 #define PLATON_REFLECT_MEMBER_OP_OUTPUT( r, OP, elem ) \
   rlp = RLP(vect_result[vect_index]);\
-  rlp.OP(t.elem);
-  vect_index++;\
+  OP(rlp, t.elem);\
+  vect_index++;
 
 /**
  *  Defines serialization and deserialization for a class

@@ -13,6 +13,7 @@
 #include <platon/service.hpp>
 #include <type_traits>
 #include <tuple>
+#include<platon/RLP.h>
 
 namespace platon {
 
@@ -29,10 +30,9 @@ namespace platon {
     * @return true
     */
    template<typename T, typename R, typename... Args>
-   void execute_action( datastream<const char*>& ds, R (T::*func)(Args...)  ) {
+   void execute_action( RLP& rlp,  R (T::*func)(Args...)  ) {
       std::tuple<std::decay_t<Args>...> args;
-      ds >> args;
-	  platon_assert(ds.remaining() == 0, "not accurate match the args serialize bytes. deserialize error\n");
+      fetch(rlp, args);
 
       T inst;
 
@@ -45,10 +45,9 @@ namespace platon {
    }
 
    template<typename T, typename... Args>
-   void execute_action( datastream<const char*>& ds, void (T::*func)(Args...)  ) {
+   void execute_action(RLP& rlp, void (T::*func)(Args...)  ) {
       std::tuple<std::decay_t<Args>...> args;
-      ds >> args;
-	  platon_assert(ds.remaining() == 0, "not accurate match the args serialize bytes. deserialize error\n");
+      fetch(rlp, args);
 
       T inst;
 
@@ -62,7 +61,7 @@ namespace platon {
     // Helper macro for PLATON_DISPATCH_INTERNAL
      #define PLATON_DISPATCH_INTERNAL( r, OP, elem ) \
 	    case BOOST_PP_STRINGIZE(elem) : \
-            PLATON::execute_action( ds, &OP::elem ); \
+            PLATON::execute_action( rlp, &OP::elem ); \
             break;
 
     // Helper macro for PLATON_DISPATCH
@@ -87,8 +86,14 @@ namespace platon {
     void invoke(void) {  \
         std::string method; \
         auto input = get_input(); \
-        datastream<const char*> ds(input.data(), input.size()); \
-        ds >> method; \
+        RLP rlp(input); \
+        std::vector<bytes> vect_parames = rlp.toVector<bytes>();\
+        rlp = RLP(vect_parames[0]);\
+        fetch(rlp, method)\
+        vect_parames.erase(vect_parames.begin());\
+        RLPStream rlp_stream;\
+        rlp_stream << vect_parames;\
+        rlp = RLP(rlp_stream.out());\
         switch( method ) { \
             PLATON_DISPATCH_HELPER( TYPE, MEMBERS ) \
             default: \

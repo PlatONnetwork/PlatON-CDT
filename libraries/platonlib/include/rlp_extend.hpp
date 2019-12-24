@@ -5,21 +5,24 @@
 namespace platon{
 
 /**
- *  Serialize a tuple
+ *  Deserialize a tuple
  *
- *  @brief Serialize a tuple
- *  @param ds - The stream to write
- *  @param t - The value to serialize
- *  @tparam RLPStream - Type of RLPStream
+ *  @brief Deserialize a tuple
+ *  @param ds - The stream to read
+ *  @param t - The destination for deserialized value
+ *  @tparam DataStream - Type of datastream
  *  @tparam Args - Type of the objects contained in the tuple
- *  @return RLPStream& - Reference to the RLPStream
+ *  @return DataStream& - Reference to the datastream
  */
 template<typename... Args>
-RLPStream& operator<<( RLPStream& ds, const std::tuple<Args...>& t ) {
-   boost::fusion::for_each( t, [&]( const auto& i ) {
-       ds << i;
-   });
-   return ds;
+void fetch(RLP& rlp, std::tuple<Args...>& t ) {
+    std::vector<bytes> vect_result = rlp.toVector<bytes>();
+    int vect_index = 0;
+    boost::fusion::for_each( t, [&]( auto& i ) {
+        rlp = RLP(vect_result[vect_index]);
+        fetch(rlp, i);
+        vect_index++;
+    });
 }
 
 }

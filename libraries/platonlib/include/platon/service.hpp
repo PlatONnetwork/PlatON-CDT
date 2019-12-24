@@ -23,8 +23,8 @@ namespace platon {
         ::platon_return(data.data(), data.size()); 
     } 
 
-    std::vector<char> get_input(void) {
-        std::vector<char> result;
+    std::vector<byte> get_input(void) {
+        std::vector<byte> result;
         size_t len = ::platon_input_length();
         result.resize(len);
         ::platon_get_input(result.data());
