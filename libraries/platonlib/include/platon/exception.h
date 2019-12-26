@@ -17,7 +17,7 @@ namespace platon {
      */
     template<typename Arg, typename... Args>
     void platonThrow(Arg&& a, Args&&... args){
-        println(a, args...);
-        abort();
+  /*      println(a, args...);
+        abort();*/
     }
 }
