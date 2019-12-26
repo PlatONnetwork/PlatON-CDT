@@ -22,7 +22,7 @@ namespace platon {
      * @tparam *Name Element value name, in the same contract, the name needs to be unique
      * @tparam T Element type
      */
-    template <const char *Name, typename T>
+    template <uint32_t index, typename T>
     class StorageType {
     public:
         /**
@@ -42,8 +42,8 @@ namespace platon {
             init();
         }
 
-        StorageType(const StorageType<Name, T>  &) = delete;
-        StorageType(const StorageType<Name, T> &&) = delete;
+        StorageType(const StorageType<index, T>  &) = delete;
+        StorageType(const StorageType<index, T> &&) = delete;
         /**
          * @brief Destroy the Storage Type object. Refresh to blockchain
          * 
@@ -101,13 +101,14 @@ namespace platon {
         operator bool() const { return t_ ? true : false; }
 
         T get() const { return t_; }
+        T& self() { return t_; }
     private:
         /**
          * @brief Load from blockchain
          * 
          */
         void init() {
-            if (getState(name_, t_) == 0) {
+            if (getState(index_, t_) == 0) {
                 t_ = default_;
             }
         }
@@ -116,63 +117,63 @@ namespace platon {
          * 
          */
         void flush() {
-            setState(name_, t_);
+            setState(index_, t_);
         }
         T default_;
-        const std::string name_ = Name;
+        const uint32_t index_ = index;
         T t_;
     };
 
-    template <const char *name>
-    using Uint8 = class StorageType<name, uint8_t>;
+    template <uint32_t index>
+    using Uint8 = class StorageType<index, uint8_t>;
 
-    template <const char *name>
-    using Int8 = class StorageType<name, int8_t>;
+    template <uint32_t index>
+    using Int8 = class StorageType<index, int8_t>;
 
-    template <const char *name>
-    using Uint16 = class StorageType<name, uint16_t>;
+    template <uint32_t index>
+    using Uint16 = class StorageType<index, uint16_t>;
 
-    template <const char *name>
-    using Int16 = class StorageType<name, int16_t>;
+    template <uint32_t index>
+    using Int16 = class StorageType<index, int16_t>;
 
-    template <const char *name>
-    using Uint = class StorageType<name, uint32_t>;
+    template <uint32_t index>
+    using Uint = class StorageType<index, uint32_t>;
 
-    template <const char *name>
-    using Int = class StorageType<name, int32_t>;
+    template <uint32_t index>
+    using Int = class StorageType<index, int32_t>;
 
-    template <const char *name>
-    using Uint64 = class StorageType<name, uint64_t>;
+    template <uint32_t index>
+    using Uint64 = class StorageType<index, uint64_t>;
 
-    template <const char *name>
-    using Int64 = class StorageType<name, int64_t>;
+    template <uint32_t index>
+    using Int64 = class StorageType<index, int64_t>;
 
-    template <const char *name>
-    using Float = class StorageType<name, float>;
+    template <uint32_t index>
+    using Float = class StorageType<index, float>;
 
-    template <const char *name>
-    using Double = class StorageType<name, double>;
+    template <uint32_t index>
+    using Double = class StorageType<index, double>;
 
-    template <const char *name>
-    using String = class StorageType<name, std::string>;
+    template <uint32_t index>
+    using String = class StorageType<index, std::string>;
 
-    template <const char *name, typename T>
-    using Vector = class StorageType<name, std::vector<T>>;
+    template <uint32_t index, typename T>
+    using Vector = class StorageType<index, std::vector<T>>;
 
-    template <const char *name, typename T>
-    using Set = class StorageType<name, std::set<T>>;
+    template <uint32_t index, typename T>
+    using Set = class StorageType<index, std::set<T>>;
 
-    template <const char *name, typename K, typename V>
-    using Map = class StorageType<name, std::map<K,V>>;
+    template <uint32_t index, typename K, typename V>
+    using Map = class StorageType<index, std::map<K,V>>;
 
-    template <const char *name,  typename T, size_t N>
-    using Array = class StorageType<name, std::array<T,N>>;
+    template <uint32_t index,  typename T, size_t N>
+    using Array = class StorageType<index, std::array<T,N>>;
 
-    template <const char *name, typename... Types>
-    using Tuple = class StorageType<name, std::tuple<Types...>>;
+    template <uint32_t index, typename... Types>
+    using Tuple = class StorageType<index, std::tuple<Types...>>;
 
-    template <const char *name,  typename T>
-    using Deque = class StorageType<name, std::deque<T>>;
+    template <uint32_t index,  typename T>
+    using Deque = class StorageType<index, std::deque<T>>;
 
 //    template <const char *name,  typename T>
 //    using Queue = class StorageType<name, std::queue<T>>;
