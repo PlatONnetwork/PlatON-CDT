@@ -7,7 +7,6 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
-
 #include "clang/Driver/Options.h"
 
 #include "Option.h"
