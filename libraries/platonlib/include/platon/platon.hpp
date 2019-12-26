@@ -15,5 +15,6 @@
 #include "platon/storagetype.hpp"
 #include "platon/deployedcontract.hpp"
 #include "platon/name.hpp"
+#include "platon/dispatcher.hpp"
 
 #define CONSTANT [[platon::constant]]

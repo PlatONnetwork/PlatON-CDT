@@ -4,8 +4,9 @@
 #pragma once
 
 #include "common.h"
-#include "datastream.h"
+#include "RLP.h"
 #include <string>
+#include <vector>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,13 +30,14 @@ namespace platon {
      */
     template <typename KEY, typename VALUE>
     inline void setState(const KEY &key, const VALUE &value) {
-        std::vector<char> vecKey(pack_size(key));
-        std::vector<char> vecValue(pack_size(value));
-        DataStream<char*> keyStream(vecKey.data(), vecKey.size());
-        DataStream<char*> valueStream(vecValue.data(), vecValue.size());
-        keyStream << key;
-        valueStream << value;
-        ::setState((const byte*)vecKey.data(), vecKey.size(),  (const byte*)vecValue.data(), vecValue.size());
+        RLPStream state_stream;
+        state_stream << key;
+        std::vector<byte> vect_key = state_stream.out();
+
+        state_stream.clear();
+        state_stream << value;
+        std::vector<byte> vect_value = state_stream.out();
+        ::setState(vect_key.data(), vect_key.size(),  vect_value.data(), vect_value.size());
     }
     /**
      * @brief Get the State object
@@ -48,16 +50,15 @@ namespace platon {
      */
     template <typename KEY, typename VALUE>
     inline size_t getState(const KEY &key, VALUE &value) {
-        std::vector<char> vecKey(pack_size(key));
-        DataStream<char*> keyStream(vecKey.data(), vecKey.size());
-        keyStream << key;
-        size_t len = ::getStateSize((const byte*)vecKey.data(), vecKey.size());
+        RLPStream state_stream;
+        state_stream << key;
+        std::vector<byte> vect_key = state_stream.out();
+        size_t len = ::getStateSize(vect_key.data(), vect_key.size());
         if (len == 0){ return 0; }
-        std::vector<char> vecValue(len);
-        ::getState((const byte*)vecKey.data(), vecKey.size(), (byte*)vecValue.data(), vecValue.size());
-
-        DataStream<char*> valueStream(vecValue.data(), vecValue.size());
-        valueStream >> value;
+        std::vector<byte> result;
+        result.resize(len);
+        ::getState(vect_key.data(), vect_key.size(), result.data(), result.size());
+        fetch(RLP(result), value);
         return len;
     }
 
@@ -69,11 +70,11 @@ namespace platon {
      */
     template <typename KEY>
     inline void delState(const KEY &key) {
+        RLPStream state_stream;
+        state_stream << key;
+        std::vector<byte> vect_key = state_stream.out();
         byte del = 0;
-        std::vector<char> vecKey(pack_size(key));
-        DataStream<char*> keyStream(vecKey.data(), vecKey.size());
-        keyStream << key;
-        ::setState((const byte*)vecKey.data(), vecKey.size(),  (const byte*)&del, 0);
+        ::setState(vect_key.data(), vect_key.size(),  (const byte*)&del, 0);
     }
 
 }
