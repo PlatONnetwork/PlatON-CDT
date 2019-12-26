@@ -14,7 +14,6 @@ contract writing for the PlatON platform.
 - GCC 5.4+ or Clang 4.0+
 - CMake 3.5+
 - Git
-- Python
 
 ### Ubuntu 
 
@@ -31,80 +30,25 @@ sudo apt install build-essential cmake libz-dev libtinfo-dev
 ```shell
 git clone https://github.com/PlatONnetwork/PlatON-CDT.git
 cd PlatON-CDT
-git submodule update --init --recursive
 ```
 - **Build Code**
 
 ``` sh
 cd PlatON-CDT
 mkdir build && cd build
-cmake .. 
-make && make install
+
+wget http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+tar xavf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+
+cmake .. -DLLVM_CONFIG=clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config
+make -j4
+
 ```
-
-### Windows
-
-**Required:** [MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z)
-
-**NOTES:** _MinGW and CMake must be installed in a directory without space._
-
-- **Get Source Code**
-
-```shell
-git clone https://github.com/PlatONnetwork/PlatON-CDT.git
-cd PlatON-CDT
-git submodule update --init --recursive
-```
-- **Build Code**
-
-``` sh
-cd PlatON-CDT
-mkdir build && cd build
-cmake -G "MinGW Makefiles" .. -DCMAKE_INSTALL_PREFIX="C:/platon.cdt" -DCMAKE_MAKE_PROGRAM=mingw32-make
-mingw32-make && mingw32-make install
-```
-
 ## Usage
-
-### Skeleton Smart Contract Without CMake Support
-
-- Init a project
-
-``` sh
-platon-init -project example -bare
+``` bash
+platon-cpp test.cpp
 ```
-
-- Build contract
-
-``` sh
-cd example
-platon-cpp -o example.wasm example.cpp -abigen
-```
-
-### Skeleton Smart Contract With CMake Support
-
-- Init CMake project
-
-``` sh
-platon-init -project cmake_example
-```
-
-- Build contract
-  * Linux
-  ```
-  cd cmake_example/build
-  cmake ..
-  ```
-  * Windows
-  >**Required:**
-  >+ [MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z)
-  >+ CMake 3.5 or higher
-
-  ```sh
-  cd cmake_example/build
-  cmake .. -G "MinGW Makefiles" -DPLATON_CDT_ROOT=<cdt_install_dir>
-  ```
-
+run command could generate test.wasm and test.abi.json in current dirctoy.
 
 ## License
 
