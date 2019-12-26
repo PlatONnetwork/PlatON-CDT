@@ -1,12 +1,12 @@
 #pragma once
 
-#include <boost/preprocessor/variadic/size.hpp>
-#include <boost/preprocessor/variadic/to_tuple.hpp>
-#include <boost/preprocessor/tuple/enum.hpp>
-#include <boost/preprocessor/facilities/overload.hpp>
-
+#include "boost/preprocessor/seq/for_each.hpp"
+#include "boost/fusion/algorithm/iteration/for_each.hpp"
+#include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/include/std_tuple.hpp>
+
+#include <boost/mp11/tuple.hpp>
 
 #include <boost/mp11/tuple.hpp>
 
@@ -16,6 +16,15 @@
 #include<platon/RLP.h>
 
 namespace platon {
+
+    template<typename... Args>
+    void get_para(RLP& rlp, std::tuple<Args...>& t ) {
+        int vect_index = 1;
+        boost::fusion::for_each( t, [&]( auto& i ) {
+            fetch(rlp[vect_index], i);
+            vect_index++;
+        });
+    }
 
 	template<typename T>
 	void platon_return(const T &t);
@@ -32,7 +41,7 @@ namespace platon {
    template<typename T, typename R, typename... Args>
    void execute_action( RLP& rlp,  R (T::*func)(Args...)  ) {
       std::tuple<std::decay_t<Args>...> args;
-      fetch(rlp, args);
+      get_para(rlp, args);
 
       T inst;
 
@@ -47,7 +56,7 @@ namespace platon {
    template<typename T, typename... Args>
    void execute_action(RLP& rlp, void (T::*func)(Args...)  ) {
       std::tuple<std::decay_t<Args>...> args;
-      fetch(rlp, args);
+      get_para(rlp, args);
 
       T inst;
 
@@ -58,11 +67,11 @@ namespace platon {
       boost::mp11::tuple_apply( f2, args );
    }
 
-    // Helper macro for PLATON_DISPATCH_INTERNAL
-     #define PLATON_DISPATCH_INTERNAL( r, OP, elem ) \
-	    case BOOST_PP_STRINGIZE(elem) : \
-            PLATON::execute_action( rlp, &OP::elem ); \
-            break;
+    // Helper macro for EOSIO_DISPATCH_INTERNAL
+    #define PLATON_DISPATCH_INTERNAL( r, OP, elem ) \
+	    else if ( method == BOOST_PP_STRINGIZE(elem) ){\
+            platon::execute_action( rlp, &OP::elem );\
+        } 
 
     // Helper macro for PLATON_DISPATCH
     #define PLATON_DISPATCH_HELPER( TYPE,  MEMBERS ) \
@@ -83,24 +92,19 @@ namespace platon {
      */
     #define PLATON_DISPATCH( TYPE, MEMBERS ) \
     extern "C" { \
-    void invoke(void) {  \
-        std::string method; \
-        auto input = get_input(); \
-        RLP rlp(input); \
-        std::vector<bytes> vect_parames = rlp.toVector<bytes>();\
-        rlp = RLP(vect_parames[0]);\
-        fetch(rlp, method)\
-        vect_parames.erase(vect_parames.begin());\
-        RLPStream rlp_stream;\
-        rlp_stream << vect_parames;\
-        rlp = RLP(rlp_stream.out());\
-        switch( method ) { \
+        void invoke(void) {  \
+            std::string method; \
+            auto input = get_input(); \
+            RLP rlp(input); \
+            fetch(rlp[0], method);\
+            if (method.empty()) {\
+                platon_assert(false, "valid method\n");\
+            }\
             PLATON_DISPATCH_HELPER( TYPE, MEMBERS ) \
-            default: \
-                platon_assert(false, "no metod to call\n");\
-                break; \
+            else {\
+                platon_assert(false, "no method to call\n");\
+            }\
         } \
-    } \
-    }
+    }\
 
 }

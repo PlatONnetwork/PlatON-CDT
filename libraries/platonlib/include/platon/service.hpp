@@ -1,6 +1,8 @@
 #pragma once
 #include<vector>
 #include<string>
+#include "platon/common.h"
+#include "platon/RLP.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,8 +21,10 @@ namespace platon {
 
     template<typename T>
     void platon_return(const T &t) {
-        auto data = pack(t);
-        ::platon_return(data.data(), data.size()); 
+        RLPStream rlp_stream;
+        rlp_stream << t;
+        std::vector<byte> result = rlp_stream.out();
+        ::platon_return(result.data(), result.size()); 
     } 
 
     std::vector<byte> get_input(void) {

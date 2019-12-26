@@ -7,14 +7,14 @@
 #include "platon/common.h"
 #include<vector>
 
+#define PLATON_REFLECT_MEMBER_NUMBER( r, OP, elem ) \
+  items_number++;
+
 #define PLATON_REFLECT_MEMBER_OP_INPUT( r, OP, elem ) \
-  rlp = rlp OP t.elem;\
-  vect_parames.push_back(rlp.out());\
-  rlp.clear()
+  OP t.elem
 
 #define PLATON_REFLECT_MEMBER_OP_OUTPUT( r, OP, elem ) \
-  rlp = RLP(vect_result[vect_index]);\
-  OP(rlp, t.elem);\
+  OP(rlp[vect_index], t.elem);\
   vect_index++;
 
 /**
@@ -27,16 +27,13 @@
  */
 #define PLATON_SERIALIZE( TYPE,  MEMBERS ) \
 friend RLPStream& operator << ( RLPStream& rlp, const TYPE& t ){ \
-    rlp.clear()\
-    std::vector<bytes> vect_parames;\
-    BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS );\
-    rlp.clear()\
-    return rlp << vect_parames;\
+    size_t items_number = 0;\
+    BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS )\
+    return rlp.appendList(items_number) BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS );\
 }\
-friend void fetch(RLP& rlp, TYPE& t){\
-    std::vector<bytes> vect_result = rlp.toVector<bytes>();\
-    int vect_index = 0;\
-    BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS );\
+friend void fetch(RLP rlp, TYPE& t){\
+    size_t vect_index = 0;\
+    BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS )\
 }
  
 
@@ -53,20 +50,14 @@ friend void fetch(RLP& rlp, TYPE& t){\
  */
 #define PLATON_SERIALIZE_DERIVED( TYPE, BASE, MEMBERS ) \
 friend RLPStream& operator << ( RLPStream& rlp, const TYPE& t ){ \
-    rlp.clear()\
-    std::vector<bytes> vect_parames;\
-    rlp = rlp << static_cast<const BASE&>(t); \
-    vect_parames.push_back(rlp.out());\
-    rlp.clear()
-    BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS );\
-    rlp.clear()\
-    return rlp << vect_parames;\
+    size_t items_number = 1;\
+    BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS )\
+    rlp.appendList(items_number) << static_cast<const BASE&>(t); \
+    return rlp BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS );\
 }\
-friend void fetch(RLP& rlp, TYPE& t){\
-    std::vector<bytes> vect_result = rlp.toVector<bytes>();\
-    int vect_index = 0;\
-    rlp = RLP(vect_result[vect_index]);\
-    rlp.fetch(static_cast<BASE&>(t));\
+friend void fetch(RLP rlp, TYPE& t){\
+    size_t vect_index = 0;\
+    fetch(rlp[vect_index], static_cast<BASE&>(t));\
     vect_index++;\
     BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS );\
 }

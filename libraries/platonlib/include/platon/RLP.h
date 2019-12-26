@@ -363,10 +363,6 @@ template <class T, size_t N> struct Converter<std::array<T, N>> { static std::ar
 
 template <class T> inline T RLP::convert(int _flags) const { return Converter<T>::convert(*this, _flags); }
 
-template <class T> void fetch(RLP& rlp, T &value){
-    value = T(rlp);
-}
-
 /**
  * @brief Class for writing to an RLP bytestream.
  */
@@ -477,4 +473,9 @@ template <class ... _Ts> bytes rlpList(_Ts ... _ts)
 /// Human readable version of RLP.
 //std::ostream& operator<<(std::ostream& _out, dev::RLP const& _d);
 
+}
+
+//get data from the RLP instance
+template <class T> void fetch(platon::RLP rlp, T &value){
+    value = T(rlp);
 }

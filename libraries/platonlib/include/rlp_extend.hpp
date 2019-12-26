@@ -15,12 +15,10 @@ namespace platon{
  *  @return DataStream& - Reference to the datastream
  */
 template<typename... Args>
-void fetch(RLP& rlp, std::tuple<Args...>& t ) {
-    std::vector<bytes> vect_result = rlp.toVector<bytes>();
+void fetch(RLP rlp, std::tuple<Args...>& t ) {
     int vect_index = 0;
     boost::fusion::for_each( t, [&]( auto& i ) {
-        rlp = RLP(vect_result[vect_index]);
-        fetch(rlp, i);
+        fetch(rlp[vect_index], i);
         vect_index++;
     });
 }
