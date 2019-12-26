@@ -4,7 +4,6 @@
 #pragma once
 
 #include <stdlib.h>
-#include "print.hpp"
 
 namespace platon {
     /**

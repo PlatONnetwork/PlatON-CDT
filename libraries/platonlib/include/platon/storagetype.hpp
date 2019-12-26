@@ -101,6 +101,7 @@ namespace platon {
         operator bool() const { return t_ ? true : false; }
 
         T get() const { return t_; }
+        T& self() { return t_; }
     private:
         /**
          * @brief Load from blockchain
