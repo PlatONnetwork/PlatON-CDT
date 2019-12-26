@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 
+
+
+if(NOT DEFINED OldVersion)
+  add_subdirectory(tools/platon-cpp)
+else ()
+
+
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION_PATCH 9)
@@ -51,3 +58,4 @@ include(CMakeModules/TestsExternalProject.txt)
 include(CTest)
 enable_testing()
 add_subdirectory(tests)
+endif()

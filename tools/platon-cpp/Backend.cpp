@@ -348,6 +348,7 @@ int GenerateWASM(char* symPath, const char* output, llvm::Module* M){
   lldArgs.push_back("-flavor");
   lldArgs.push_back("wasm");
   lldArgs.push_back(TempFilename);
+  lldArgs.push_back("--import-memory");
   lldArgs.push_back("--entry");
   lldArgs.push_back("invoke");
   lldArgs.push_back("-o");
