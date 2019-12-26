@@ -37,7 +37,6 @@
 #include "llvm/Support/WithColor.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Transforms/Utils/Cloning.h"
-
 #include "llvm/Support/Program.h"
 #include "llvm/Support/Path.h"
 #include <memory>
@@ -92,43 +91,10 @@ static std::unique_ptr<ToolOutputFile> GetOutputStream(const char *TargetName,
 }
 
 int init(){
-  //InitLLVM X(argc, argv);
-
-  // Enable debug stream buffering.
-//  EnableDebugBuffering = true;
-
-  // Initialize targets first, so that --version shows registered targets.
-  /*
-  InitializeAllTargets();
-  InitializeAllTargetMCs();
-  InitializeAllAsmPrinters();
-  */
-//  InitializeAllAsmParsers();
-
   LLVMInitializeWebAssemblyTargetInfo();
   LLVMInitializeWebAssemblyTarget();
   LLVMInitializeWebAssemblyTargetMC();
   LLVMInitializeWebAssemblyAsmPrinter();
-  /*
-  // Initialize codegen and IR passes used by llc so that the -print-after,
-  // -print-before, and -stop-after options work.
-  PassRegistry *Registry = PassRegistry::getPassRegistry();
-  initializeCore(*Registry);
-  initializeCodeGen(*Registry);
-  initializeLoopStrengthReducePass(*Registry);
-  initializeLowerIntrinsicsPass(*Registry);
-  initializeEntryExitInstrumenterPass(*Registry);
-  initializePostInlineEntryExitInstrumenterPass(*Registry);
-  initializeUnreachableBlockElimLegacyPassPass(*Registry);
-  initializeConstantHoistingLegacyPassPass(*Registry);
-  initializeScalarOpts(*Registry);
-  initializeVectorization(*Registry);
-  initializeScalarizeMaskedMemIntrinPass(*Registry);
-  initializeExpandReductionsPass(*Registry);
-
-  // Initialize debugging passes.
-  initializeScavengerTestPass(*Registry);
-  */
 
   // Register the target printer for --version.
   cl::AddExtraVersionPrinter(TargetRegistry::printRegisteredTargetsForVersion);
