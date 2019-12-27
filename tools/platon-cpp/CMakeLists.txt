@@ -87,14 +87,14 @@ target_link_libraries(platon-cpp
 
   LLVMOption
 
-
-  LLVMWebAssemblyAsmParser
-  LLVMWebAssemblyCodeGen
   LLVMWebAssemblyDisassembler
-  LLVMWebAssemblyAsmPrinter
+  LLVMWebAssemblyCodeGen
   LLVMWebAssemblyDesc
+  LLVMWebAssemblyAsmPrinter
+  LLVMWebAssemblyAsmParser
   LLVMWebAssemblyInfo
 
+  LLVMAggressiveInstCombine
 
   LLVMGlobalISel 
   LLVMSelectionDAG 
@@ -135,7 +135,7 @@ target_link_libraries(platon-cpp
 )
 
 target_link_libraries(platon-cpp
-  #  z 
+  z 
   rt 
   dl 
   tinfo 

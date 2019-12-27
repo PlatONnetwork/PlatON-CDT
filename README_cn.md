@@ -13,7 +13,6 @@
 - GCC 5.4+ 或 Clang 4.0+
 - CMake 3.5+
 - Git
-- Python
 
 ### Ubuntu
 
@@ -30,7 +29,6 @@ sudo apt install build-essential cmake libz-dev libtinfo-dev
 ```shell
 git clone https://github.com/PlatONnetwork/PlatON-CDT.git
 cd PlatON-CDT
-git submodule update --init --recursive
 ```
 
 - 执行编译
@@ -38,76 +36,22 @@ git submodule update --init --recursive
 ``` sh
 cd PlatON-CDT
 mkdir build && cd build
-cmake .. 
-make && make install
-```
 
-### Windows
+wget http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+tar xavf clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 
-Windows下编译需要先安装[MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z), 且安装路径不能含有空格(即: 不能安装在"Program
-Files"或"Program Files(x86)目录"), 否则编译失败.
+cmake .. -DLLVM_CONFIG=clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config
+make -j4
 
-- 获取源码
-
-```shell
-git clone https://github.com/PlatONnetwork/PlatON-CDT.git
-cd PlatON-CDT
-git submodule update --init --recursive
-```
-
-- 执行编译
-
-``` sh
-cd PlatON-CDT
-mkdir build && cd build
-cmake -G "MinGW Makefiles" .. -DCMAKE_INSTALL_PREFIX="C:/platon.cdt" -DCMAKE_MAKE_PROGRAM=mingw32-make
-mingw32-make && mingw32-make install
 ```
 
 ## 使用
 
 在使用PlatON-CDT之前必须将PlatON-CDT编译生成的执行文件路径加到PATH环境变量中.
-
-### 单文件项目
-
-- 初始化项目
-
 ``` sh
-platon-init -project example -bare
+platon-cpp test.cpp
 ```
-
-- 编译WASM文件
-
-``` sh
-cd example
-platon-cpp -o example.wasm example.cpp -abigen
-```
-
-### CMake项目
-
-- 初始化项目
-
-```sh
-platon-init -project cmake_example 
-```
-
-- 编译
-  
-  * Linux
-  ```
-  cd cmake_example/build
-  cmake ..
-  ```
-  * Windows
-  >**编译依赖:**
-  >+ [MinGW-W64 GCC-8.1.0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z)
-  >+ CMake 3.5 or higher
-  
-  ```sh
-  cd cmake_example/build
-  cmake .. -G "MinGW Makefiles" -DPLATON_CDT_ROOT=<cdt_install_dir>
-  ```
-
+运行指令会在当前目录生成test.wasm和test.abi.json两个文件
 
 ## License
 
