@@ -9,6 +9,25 @@
 
 using namespace platon;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void platon_debug(uint8_t *dst, size_t len){
+    for (size_t i = 0; i < len; i++){   
+        std::cout << *(char*)(dst + i);
+    }
+    std::cout << std::endl;
+}
+
+void platon_panic(){
+    std::cout << "platon panic"<< std::endl;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 class WhtType 
 {
     public:

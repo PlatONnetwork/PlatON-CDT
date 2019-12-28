@@ -56,8 +56,8 @@ std::map<std::vector<byte>, std::vector<byte> > map_result;
 extern "C" {
 #endif
 
-void platon_return(const void *res, const size_t len){
-    byte *ptr = (byte *)res;
+void platon_return(const uint8_t *value, const size_t len){
+    byte *ptr = (byte *)value;
     std::vector<byte> my_return;
     for(size_t i = 0; i < len; i++) {
         my_return.push_back(*ptr);
@@ -71,24 +71,27 @@ void platon_return(const void *res, const size_t len){
     std::cout << std::endl;
 }
 
-size_t platon_input_length(void){
+size_t platon_get_input_length(void){
     return input_result.size();
 }
 
-void platon_get_input(const void *inputptr){
-    byte *ptr = (byte *)inputptr;
+void platon_get_input(const uint8_t *value){
+    byte *ptr = (byte *)value;
     for (auto one :input_result) {
         *ptr = one;
         ptr++;
     }
 }
 
-void platon_panic( const char* cstr, const uint32_t len){
-    for (uint32_t i = 0; i < len; i++) {
-        std::cout << *cstr;
-        cstr++;
+void platon_debug(uint8_t *dst, size_t len){
+    for (size_t i = 0; i < len; i++){   
+        std::cout << *(char*)(dst + i);
     }
     std::cout << std::endl;
+}
+
+void platon_panic(){
+    std::cout << "platon panic"<< std::endl;
 }
 
 std::vector<byte> getVector(const uint8_t* address, size_t len){
@@ -101,20 +104,20 @@ std::vector<byte> getVector(const uint8_t* address, size_t len){
     return vect_result;
 }
 
-void setState(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen){
+void platon_set_state(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen){
     std::vector<byte> vect_key, vect_value;
     vect_key = getVector(key, klen);
     vect_value = getVector(value, vlen);
     map_result[vect_key] = vect_value;
 }
 
-size_t getStateSize(const uint8_t* key, size_t klen){
+size_t platon_get_state_length(const uint8_t* key, size_t klen){
     std::vector<byte> vect_key;
     vect_key = getVector(key, klen);
     return map_result[vect_key].size();
 }
 
-void getState(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
+void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
     std::vector<byte> vect_key, vect_value;
     vect_key = getVector(key, klen);
     vect_value = map_result[vect_key];
@@ -134,13 +137,17 @@ int main(int argc, char **argv) {
     wht_stream.appendList(2) << "add_message" << one;
     input_result = wht_stream.out();
     invoke();
+
     wht_stream.clear();
     my_message two("2_head", "2_body", "2_end");
     wht_stream.appendList(2) << "add_message" << two;
     input_result = wht_stream.out();
     invoke();
+
     wht_stream.clear();
     wht_stream.appendList(2) << "get_message" << "jatel";
     input_result = wht_stream.out();
     invoke();
+
+    platon_throw("test panic");
 }

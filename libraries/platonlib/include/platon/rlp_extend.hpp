@@ -1,6 +1,6 @@
 #pragma once
 #include "boost/fusion/algorithm/iteration/for_each.hpp"
-#include<platon/RLP.h>
+#include <platon/RLP.h>
 
 namespace platon{
 
@@ -75,7 +75,7 @@ void fetch(const RLP &rlp, std::vector<T> &ret)
             ret.push_back(one);
         }
     }else{
-        platonThrow("bad cast");
+        platon_throw("bad cast");
     }
 }
 
@@ -90,7 +90,7 @@ void fetch(const RLP &rlp, std::set<T> &ret)
             ret.insert(one);
         }
     }else{
-        platonThrow("bad cast");
+        platon_throw("bad cast");
     }
 }
 
@@ -104,7 +104,7 @@ void fetch(const RLP &rlp, std::unordered_set<T> &ret)
             ret.insert(one);
         }
     }else{
-        platonThrow("bad cast");
+        platon_throw("bad cast");
     }
 }
 
@@ -112,7 +112,7 @@ template <class T, class U>
 void fetch(const RLP &rlp, std::pair<T, U> &ret)
 {
     if (rlp.itemCountStrict() != 2){
-        platonThrow("bad cast");
+        platon_throw("bad cast");
     }
     T one;
     fetch(rlp[0], one);
@@ -126,7 +126,7 @@ template <class T, size_t N>
 void fetch(const RLP &rlp, std::array<T, N> &ret)
 {
     if (rlp.itemCountStrict() != N){
-        platonThrow("bad cast");
+        platon_throw("bad cast");
     }
     for (size_t i = 0; i < N; ++i){
         T one;
@@ -145,7 +145,7 @@ void fetch(const RLP &rlp, std::map<T, U> &ret)
             ret.insert(one);
         }
     }else{
-        platonThrow("bad cast");
+        platon_throw("bad cast");
     }
 }
 
