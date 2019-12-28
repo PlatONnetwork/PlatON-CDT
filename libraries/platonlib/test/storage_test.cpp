@@ -11,6 +11,17 @@ std::map<std::vector<byte>, std::vector<byte> > result;
 extern "C" {
 #endif
 
+void platon_debug(uint8_t *dst, size_t len){
+    for (size_t i = 0; i < len; i++){   
+        std::cout << *(char*)(dst + i);
+    }
+    std::cout << std::endl;
+}
+
+void platon_panic(){
+    std::cout << "platon panic"<< std::endl;
+}
+
 std::vector<byte> getVector(const uint8_t* address, size_t len){
     byte *ptr = (byte *)address;
     std::vector<byte> vect_result;
@@ -21,20 +32,20 @@ std::vector<byte> getVector(const uint8_t* address, size_t len){
     return vect_result;
 }
 
-void setState(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen){
+void platon_set_state(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen){
     std::vector<byte> vect_key, vect_value;
     vect_key = getVector(key, klen);
     vect_value = getVector(value, vlen);
     result[vect_key] = vect_value;
 }
 
-size_t getStateSize(const uint8_t* key, size_t klen){
+size_t platon_get_state_length(const uint8_t* key, size_t klen){
     std::vector<byte> vect_key;
     vect_key = getVector(key, klen);
     return result[vect_key].size();
 }
 
-void getState(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
+void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
     std::vector<byte> vect_key, vect_value;
     vect_key = getVector(key, klen);
     vect_value = result[vect_key];

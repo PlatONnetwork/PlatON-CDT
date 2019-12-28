@@ -10,8 +10,8 @@ std::vector<byte> result;
 extern "C" {
 #endif
 
-void platon_return(const void *res, const size_t len){
-    byte *ptr = (byte *)res;
+void platon_return(const uint8_t *value, const size_t len){
+    byte *ptr = (byte *)value;
     std::vector<byte> my_return;
     for(size_t i = 0; i < len; i++) {
         my_return.push_back(*ptr);
@@ -22,23 +22,27 @@ void platon_return(const void *res, const size_t len){
     std::cout << str_return << std::endl;
 }
 
-size_t platon_input_length(void){
+size_t platon_get_input_length(void){
     return result.size();
 }
 
-void platon_get_input(const void *inputptr){
-    byte *ptr = (byte *)inputptr;
+void platon_get_input(const uint8_t *value){
+    byte *ptr = (byte *)value;
     for (auto one :result) {
         *ptr = one;
         ptr++;
     }
 }
-void platon_panic( const char* cstr, const uint32_t len){
-    for (uint32_t i = 0; i < len; i++) {
-        std::cout << *cstr;
-        cstr++;
+
+void platon_debug(uint8_t *dst, size_t len){
+    for (size_t i = 0; i < len; i++){   
+        std::cout << *(char*)(dst + i);
     }
     std::cout << std::endl;
+}
+
+void platon_panic(){
+    std::cout << "platon panic"<< std::endl;
 }
 
 #ifdef __cplusplus
