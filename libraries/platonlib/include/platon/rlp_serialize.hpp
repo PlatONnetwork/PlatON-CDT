@@ -4,8 +4,9 @@
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include "platon/RLP.h"
+#include "platon/rlp_extend.hpp"
 #include "platon/common.h"
-#include<vector>
+#include <vector>
 
 #define PLATON_REFLECT_MEMBER_NUMBER( r, OP, elem ) \
   items_number++;
@@ -31,7 +32,7 @@ friend RLPStream& operator << ( RLPStream& rlp, const TYPE& t ){ \
     BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS )\
     return rlp.appendList(items_number) BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS );\
 }\
-friend void fetch(RLP rlp, TYPE& t){\
+friend void fetch(const RLP &rlp, TYPE& t){\
     size_t vect_index = 0;\
     BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS )\
 }
@@ -55,7 +56,7 @@ friend RLPStream& operator << ( RLPStream& rlp, const TYPE& t ){ \
     rlp.appendList(items_number) << static_cast<const BASE&>(t); \
     return rlp BOOST_PP_SEQ_FOR_EACH( PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS );\
 }\
-friend void fetch(RLP rlp, TYPE& t){\
+friend void fetch(const RLP &rlp, TYPE& t){\
     size_t vect_index = 0;\
     fetch(rlp[vect_index], static_cast<BASE&>(t));\
     vect_index++;\
