@@ -299,7 +299,8 @@ int compileModule(Module* M) {
   return 0;
 }
 
-int GenerateWASM(char* symPath, const char* output, llvm::Module* M){
+int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs,const char* output, llvm::Module* M){
+
   llvm::sys::fs::createTemporaryFile("platon-cpp", "wasm", TempFilename);
   compileModule(M);
 
@@ -315,6 +316,9 @@ int GenerateWASM(char* symPath, const char* output, llvm::Module* M){
   lldArgs.push_back("wasm");
   lldArgs.push_back(TempFilename);
   lldArgs.push_back("--import-memory");
+  for(unsigned i=0;i<ldArgs.size();i++){
+    lldArgs.push_back(ldArgs[i].data());
+  }
   lldArgs.push_back("--entry");
   lldArgs.push_back("invoke");
   lldArgs.push_back("-o");
