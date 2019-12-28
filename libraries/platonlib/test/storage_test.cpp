@@ -1,4 +1,5 @@
 #include "platon/storagetype.hpp"
+#include "platon/rlp_extend.hpp"
 #include <iostream>
 #include <string>
 #include <vector>

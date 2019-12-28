@@ -1,9 +1,11 @@
 #include "platon/RLP.h"
+#include "platon/rlp_extend.hpp"
 #include "platon/rlp_serialize.hpp"
 #include <string>
 #include <iostream>
 #include <vector>
 #include <algorithm>
+# include <map>
 
 using namespace platon;
 
@@ -135,5 +137,20 @@ int main(int argc, char **argv) {
     derived one_test_derived;
     fetch(RLP(result), one_test_derived);
     std::cout << one_test_derived;
+    std::cout <<  std::endl;
+
+    // 测试 std::map
+    std::map<std::string, derived> map_test;
+    map_test["wht_1"] = test_derived;
+    map_test["wht_2"] = derived("group_map", 3, one, "jatel_derived_map");
+    wht_stream.clear();
+    wht_stream << map_test;
+    result = wht_stream.out();
+
+    std::map<std::string, derived> map_test_one;
+    fetch(RLP(result), map_test_one);
+    for( auto i : map_test_one) {
+        std::cout << i.first << ' ' << i.second << ' ';
+    }
     std::cout <<  std::endl;
 }
