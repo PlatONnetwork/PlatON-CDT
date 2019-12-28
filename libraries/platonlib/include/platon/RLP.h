@@ -12,10 +12,9 @@
 
 #include "fixedhash.hpp"
 #include "vector_ref.h"
-#include "exception.h"
 #include "common.h"
+#include "platon/service.hpp"
 #include <array>
-#include <exception>
 #include <iomanip>
 #include <iosfwd>
 #include <vector>
@@ -41,7 +40,7 @@ namespace platon
     static const byte c_rlpListImmLenCount = 256 - c_rlpListStart - c_rlpMaxLengthBytes;
     static const byte c_rlpListIndLenZero = c_rlpListStart + c_rlpListImmLenCount - 1;
 
-    template <class T> struct Converter { static T convert(RLP const&, int) { platonThrow("bad cast"); } };
+    template <class T> struct Converter { static T convert(RLP const&, int) { platon_throw("bad cast"); } };
 
 /**
  * Class for interpreting Recursive Linear-Prefix Data.
@@ -101,11 +100,11 @@ namespace platon
 
         /// @returns the number of items in the list, or zero if it isn't a list.
         size_t itemCount() const { return isList() ? items() : 0; }
-        size_t itemCountStrict() const { if (!isList()) platonThrow("bad cast"); return items(); }
+        size_t itemCountStrict() const { if (!isList()) platon_throw("bad cast"); return items(); }
 
         /// @returns the number of bytes in the data, or zero if it isn't data.
         size_t size() const { return isData() ? length() : 0; }
-        size_t sizeStrict() const { if (!isData()) platonThrow("bad cast"); return length(); }
+        size_t sizeStrict() const { if (!isData()) platon_throw("bad cast"); return length(); }
 
         /// Equality operators; does best-effort conversion and checks for equality.
         bool operator==(char const* _s) const { return isData() && toString() == _s; }
@@ -176,11 +175,11 @@ namespace platon
         template <class T, size_t N> explicit operator std::array<T, N>() const { return toArray<T, N>(); }
 
         /// Converts to bytearray. @returns the empty byte array if not a string.
-        bytes toBytes(int _flags = LaissezFaire) const { if (!isData()) { if (_flags & ThrowOnFail) platonThrow("bad cast"); else return bytes(); } return bytes(payload().data(), payload().data() + length()); }
+        bytes toBytes(int _flags = LaissezFaire) const { if (!isData()) { if (_flags & ThrowOnFail) platon_throw("bad cast"); else return bytes(); } return bytes(payload().data(), payload().data() + length()); }
         /// Converts to bytearray. @returns the empty byte array if not a string.
-        bytesConstRef toBytesConstRef(int _flags = LaissezFaire) const { if (!isData()) { if (_flags & ThrowOnFail) platonThrow("bad cast"); else return bytesConstRef(); } return payload().cropped(0, length()); }
+        bytesConstRef toBytesConstRef(int _flags = LaissezFaire) const { if (!isData()) { if (_flags & ThrowOnFail) platon_throw("bad cast"); else return bytesConstRef(); } return payload().cropped(0, length()); }
         /// Converts to string. @returns the empty string if not a string.
-        std::string toString(int _flags = LaissezFaire) const { if (!isData()) { if (_flags & ThrowOnFail) platonThrow("bad cast"); else return std::string(); } return payload().cropped(0, length()).toString(); }
+        std::string toString(int _flags = LaissezFaire) const { if (!isData()) { if (_flags & ThrowOnFail) platon_throw("bad cast"); else return std::string(); } return payload().cropped(0, length()).toString(); }
         /// Converts to string. @throws BadCast if not a string.
         std::string toStringStrict() const { return toString(Strict); }
 
@@ -195,7 +194,7 @@ namespace platon
                     ret.push_back(i.convert<T>(_flags));
             }
             else if (_flags & ThrowOnFail)
-                platonThrow("bad cast");
+                platon_throw("bad cast");
             return ret;
         }
 
@@ -207,7 +206,7 @@ namespace platon
                 for (auto const& i: *this)
                     ret.insert(i.convert<T>(_flags));
             else if (_flags & ThrowOnFail)
-                platonThrow("bad cast");
+                platon_throw("bad cast");
             return ret;
         }
 
@@ -219,7 +218,7 @@ namespace platon
                 for (auto const& i: *this)
                     ret.insert(i.convert<T>(_flags));
             else if (_flags & ThrowOnFail)
-                platonThrow("bad cast");
+                platon_throw("bad cast");
             return ret;
         }
 
@@ -230,7 +229,7 @@ namespace platon
             if (itemCountStrict() != 2)
             {
                 if (_flags & ThrowOnFail)
-                    platonThrow("bad cast");
+                    platon_throw("bad cast");
                 else
                     return ret;
             }
@@ -245,7 +244,7 @@ namespace platon
             if (itemCountStrict() != N)
             {
                 if (_flags & ThrowOnFail)
-                    platonThrow("bad cast");
+                    platon_throw("bad cast");
                 else
                     return std::array<T, N>();
             }
@@ -262,7 +261,7 @@ namespace platon
             if ((!isInt() && !(_flags & AllowNonCanon)) || isList() || isNull())
             {
                 if (_flags & ThrowOnFail)
-                    platonThrow("bad cast");
+                    platon_throw("bad cast");
                 else
                     return 0;
             }
@@ -271,7 +270,7 @@ namespace platon
             if (p.size() > intTraits<_T>::maxSize && (_flags & FailIfTooBig))
             {
                 if (_flags & ThrowOnFail)
-                    platonThrow("bad cast");
+                    platon_throw("bad cast");
                 else
                     return 0;
             }
@@ -283,7 +282,7 @@ namespace platon
         {
             int64_t i = toInt<int64_t>(_flags);
             if ((_flags & ThrowOnFail) && i < 0)
-                platonThrow("bad cast");
+                platon_throw("bad cast");
             return i;
         }
 
@@ -295,7 +294,7 @@ namespace platon
             if (!isData() || (l > _N::size && (_flags & FailIfTooBig)) || (l < _N::size && (_flags & FailIfTooSmall)))
             {
                 if (_flags & ThrowOnFail)
-                    platonThrow("bad cast");
+                    platon_throw("bad cast");
                 else
                     return _N();
             }
@@ -307,7 +306,7 @@ namespace platon
         }
 
         /// @returns the data payload. Valid for all types.
-        bytesConstRef payload() const { auto l = length(); if (l > m_data.size()) platonThrow("bad cast"); return m_data.cropped(payloadOffset(), l); }
+        bytesConstRef payload() const { auto l = length(); if (l > m_data.size()) platon_throw("bad cast"); return m_data.cropped(payloadOffset(), l); }
 
         /// @returns the theoretical size of this item as encoded in the data.
         /// @note Under normal circumstances, is equivalent to m_data.size() - use that unless you know it won't work.
@@ -428,13 +427,13 @@ public:
     void clear() { m_out.clear(); m_listStack.clear(); }
 
     /// Read the byte stream.
-    bytes const& out() const { if(!m_listStack.empty()) platonThrow("listStack is not empty"); return m_out; }
+    bytes const& out() const { if(!m_listStack.empty()) platon_throw("listStack is not empty"); return m_out; }
 
     /// Invalidate the object and steal the output byte stream.
-    bytes&& invalidate() { if(!m_listStack.empty()) platonThrow("listStack is not empty"); return std::move(m_out); }
+    bytes&& invalidate() { if(!m_listStack.empty()) platon_throw("listStack is not empty"); return std::move(m_out); }
 
     /// Swap the contents of the output stream out for some other byte array.
-    void swapOut(bytes& _dest) { if(!m_listStack.empty()) platonThrow("listStack is not empty"); swap(m_out, _dest); }
+    void swapOut(bytes& _dest) { if(!m_listStack.empty()) platon_throw("listStack is not empty"); swap(m_out, _dest); }
 
 private:
     void noteAppended(size_t _itemCount = 1);

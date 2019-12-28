@@ -27,6 +27,14 @@ namespace platon {
         });
     }
 
+    template<typename T>
+    void platon_return(const T &t) {
+        RLPStream rlp_stream;
+        rlp_stream << t;
+        std::vector<byte> result = rlp_stream.out();
+        ::platon_return(result.data(), result.size()); 
+    } 
+
 	template<typename T>
 	void platon_return(const T &t);
      /**
@@ -99,11 +107,11 @@ namespace platon {
             RLP rlp(input); \
             fetch(rlp[0], method);\
             if (method.empty()) {\
-                platon_assert(false, "valid method\n");\
+                platon_throw("valid method\n");\
             }\
             PLATON_DISPATCH_HELPER( TYPE, MEMBERS ) \
             else {\
-                platon_assert(false, "no method to call\n");\
+                platon_throw("no method to call\n");\
             }\
         } \
     }\

@@ -11,9 +11,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void setState(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen);
-    size_t getStateSize(const uint8_t* key, size_t klen);
-    void getState(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen);
+    void platon_set_state(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen);
+    size_t platon_get_state_length(const uint8_t* key, size_t klen);
+    void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen);
 #ifdef __cplusplus
 }
 #endif
@@ -37,7 +37,7 @@ namespace platon {
         state_stream.clear();
         state_stream << value;
         std::vector<byte> vect_value = state_stream.out();
-        ::setState(vect_key.data(), vect_key.size(),  vect_value.data(), vect_value.size());
+        ::platon_set_state(vect_key.data(), vect_key.size(),  vect_value.data(), vect_value.size());
     }
     /**
      * @brief Get the State object
@@ -53,11 +53,11 @@ namespace platon {
         RLPStream state_stream;
         state_stream << key;
         std::vector<byte> vect_key = state_stream.out();
-        size_t len = ::getStateSize(vect_key.data(), vect_key.size());
+        size_t len = ::platon_get_state_length(vect_key.data(), vect_key.size());
         if (len == 0){ return 0; }
         std::vector<byte> result;
         result.resize(len);
-        ::getState(vect_key.data(), vect_key.size(), result.data(), result.size());
+        ::platon_get_state(vect_key.data(), vect_key.size(), result.data(), result.size());
         fetch(RLP(result), value);
         return len;
     }
@@ -74,7 +74,7 @@ namespace platon {
         state_stream << key;
         std::vector<byte> vect_key = state_stream.out();
         byte del = 0;
-        ::setState(vect_key.data(), vect_key.size(),  (const byte*)&del, 0);
+        ::platon_set_state(vect_key.data(), vect_key.size(),  (const byte*)&del, 0);
     }
 
 }
