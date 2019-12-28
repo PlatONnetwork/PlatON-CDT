@@ -1,5 +1,4 @@
-#include "platon/dispatcher.hpp"
-#include "platon/common.h"
+#include "platon/platon.hpp"
 #include <string>
 #include <iostream>
 #include <vector>
