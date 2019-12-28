@@ -13,7 +13,8 @@
 #include <platon/service.hpp>
 #include <type_traits>
 #include <tuple>
-#include<platon/RLP.h>
+#include "platon/RLP.h"
+#include "platon/rlp_extend.hpp"
 
 namespace platon {
 

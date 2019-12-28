@@ -412,6 +412,18 @@ public:
     /// Shift operators for appending data items.
     template <class T> RLPStream& operator<<(T _data) { return append(_data); }
 
+    template <class _T>RLPStream& operator << (std::vector<_T> const& _s);
+
+    template <class _T, size_t S> RLPStream& operator << (std::array<_T, S> const& _s);
+
+    template <class _T> RLPStream& operator << (std::set<_T> const& _s);
+
+    template <class _T> RLPStream& operator << (std::unordered_set<_T> const& _s);
+
+    template <class T, class U> RLPStream& operator << (std::pair<T, U> const& _s);
+
+    template <class T, class U> RLPStream& operator << (std::map<T, U> const& _s);
+
     /// Clear the output stream so far.
     void clear() { m_out.clear(); m_listStack.clear(); }
 
@@ -473,9 +485,4 @@ template <class ... _Ts> bytes rlpList(_Ts ... _ts)
 /// Human readable version of RLP.
 //std::ostream& operator<<(std::ostream& _out, dev::RLP const& _d);
 
-}
-
-//get data from the RLP instance
-template <class T> void fetch(platon::RLP rlp, T &value){
-    value = T(rlp);
 }
