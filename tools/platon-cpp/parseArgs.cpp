@@ -38,7 +38,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
     else if(Option.matches(clang::driver::options::OPT_o))
       Output = A->getValue();
     else if(Option.matches(clang::driver::options::OPT_Wl_COMMA)){
-      for(unsigned i=0;i<A->getNumValues();i++){
+      for(unsigned i=0; i<A->getNumValues(); i++){
         ldArgs.push_back(A->getValue(i));
       }
 
