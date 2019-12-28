@@ -7,6 +7,7 @@ public:
   std::string Output;
   bool Help;
   bool OutputIR;
+  std::vector<std::string> ldArgs;
   std::vector<std::string> clangArgs;
 
   bool ParseArgs(int, char**);

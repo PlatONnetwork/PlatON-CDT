@@ -21,7 +21,7 @@ using namespace tooling;
 
 
 bool ParseArgs(int, char *[], PCCOption &);
-int GenerateWASM(char* clangPath, const char* output, llvm::Module*);
+int GenerateWASM(char* clangPath, vector<string> &ldArgs, const char* output, llvm::Module*);
 
 //void PCCPass(llvm::Module &);
 //bool GenFiles(llvm::Module*, PCCOption &Option);
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
 //  PCCPass(*M);
 
 	//link lib
-  
-  GenerateWASM(argv[0], Option.Output.data(), M);
+    
+  GenerateWASM(argv[0], Option.ldArgs, Option.Output.data(), M);
   return 0;
 }

@@ -37,7 +37,12 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       OutputIR = true;
     else if(Option.matches(clang::driver::options::OPT_o))
       Output = A->getValue();
-    else {
+    else if(Option.matches(clang::driver::options::OPT_Wl_COMMA)){
+      for(unsigned i=0; i<A->getNumValues(); i++){
+        ldArgs.push_back(A->getValue(i));
+      }
+
+    } else {
       ArgStringList ASL;
       A->render(Args, ASL);
       for (auto it : ASL)
@@ -68,5 +73,6 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       "link";
     Output = (prefix + suffix).str();
   }
+
   return true;
 }
