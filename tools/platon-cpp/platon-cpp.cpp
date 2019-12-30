@@ -39,8 +39,6 @@ public:
                      std::shared_ptr<PCHContainerOperations> PCHContainerOps,
                      DiagnosticConsumer *DiagConsumer) override {
 
-    // Invocation->getCodeGenOpts().OptimizationLevel = 2;
-    
     Invocation->getCodeGenOpts().setDebugInfo(clang::codegenoptions::LimitedDebugInfo);
     IntrusiveRefCntPtr<clang::DiagnosticsEngine> Diags =
         CompilerInstance::createDiagnostics(&Invocation->getDiagnosticOpts(),
