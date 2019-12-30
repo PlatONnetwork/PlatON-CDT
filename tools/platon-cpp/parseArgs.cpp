@@ -50,7 +50,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
     }
   }
   clangArgs.push_back("--target=wasm32-wasm");
-  clangArgs.push_back("-O2");
+  // clangArgs.push_back("-O2");
 
   if(Help){
     clangOpts->PrintHelp(

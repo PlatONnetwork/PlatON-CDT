@@ -39,8 +39,7 @@ public:
                      std::shared_ptr<PCHContainerOperations> PCHContainerOps,
                      DiagnosticConsumer *DiagConsumer) override {
 
-
-    Invocation->getCodeGenOpts().OptimizationLevel = 2;
+    // Invocation->getCodeGenOpts().OptimizationLevel = 2;
     
     Invocation->getCodeGenOpts().setDebugInfo(clang::codegenoptions::LimitedDebugInfo);
     IntrusiveRefCntPtr<clang::DiagnosticsEngine> Diags =
@@ -65,10 +64,10 @@ public:
     if(!succ)return false;
    
     if(Mod == nullptr){
-      Mod = Act.takeModule();
+      Mod = std::move(Act.takeModule());
       return true;
     } else {
-      bool Err = Linker::linkModules(*Mod, Act.takeModule());
+      bool Err = Linker::linkModules(*Mod, std::move(Act.takeModule()));
       return !Err;
     }
   }
@@ -103,15 +102,15 @@ int main(int argc, char **argv) {
 
   if(Tool.run(&Builder))return 0;
 
-  llvm::Module* M = Builder.Mod.get();
+  std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
   if(Option.OutputIR){
-    OutputIRFile(M, Option.Output);
+    OutputIRFile(M.get(), Option.Output);
     return 0;
   }
 //  PCCPass(*M);
 
 	//link lib
     
-  GenerateWASM(argv[0], Option.ldArgs, Option.Output.data(), M);
+  GenerateWASM(argv[0], Option.ldArgs, Option.Output.data(), M.get());
   return 0;
 }
