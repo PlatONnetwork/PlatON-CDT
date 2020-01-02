@@ -30,7 +30,7 @@ add_executable(platon-cpp
 add_custom_command(
   TARGET platon-cpp
   PRE_BUILD
-  COMMAND cp ${LLVM_BINDIR}/lld ./
+  COMMAND cp ${LLVM_BINDIR}/lld ./platon-lld
   )
 
 

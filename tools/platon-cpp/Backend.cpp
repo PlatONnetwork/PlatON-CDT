@@ -308,7 +308,7 @@ int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* ou
   SmallString<128> lld(binPath);
    
   llvm::sys::path::remove_filename(lld);
-  llvm::sys::path::append(lld, "lld");
+  llvm::sys::path::append(lld, "platon-lld");
 
   std::vector<StringRef> lldArgs;
   lldArgs.push_back(lld);
