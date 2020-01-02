@@ -308,7 +308,7 @@ int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* ou
   SmallString<128> lld(binPath);
    
   llvm::sys::path::remove_filename(lld);
-  llvm::sys::path::append(lld, "lld");
+  llvm::sys::path::append(lld, "platon-lld");
 
   std::vector<StringRef> lldArgs;
   lldArgs.push_back(lld);
@@ -316,6 +316,7 @@ int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* ou
   lldArgs.push_back("wasm");
   lldArgs.push_back(TempFilename);
   lldArgs.push_back("--import-memory");
+  lldArgs.push_back("-L.");
   for(unsigned i=0; i<ldArgs.size(); i++){
     lldArgs.push_back(ldArgs[i].data());
   }

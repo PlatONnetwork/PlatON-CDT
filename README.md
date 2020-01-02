@@ -14,6 +14,8 @@ contract writing for the PlatON platform.
 - GCC 5.4+ or Clang 4.0+
 - CMake 3.5+
 - Git
+- Tar
+- Wget
 
 ### Ubuntu 
 
@@ -22,7 +24,7 @@ contract writing for the PlatON platform.
 - **Install Dependencies**
 
 ``` shell
-sudo apt install build-essential cmake libz-dev libtinfo-dev
+sudo apt install build-essential cmake libz-dev libtinfo-dev tar wget
 ```
 
 - **Get Source Code**
@@ -37,10 +39,7 @@ cd PlatON-CDT
 cd PlatON-CDT
 mkdir build && cd build
 
-wget http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-tar xavf clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-
-cmake .. -DLLVM_CONFIG=clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config
+cmake ..
 make -j4
 
 ```

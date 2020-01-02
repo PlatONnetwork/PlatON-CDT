@@ -1,18 +1,4 @@
 cmake_minimum_required(VERSION 3.4.3)
-project(platon-cpp)
-
-if(NOT DEFINED LLVM_CONFIG)
-  find_program(LLVM_CONFIG NAMES llvm-config-8.0)
-
-  if(NOT LLVM_CONFIG)
-    find_program(LLVM_CONFIG NAMES llvm-config)
-  endif()
-
-  if(NOT LLVM_CONFIG)
-    message(FATAL_ERROR "Can not find llvm-config, Please specify by -DLLVM_CONFIG=")
-  endif()
-
-endif()
 
 execute_process(COMMAND ${LLVM_CONFIG} --includedir
   OUTPUT_VARIABLE LLVM_INCLUDEDIR
@@ -20,10 +6,6 @@ execute_process(COMMAND ${LLVM_CONFIG} --includedir
 
 execute_process(COMMAND ${LLVM_CONFIG} --libdir
   OUTPUT_VARIABLE LLVM_LIBDIR
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND ${LLVM_CONFIG} --bindir
-  OUTPUT_VARIABLE LLVM_BINDIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
@@ -48,7 +30,7 @@ add_executable(platon-cpp
 add_custom_command(
   TARGET platon-cpp
   PRE_BUILD
-  COMMAND cp ${LLVM_BINDIR}/lld ./
+  COMMAND cp ${LLVM_BINDIR}/lld ./platon-lld
   )
 
 
