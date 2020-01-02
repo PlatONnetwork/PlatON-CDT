@@ -37,8 +37,14 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       OutputIR = true;
     else if(Option.matches(clang::driver::options::OPT_o))
       Output = A->getValue();
-    else if(Option.matches(clang::driver::options::OPT_Wl_COMMA)){
-      for(unsigned i=0; i<A->getNumValues(); i++){
+    else if(Option.matches(clang::driver::options::OPT_L)) {
+      ldArgs.push_back("-L");
+      ldArgs.push_back(A->getValue());
+    } else if(Option.matches(clang::driver::options::OPT_l)) {
+      ldArgs.push_back("-l");
+      ldArgs.push_back(A->getValue());
+    } else if(Option.matches(clang::driver::options::OPT_Wl_COMMA)) {
+      for(unsigned i=0; i<A->getNumValues(); i++) {
         ldArgs.push_back(A->getValue(i));
       }
 

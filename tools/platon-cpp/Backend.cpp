@@ -316,6 +316,7 @@ int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* ou
   lldArgs.push_back("wasm");
   lldArgs.push_back(TempFilename);
   lldArgs.push_back("--import-memory");
+  lldArgs.push_back("-L.");
   for(unsigned i=0; i<ldArgs.size(); i++){
     lldArgs.push_back(ldArgs[i].data());
   }
