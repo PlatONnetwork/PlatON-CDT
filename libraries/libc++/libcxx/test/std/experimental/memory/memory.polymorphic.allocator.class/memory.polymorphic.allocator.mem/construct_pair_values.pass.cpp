@@ -1,13 +1,11 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
-// REQUIRES: c++experimental
 // UNSUPPORTED: c++98, c++03
 
 // <experimental/memory_resource>
@@ -93,7 +91,36 @@ void test_pmr_uses_allocator(TT&& t, UU&& u)
     }
 }
 
-int main()
+template <class Alloc, class TT, class UU>
+void test_pmr_not_uses_allocator(TT&& t, UU&& u)
+{
+    {
+        using T = NotUsesAllocator<Alloc, 1>;
+        using U = NotUsesAllocator<Alloc, 1>;
+        assert((doTest<T, U>(UA_None, UA_None,
+                             std::forward<TT>(t), std::forward<UU>(u))));
+    }
+    {
+        using T = UsesAllocatorV1<Alloc, 1>;
+        using U = UsesAllocatorV2<Alloc, 1>;
+        assert((doTest<T, U>(UA_None, UA_None,
+                             std::forward<TT>(t), std::forward<UU>(u))));
+    }
+    {
+        using T = UsesAllocatorV2<Alloc, 1>;
+        using U = UsesAllocatorV3<Alloc, 1>;
+        assert((doTest<T, U>(UA_None, UA_None,
+                             std::forward<TT>(t), std::forward<UU>(u))));
+    }
+    {
+        using T = UsesAllocatorV3<Alloc, 1>;
+        using U = NotUsesAllocator<Alloc, 1>;
+        assert((doTest<T, U>(UA_None, UA_None,
+                             std::forward<TT>(t), std::forward<UU>(u))));
+    }
+}
+
+int main(int, char**)
 {
     using ERT = std::experimental::erased_type;
     using PMR = ex::memory_resource*;
@@ -102,14 +129,16 @@ int main()
         int x = 42;
         int y = 42;
         test_pmr_uses_allocator<ERT>(x, std::move(y));
-        test_pmr_uses_allocator<PMR>(x, std::move(y));
+        test_pmr_not_uses_allocator<PMR>(x, std::move(y));
         test_pmr_uses_allocator<PMA>(x, std::move(y));
     }
     {
         int x = 42;
         const int y = 42;
         test_pmr_uses_allocator<ERT>(std::move(x), y);
-        test_pmr_uses_allocator<PMR>(std::move(x), y);
+        test_pmr_not_uses_allocator<PMR>(std::move(x), y);
         test_pmr_uses_allocator<PMA>(std::move(x), y);
     }
+
+  return 0;
 }

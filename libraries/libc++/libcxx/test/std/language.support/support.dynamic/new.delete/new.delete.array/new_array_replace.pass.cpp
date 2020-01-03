@@ -1,15 +1,15 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 // test operator new[] replacement by replacing only operator new
 
 // UNSUPPORTED: sanitizer-new-delete
+// XFAIL: libcpp-no-vcruntime
 
 
 #include <new>
@@ -20,7 +20,7 @@
 
 #include "test_macros.h"
 
-volatile int new_called = 0;
+int new_called = 0;
 
 void* operator new(std::size_t s) TEST_THROW_SPEC(std::bad_alloc)
 {
@@ -44,15 +44,17 @@ struct A
     ~A() {--A_constructed;}
 };
 
-A* volatile ap;
-
-int main()
+int main(int, char**)
 {
-    ap = new A[3];
+    A *ap = new A[3];
+    DoNotOptimize(ap);
     assert(ap);
     assert(A_constructed == 3);
     assert(new_called == 1);
     delete [] ap;
+    DoNotOptimize(ap);
     assert(A_constructed == 0);
     assert(new_called == 0);
+
+  return 0;
 }

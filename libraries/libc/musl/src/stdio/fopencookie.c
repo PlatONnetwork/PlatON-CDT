@@ -1,8 +1,10 @@
 #define _GNU_SOURCE
 #include "stdio_impl.h"
 #include <stdlib.h>
-//include <sys/ioctl.h>
-//include <fcntl.h>
+#ifdef NO_ONTOLOGY_WASM
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#endif
 #include <errno.h>
 #include <string.h>
 
@@ -116,15 +118,12 @@ FILE *fopencookie(void *cookie, const char *mode, cookie_io_functions_t iofuncs)
 
 	/* Set up our fcookie */
 	f->fc.cookie = cookie;
-	f->fc.iofuncs.read = iofuncs.read;
-	f->fc.iofuncs.write = iofuncs.write;
-	f->fc.iofuncs.seek = iofuncs.seek;
-	f->fc.iofuncs.close = iofuncs.close;
+	f->fc.iofuncs = iofuncs;
 
 	f->f.fd = -1;
 	f->f.cookie = &f->fc;
 	f->f.buf = f->buf + UNGET;
-	f->f.buf_size = BUFSIZ;
+	f->f.buf_size = sizeof f->buf - UNGET;
 	f->f.lbf = EOF;
 
 	/* Initialize op ptrs. No problem if some are unneeded. */

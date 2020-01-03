@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -12,6 +11,7 @@
 // template<class InputIterator>
 //   basic_string(InputIterator begin, InputIterator end,
 //   const Allocator& a = Allocator());
+
 
 #include <string>
 #include <iterator>
@@ -56,7 +56,7 @@ test(It first, It last, const A& a)
     assert(s2.capacity() >= s2.size());
 }
 
-int main()
+int main(int, char**)
 {
     {
     typedef test_allocator<char> A;
@@ -116,4 +116,15 @@ int main()
     test(input_iterator<const char*>(s), input_iterator<const char*>(s+50), A());
     }
 #endif
+    {
+      static_assert((!std::is_constructible<std::string, std::string,
+                                            std::string>::value),
+                    "");
+      static_assert(
+          (!std::is_constructible<std::string, std::string, std::string,
+                                  std::allocator<char> >::value),
+          "");
+    }
+
+  return 0;
 }

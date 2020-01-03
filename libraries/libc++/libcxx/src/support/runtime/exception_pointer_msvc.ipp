@@ -1,35 +1,26 @@
 // -*- C++ -*-
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <yvals.h> // for _CRTIMP2_PURE
 
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL __ExceptionPtrCreate(_Out_ void*);
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL __ExceptionPtrDestroy(_Inout_ void*);
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL __ExceptionPtrCopy(_Out_ void*,
-                                                              _In_ const void*);
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL
-__ExceptionPtrAssign(_Inout_ void*, _In_ const void*);
-_CRTIMP2_PURE bool __CLRCALL_PURE_OR_CDECL
-__ExceptionPtrCompare(_In_ const void*, _In_ const void*);
-_CRTIMP2_PURE bool __CLRCALL_PURE_OR_CDECL
-__ExceptionPtrToBool(_In_ const void*);
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL __ExceptionPtrSwap(_Inout_ void*,
-                                                              _Inout_ void*);
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL
-__ExceptionPtrCurrentException(_Out_ void*);
-[[noreturn]] _CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL
-__ExceptionPtrRethrow(_In_ const void*);
-_CRTIMP2_PURE void __CLRCALL_PURE_OR_CDECL
-__ExceptionPtrCopyException(_Inout_ void*, _In_ const void*, _In_ const void*);
+_LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrCreate(void*);
+_LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrDestroy(void*);
+_LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrCopy(void*, const void*);
+_LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrAssign(void*, const void*);
+_LIBCPP_CRT_FUNC bool __cdecl __ExceptionPtrCompare(const void*, const void*);
+_LIBCPP_CRT_FUNC bool __cdecl __ExceptionPtrToBool(const void*);
+_LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrSwap(void*, void*);
+_LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrCurrentException(void*);
+[[noreturn]] _LIBCPP_CRT_FUNC void __cdecl __ExceptionPtrRethrow(const void*);
+_LIBCPP_CRT_FUNC void __cdecl
+__ExceptionPtrCopyException(void*, const void*, const void*);
 
 namespace std {
 

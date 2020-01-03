@@ -16,7 +16,9 @@
 #include <stdint.h>
 #include <float.h>
 #include <math.h>
-//include <complex.h>
+#ifdef NO_ONTOLOGY_WASM
+#include <complex.h>
+#endif
 #include <endian.h>
 
 #if LDBL_MANT_DIG == 53 && LDBL_MAX_EXP == 1024
@@ -26,6 +28,17 @@ union ldshape {
 	struct {
 		uint64_t m;
 		uint16_t se;
+	} i;
+};
+#elif LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384 && __BYTE_ORDER == __BIG_ENDIAN
+/* This is the m68k variant of 80-bit long double, and this definition only works
+ * on archs where the alignment requirement of uint64_t is <= 4. */
+union ldshape {
+	long double f;
+	struct {
+		uint16_t se;
+		uint16_t pad;
+		uint64_t m;
 	} i;
 };
 #elif LDBL_MANT_DIG == 113 && LDBL_MAX_EXP == 16384 && __BYTE_ORDER == __LITTLE_ENDIAN
@@ -142,29 +155,53 @@ do {                                              \
   (d) = __u.f;                                    \
 } while (0)
 
+#ifdef NO_ONTOLOGY_WASM
+#undef __CMPLX
+#undef CMPLX
+#undef CMPLXF
+#undef CMPLXL
+
+#define __CMPLX(x, y, t) \
+	((union { _Complex t __z; t __xy[2]; }){.__xy = {(x),(y)}}.__z)
+
+#define CMPLX(x, y) __CMPLX(x, y, double)
+#define CMPLXF(x, y) __CMPLX(x, y, float)
+#define CMPLXL(x, y) __CMPLX(x, y, long double)
+#endif
+
 /* fdlibm kernel functions */
 
-int    __rem_pio2_large(double*,double*,int,int,int);
+hidden int    __rem_pio2_large(double*,double*,int,int,int);
 
-int    __rem_pio2(double,double*);
-double __sin(double,double,int);
-double __cos(double,double);
-double __tan(double,double,int);
-double __expo2(double);
+hidden int    __rem_pio2(double,double*);
+hidden double __sin(double,double,int);
+hidden double __cos(double,double);
+hidden double __tan(double,double,int);
+hidden double __expo2(double);
+#ifdef NO_ONTOLOGY_WASM
+hidden double complex __ldexp_cexp(double complex,int);
+#endif
 
-int    __rem_pio2f(float,double*);
-float  __sindf(double);
-float  __cosdf(double);
-float  __tandf(double,int);
-float  __expo2f(float);
+hidden int    __rem_pio2f(float,double*);
+hidden float  __sindf(double);
+hidden float  __cosdf(double);
+hidden float  __tandf(double,int);
+hidden float  __expo2f(float);
+#ifdef NO_ONTOLOGY_WASM
+hidden float complex __ldexp_cexpf(float complex,int);
+#endif
 
-int __rem_pio2l(long double, long double *);
-long double __sinl(long double, long double, int);
-long double __cosl(long double, long double);
-long double __tanl(long double, long double, int);
+hidden int __rem_pio2l(long double, long double *);
+hidden long double __sinl(long double, long double, int);
+hidden long double __cosl(long double, long double);
+hidden long double __tanl(long double, long double, int);
 
 /* polynomial evaluation */
-long double __polevll(long double, const long double *, int);
-long double __p1evll(long double, const long double *, int);
+hidden long double __polevll(long double, const long double *, int);
+hidden long double __p1evll(long double, const long double *, int);
+
+extern int __signgam;
+hidden double __lgamma_r(double, int *);
+hidden float __lgammaf_r(float, int *);
 
 #endif

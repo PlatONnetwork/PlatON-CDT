@@ -1,8 +1,11 @@
 #include <locale.h>
 #include <string.h>
+#ifdef NO_ONTOLOGY_WASM
+#include <sys/mman.h>
+#endif
 #include "locale_impl.h"
 #include "libc.h"
-#include "atomic.h"
+#include "lock.h"
 
 const char *__lctrans_impl(const char *msg, const struct __locale_map *lm)
 {
@@ -10,10 +13,6 @@ const char *__lctrans_impl(const char *msg, const struct __locale_map *lm)
 	if (lm) trans = __mo_lookup(lm->map, lm->map_size, msg);
 	return trans ? trans : msg;
 }
-
-//const unsigned char *__map_file(const char *, size_t *);
-//int __munmap(void *, size_t);
-char *__strchrnul(const char *, int);
 
 static const char envvars[][12] = {
 	"LC_CTYPE",
@@ -26,7 +25,7 @@ static const char envvars[][12] = {
 
 const struct __locale_map *__get_locale(int cat, const char *val)
 {
-	static volatile int lock[2];
+	static volatile int lock[1];
 	static void *volatile loc_head;
 	const struct __locale_map *p;
 	struct __locale_map *new = 0;
@@ -67,7 +66,8 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 
 	if (!libc.secure) path = getenv("MUSL_LOCPATH");
 	/* FIXME: add a default path? */
-        /*
+
+#ifdef NO_ONTOLOGY_WASM
 	if (path) for (; *path; path=z+!!*z) {
 		z = __strchrnul(path, ':');
 		l = z - path - !!*z;
@@ -93,7 +93,8 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 			break;
 		}
 	}
-        */
+#endif
+
 	/* If no locale definition was found, make a locale map
 	 * object anyway to store the name, which is kept for the
 	 * sake of being able to do message translations at the

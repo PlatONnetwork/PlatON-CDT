@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -19,7 +18,22 @@
 #include <cassert>
 #include <cstddef>
 
-int main()
+struct S
+{
+    S() : x_(0) { default_ctor_called = true; }
+    S(int x) : x_(x) {}
+    int x_;
+    static bool default_ctor_called;
+};
+
+bool S::default_ctor_called = false;
+
+bool operator==(const S& lhs, const S& rhs)
+{
+    return lhs.x_ == rhs.x_;
+}
+
+int main(int, char**)
 {
     {
         typedef int T;
@@ -55,4 +69,17 @@ int main()
                 assert(v2[i][j] == a[i][j]);
         }
     }
+    {
+        typedef S T;
+        T a[] = {T(1), T(2), T(3), T(4), T(5)};
+        const unsigned N = sizeof(a)/sizeof(a[0]);
+        std::valarray<T> v2;
+        v2 = {T(1), T(2), T(3), T(4), T(5)};
+        assert(v2.size() == N);
+        for (std::size_t i = 0; i < v2.size(); ++i)
+            assert(v2[i] == a[i]);
+        assert(!S::default_ctor_called);
+    }
+
+  return 0;
 }

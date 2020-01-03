@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -11,12 +10,23 @@
 
 // template<RandomAccessIterator Iter>
 //   requires LessThanComparable<Iter::value_type>
-//   bool
+//   constexpr bool   // constexpr after C++17
 //   is_heap(Iter first, Iter last);
 
 #include <algorithm>
 #include <functional>
 #include <cassert>
+
+#include "test_macros.h"
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int ia[] = {0, 0, 1, 1, 1};
+    int ib[] = {1, 0, 4, 1, 0};
+    return     std::is_heap(std::begin(ia), std::end(ia), std::greater<int>())
+           && !std::is_heap(std::begin(ib), std::end(ib), std::greater<int>());
+    }
+#endif
 
 void test()
 {
@@ -516,7 +526,13 @@ void test()
     assert(std::is_heap(i246, i246+7, std::greater<int>()) == (std::is_heap_until(i246, i246+7, std::greater<int>()) == i246+7));
 }
 
-int main()
+int main(int, char**)
 {
     test();
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

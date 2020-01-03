@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -30,13 +29,17 @@ size_t StrLen ( const CharT *s ) {
 
 template<typename CharT>
 void test ( const CharT *s ) {
-    std::basic_string_view<CharT> sv1 ( s );
+    typedef std::basic_string_view<CharT> SV;
+//  I'd love to do this, but it would require traits::length() to be noexcept
+//  LIBCPP_ASSERT_NOEXCEPT(SV(s));
+
+    SV sv1 ( s );
     assert ( sv1.size() == StrLen( s ));
     assert ( sv1.data() == s );
     }
 
 
-int main () {
+int main(int, char**) {
 
     test ( "QBCDE" );
     test ( "A" );
@@ -62,4 +65,6 @@ int main () {
     static_assert ( sv1.size() == 5, "");
     }
 #endif
+
+  return 0;
 }

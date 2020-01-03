@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -43,14 +42,14 @@ struct TestEachIntegralType {
         TestFunctor<char16_t>()();
         TestFunctor<char32_t>()();
 #endif
-		TestFunctor<  int8_t>()();
-		TestFunctor< uint8_t>()();
-		TestFunctor< int16_t>()();
-		TestFunctor<uint16_t>()();
-		TestFunctor< int32_t>()();
-		TestFunctor<uint32_t>()();
-		TestFunctor< int64_t>()();
-		TestFunctor<uint64_t>()();
+        TestFunctor<  int8_t>()();
+        TestFunctor< uint8_t>()();
+        TestFunctor< int16_t>()();
+        TestFunctor<uint16_t>()();
+        TestFunctor< int32_t>()();
+        TestFunctor<uint32_t>()();
+        TestFunctor< int64_t>()();
+        TestFunctor<uint64_t>()();
     }
 };
 

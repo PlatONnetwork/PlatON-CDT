@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -39,7 +38,7 @@ struct mutex
 
 mutex m;
 
-int main()
+int main(int, char**)
 {
     typedef std::chrono::steady_clock Clock;
     std::shared_lock<mutex> lk(m, std::defer_lock);
@@ -49,7 +48,7 @@ int main()
 #ifndef TEST_HAS_NO_EXCEPTIONS
     try
     {
-        lk.try_lock_until(Clock::now());
+        TEST_IGNORE_NODISCARD lk.try_lock_until(Clock::now());
         assert(false);
     }
     catch (std::system_error& e)
@@ -65,7 +64,7 @@ int main()
 #ifndef TEST_HAS_NO_EXCEPTIONS
     try
     {
-        lk.try_lock_until(Clock::now());
+        TEST_IGNORE_NODISCARD lk.try_lock_until(Clock::now());
         assert(false);
     }
     catch (std::system_error& e)
@@ -73,4 +72,6 @@ int main()
         assert(e.code().value() == EPERM);
     }
 #endif
+
+  return 0;
 }

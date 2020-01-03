@@ -1,29 +1,41 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 // <algorithm>
 
 // template<class ForwardIterator, class Predicate>
-//     ForwardIterator
+//     constpexr ForwardIterator       // constexpr after C++17
 //     partition_point(ForwardIterator first, ForwardIterator last, Predicate pred);
 
 #include <algorithm>
 #include <cassert>
 
+#include "test_macros.h"
 #include "test_iterators.h"
 
 struct is_odd
 {
-    bool operator()(const int& i) const {return i & 1;}
+    TEST_CONSTEXPR bool operator()(const int& i) const {return i & 1;}
 };
 
-int main()
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int ia[] = {1, 3, 5, 2, 4, 6};
+    int ib[] = {1, 2, 3, 4, 5, 6};
+    return    (std::partition_point(std::begin(ia), std::end(ia), is_odd()) == ia+3)
+           && (std::partition_point(std::begin(ib), std::end(ib), is_odd()) == ib+1)
+           ;
+    }
+#endif
+
+
+int main(int, char**)
 {
     {
         const int ia[] = {2, 4, 6, 8, 10};
@@ -73,4 +85,10 @@ int main()
                                     forward_iterator<const int*>(std::begin(ia)),
                                     is_odd()) == forward_iterator<const int*>(ia));
     }
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

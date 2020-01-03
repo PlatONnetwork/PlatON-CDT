@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -33,7 +32,6 @@ void
 test1()
 {
     typedef std::extreme_value_distribution<> D;
-    typedef D::param_type P;
     typedef std::mt19937 G;
     G g;
     D d(0.5, 2);
@@ -75,7 +73,6 @@ void
 test2()
 {
     typedef std::extreme_value_distribution<> D;
-    typedef D::param_type P;
     typedef std::mt19937 G;
     G g;
     D d(1, 2);
@@ -117,7 +114,6 @@ void
 test3()
 {
     typedef std::extreme_value_distribution<> D;
-    typedef D::param_type P;
     typedef std::mt19937 G;
     G g;
     D d(1.5, 3);
@@ -159,7 +155,6 @@ void
 test4()
 {
     typedef std::extreme_value_distribution<> D;
-    typedef D::param_type P;
     typedef std::mt19937 G;
     G g;
     D d(3, 4);
@@ -197,10 +192,12 @@ test4()
     assert(std::abs((kurtosis - x_kurtosis) / x_kurtosis) < 0.01);
 }
 
-int main()
+int main(int, char**)
 {
     test1();
     test2();
     test3();
     test4();
+
+  return 0;
 }

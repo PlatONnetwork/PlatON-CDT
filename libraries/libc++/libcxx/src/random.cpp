@@ -1,9 +1,8 @@
 //===-------------------------- random.cpp --------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -25,7 +24,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(_LIBCPP_USING_DEV_RANDOM)
+#if defined(_LIBCPP_USING_GETENTROPY)
+#include <sys/random.h>
+#elif defined(_LIBCPP_USING_DEV_RANDOM)
 #include <fcntl.h>
 #include <unistd.h>
 #elif defined(_LIBCPP_USING_NACL_RANDOM)
@@ -35,7 +36,30 @@
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
-#if defined(_LIBCPP_USING_ARC4_RANDOM)
+#if defined(_LIBCPP_USING_GETENTROPY)
+
+random_device::random_device(const string& __token)
+{
+    if (__token != "/dev/urandom")
+        __throw_system_error(ENOENT, ("random device not supported " + __token).c_str());
+}
+
+random_device::~random_device()
+{
+}
+
+unsigned
+random_device::operator()()
+{
+    unsigned r;
+    size_t n = sizeof(r);
+    int err = getentropy(&r, n);
+    if (err)
+        __throw_system_error(errno, "random_device getentropy failed");
+    return r;
+}
+
+#elif defined(_LIBCPP_USING_ARC4_RANDOM)
 
 random_device::random_device(const string& __token)
 {

@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -16,8 +15,11 @@
 //
 
 #include <numeric>
-#include <vector>
+#include <algorithm>
 #include <cassert>
+#include <functional>
+#include <iterator>
+#include <vector>
 
 #include "test_iterators.h"
 
@@ -52,38 +54,38 @@ test()
         test(Iter(ia), Iter(ia + i), 0, pRes, pRes + i);
 }
 
-int triangle(int n) { return n*(n+1)/2; }
+size_t triangle(size_t n) { return n*(n+1)/2; }
 
 //  Basic sanity
 void basic_tests()
 {
     {
-    std::vector<int> v(10);
+    std::vector<size_t> v(10);
     std::fill(v.begin(), v.end(), 3);
-    std::exclusive_scan(v.begin(), v.end(), v.begin(), 50);
+    std::exclusive_scan(v.begin(), v.end(), v.begin(), size_t{50});
     for (size_t i = 0; i < v.size(); ++i)
-        assert(v[i] == 50 + (int) i * 3);
+        assert(v[i] == 50 + i * 3);
     }
 
     {
-    std::vector<int> v(10);
+    std::vector<size_t> v(10);
     std::iota(v.begin(), v.end(), 0);
-    std::exclusive_scan(v.begin(), v.end(), v.begin(), 30);
+    std::exclusive_scan(v.begin(), v.end(), v.begin(), size_t{30});
     for (size_t i = 0; i < v.size(); ++i)
         assert(v[i] == 30 + triangle(i-1));
     }
 
     {
-    std::vector<int> v(10);
+    std::vector<size_t> v(10);
     std::iota(v.begin(), v.end(), 1);
-    std::exclusive_scan(v.begin(), v.end(), v.begin(), 40);
+    std::exclusive_scan(v.begin(), v.end(), v.begin(), size_t{40});
     for (size_t i = 0; i < v.size(); ++i)
         assert(v[i] == 40 + triangle(i));
     }
 
 }
 
-int main()
+int main(int, char**)
 {
     basic_tests();
 
@@ -94,4 +96,6 @@ int main()
     test<random_access_iterator<const int*> >();
     test<const int*>();
     test<      int*>();
+
+  return 0;
 }

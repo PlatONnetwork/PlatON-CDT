@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -15,9 +14,10 @@
 
 #include <ios>
 #include <string>
+#include <system_error>
 #include <cassert>
 
-int main()
+int main(int, char**)
 {
     // LWG2462 std::ios_base::failure is overspecified
     static_assert((std::is_base_of<std::system_error, std::ios_base::failure>::value), "");
@@ -28,7 +28,8 @@ int main()
         assert(se.code() == std::make_error_code(std::errc::is_a_directory));
         std::string what_message(se.what());
         assert(what_message.find(what_arg) != std::string::npos);
-        assert(what_message.find("Is a directory") != std::string::npos);
+        assert(what_message.find(std::generic_category().message(static_cast<int>
+            (std::errc::is_a_directory))) != std::string::npos);
     }
     {
         std::string what_arg("io test message");
@@ -39,4 +40,6 @@ int main()
         assert(what_message.find(std::iostream_category().message(static_cast<int>
             (std::io_errc::stream))) != std::string::npos);
     }
+
+  return 0;
 }

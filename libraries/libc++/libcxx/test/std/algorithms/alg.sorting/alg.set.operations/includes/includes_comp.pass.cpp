@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -12,14 +11,29 @@
 // template<InputIterator Iter1, InputIterator Iter2, typename Compare>
 //   requires Predicate<Compare, Iter1::value_type, Iter2::value_type>
 //         && Predicate<Compare, Iter2::value_type, Iter1::value_type>
-//   bool
+//   constexpr bool             // constexpr after C++17
 //   includes(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Compare comp);
 
 #include <algorithm>
 #include <functional>
 #include <cassert>
 
+#include "test_macros.h"
 #include "test_iterators.h"
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int ia[] = {1, 2, 2, 3, 3, 3, 4, 4, 4, 4};
+    int ib[] = {2, 4};
+    int ic[] = {3, 3, 3, 3};
+
+    auto comp = [](int a, int b) {return a < b; };
+    return  std::includes(std::begin(ia), std::end(ia), std::begin(ib), std::end(ib), comp)
+        && !std::includes(std::begin(ia), std::end(ia), std::begin(ic), std::end(ic), comp)
+           ;
+    }
+#endif
+
 
 template <class Iter1, class Iter2>
 void
@@ -51,7 +65,7 @@ test()
     assert(!std::includes(Iter1(ia), Iter1(ia+sa), Iter2(id), Iter2(id+4), std::less<int>()));
 }
 
-int main()
+int main(int, char**)
 {
     test<input_iterator<const int*>, input_iterator<const int*> >();
     test<input_iterator<const int*>, forward_iterator<const int*> >();
@@ -82,4 +96,10 @@ int main()
     test<const int*, bidirectional_iterator<const int*> >();
     test<const int*, random_access_iterator<const int*> >();
     test<const int*, const int*>();
+
+#if TEST_STD_VER > 17
+   static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

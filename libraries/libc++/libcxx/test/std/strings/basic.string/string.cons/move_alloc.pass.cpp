@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -35,15 +34,15 @@ test(S s0, const typename S::allocator_type& a)
 }
 
 
-int main()
+int main(int, char**)
 {
     {
     typedef test_allocator<char> A;
     typedef std::basic_string<char, std::char_traits<char>, A> S;
 #if TEST_STD_VER > 14
-	static_assert((noexcept(S{})), "" );
+    static_assert((noexcept(S{})), "" );
 #elif TEST_STD_VER >= 11
-	static_assert((noexcept(S()) == std::is_nothrow_move_constructible<A>::value), "" );
+    static_assert((noexcept(S()) == std::is_nothrow_move_constructible<A>::value), "" );
 #endif
     test(S(), A(3));
     test(S("1"), A(5));
@@ -55,9 +54,9 @@ int main()
     typedef test_allocator<char> A;
     typedef std::basic_string<char, std::char_traits<char>, A> S;
 #if TEST_STD_VER > 14
-	static_assert((noexcept(S{})), "" );
+    static_assert((noexcept(S{})), "" );
 #elif TEST_STD_VER >= 11
-	static_assert((noexcept(S()) == std::is_nothrow_move_constructible<A>::value), "" );
+    static_assert((noexcept(S()) == std::is_nothrow_move_constructible<A>::value), "" );
 #endif
     S s1 ( "Twas brillig, and the slivy toves did gyre and gymbal in the wabe" );
     S s2 (std::move(s1), A(1));
@@ -67,12 +66,14 @@ int main()
     typedef min_allocator<char> A;
     typedef std::basic_string<char, std::char_traits<char>, A> S;
 #if TEST_STD_VER > 14
-	static_assert((noexcept(S{})), "" );
+    static_assert((noexcept(S{})), "" );
 #elif TEST_STD_VER >= 11
-	static_assert((noexcept(S()) == std::is_nothrow_move_constructible<A>::value), "" );
+    static_assert((noexcept(S()) == std::is_nothrow_move_constructible<A>::value), "" );
 #endif
     test(S(), A());
     test(S("1"), A());
     test(S("1234567890123456789012345678901234567890123456789012345678901234567890"), A());
     }
+
+  return 0;
 }

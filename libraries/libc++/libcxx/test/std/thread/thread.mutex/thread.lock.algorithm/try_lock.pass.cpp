@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -73,7 +72,7 @@ public:
     bool locked() const {return locked_;}
 };
 
-int main()
+int main(int, char**)
 {
     {
         L0 l0;
@@ -102,7 +101,7 @@ int main()
         L2 l1;
         try
         {
-            std::try_lock(l0, l1);
+            (void)std::try_lock(l0, l1);
             assert(false);
         }
         catch (int)
@@ -116,7 +115,7 @@ int main()
         L0 l1;
         try
         {
-            std::try_lock(l0, l1);
+            (void)std::try_lock(l0, l1);
             assert(false);
         }
         catch (int)
@@ -152,7 +151,7 @@ int main()
         L2 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -206,7 +205,7 @@ int main()
         L2 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -222,7 +221,7 @@ int main()
         L0 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -238,7 +237,7 @@ int main()
         L0 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -301,7 +300,7 @@ int main()
         L1 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -317,7 +316,7 @@ int main()
         L0 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -333,7 +332,7 @@ int main()
         L2 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -349,7 +348,7 @@ int main()
         L2 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -365,7 +364,7 @@ int main()
         L1 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -381,7 +380,7 @@ int main()
         L2 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -406,7 +405,7 @@ int main()
         L1 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -440,7 +439,7 @@ int main()
         L1 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -456,7 +455,7 @@ int main()
         L0 l2;
         try
         {
-            std::try_lock(l0, l1, l2);
+            (void)std::try_lock(l0, l1, l2);
             assert(false);
         }
         catch (int)
@@ -523,4 +522,6 @@ int main()
         assert(!l3.locked());
     }
 #endif  // TEST_STD_VER >= 11
+
+  return 0;
 }

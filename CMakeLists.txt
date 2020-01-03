@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.4.3)
 
 project(PlatON-CDT)
 
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  message(WARNING "CMAKE_INSTALL_PREFIX is set to default path of ${CMAKE_INSTALL_PREFIX}, resetting to ${CMAKE_BINARY_DIR}/platon.cdt")
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/platon.cdt")
+ elseif ("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
+   message(WARNING "CMAKE_INSTALL_PREFIX is explicitly set to /usr/local. This is not recommanded.")
+endif()
+
 if(NOT DEFINED LLVM_CONFIG)
   find_program(LLVM_CONFIG NAMES llvm-config-8.0)
 
@@ -18,14 +25,16 @@ if(NOT DEFINED LLVM_CONFIG)
 
 endif()
 
+set(LLVM_CONFIG_FILE "${CMAKE_BINARY_DIR}/${LLVM_CONFIG}")
+execute_process(COMMAND dirname ${LLVM_CONFIG_FILE} OUTPUT_VARIABLE COMPILE_TOOLS_DIR)
+message(WARNING "Clang executable directory is ${COMPILE_TOOLS_DIR}.")
+
+add_subdirectory(libraries/)
+
 execute_process(COMMAND ${LLVM_CONFIG} --bindir
   OUTPUT_VARIABLE LLVM_BINDIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-
-
 add_subdirectory(tools/platon-cpp)
 
-include(CTest)
-enable_testing()
-add_subdirectory(tests)
+

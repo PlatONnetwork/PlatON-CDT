@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -16,17 +15,28 @@
 #include <algorithm>
 #include <cassert>
 
+#include "test_macros.h"
 #include "test_iterators.h"
 
 struct test1
 {
-    bool operator()(const int& i) const
+    TEST_CONSTEXPR bool operator()(const int& i) const
     {
         return i % 2 == 0;
     }
 };
 
-int main()
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int ia[] = {1, 3, 6, 7};
+    int ib[] = {1, 3, 5, 7};
+    return !std::none_of(std::begin(ia), std::end(ia), test1())
+        &&  std::none_of(std::begin(ib), std::end(ib), test1())
+        ;
+    }
+#endif
+
+int main(int, char**)
 {
     {
         int ia[] = {2, 4, 6, 8};
@@ -52,4 +62,10 @@ int main()
         assert(std::none_of(input_iterator<const int*>(ia),
                             input_iterator<const int*>(ia), test1()) == true);
     }
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

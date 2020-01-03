@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -11,13 +10,25 @@
 
 // template<ForwardIterator Iter, class T>
 //   requires OutputIterator<Iter, const T&>
-//   void
+//   constexpr void      // constexpr after C++17
 //   fill(Iter first, Iter last, const T& value);
 
 #include <algorithm>
 #include <cassert>
 
+#include "test_macros.h"
 #include "test_iterators.h"
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int ia[] = {0, 1, 2, 3, 4};
+
+    std::fill(std::begin(ia), std::end(ia), 5);
+
+    return std::all_of(std::begin(ia), std::end(ia), [](int a) {return a == 5; })
+        ;
+    }
+#endif
 
 template <class Iter>
 void
@@ -45,7 +56,7 @@ test_int()
     assert(ia[3] == 1);
 }
 
-int main()
+int main(int, char**)
 {
     test_char<forward_iterator<char*> >();
     test_char<bidirectional_iterator<char*> >();
@@ -56,4 +67,10 @@ int main()
     test_int<bidirectional_iterator<int*> >();
     test_int<random_access_iterator<int*> >();
     test_int<int*>();
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

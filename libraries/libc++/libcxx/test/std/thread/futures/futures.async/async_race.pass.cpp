@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -21,7 +20,7 @@
 //     async(launch policy, F&& f, Args&&... args);
 
 // This test is designed to cause and allow TSAN to detect the race condition
-// reported in PR23293. (http://llvm.org/PR23293).
+// reported in PR23293: https://bugs.llvm.org/show_bug.cgi?id=23293
 
 #include <future>
 #include <chrono>
@@ -63,6 +62,8 @@ void test_each() {
     }
 }
 
-int main() {
+int main(int, char**) {
     for (int i=0; i < 25; ++i) test_each();
+
+  return 0;
 }

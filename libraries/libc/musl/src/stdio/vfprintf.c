@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <wchar.h>
 #include <inttypes.h>
 #include <math.h>
@@ -101,7 +102,9 @@ static const unsigned char states[]['z'-'A'+1] = {
 union arg
 {
 	uintmax_t i;
+#ifdef WASM_FLOAT_SUPPORT
 	long double f;
+#endif
 	void *p;
 };
 
@@ -124,8 +127,10 @@ static void pop_arg(union arg *arg, int type, va_list *ap)
 	break; case UMAX:	arg->i = va_arg(*ap, uintmax_t);
 	break; case PDIFF:	arg->i = va_arg(*ap, ptrdiff_t);
 	break; case UIPTR:	arg->i = (uintptr_t)va_arg(*ap, void *);
+#ifdef WASM_FLOAT_SUPPORT
 	break; case DBL:	arg->f = va_arg(*ap, double);
 	break; case LDBL:	arg->f = va_arg(*ap, long double);
+#endif
 	}
 }
 
@@ -169,6 +174,7 @@ static char *fmt_u(uintmax_t x, char *s)
 	return s;
 }
 
+#ifdef WASM_FLOAT_SUPPORT
 /* Do not override this check. The floating point printing code below
  * depends on the float.h constants being right. If they are wrong, it
  * may overflow the stack. */
@@ -220,6 +226,7 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
 		else re=LDBL_MANT_DIG/4-1-p;
 
 		if (re) {
+			round *= 1<<(LDBL_MANT_DIG%4);
 			while (re--) round*=16;
 			if (*prefix=='-') {
 				y=-y;
@@ -415,6 +422,7 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
 
 	return MAX(w, pl+l);
 }
+#endif
 
 static int getint(char **s) {
 	int i;
@@ -559,7 +567,7 @@ static int printf_core(FILE *f, const char *fmt, va_list *ap, union arg *nl_arg,
 			if (0) {
 		case 'o':
 			a = fmt_o(arg.i, z);
-			if ((fl&ALT_FORM) && p<z-a+1) prefix+=5, pl=1;
+			if ((fl&ALT_FORM) && p<z-a+1) p=z-a+1;
 			} if (0) {
 		case 'd': case 'i':
 			pl=1;
@@ -574,7 +582,7 @@ static int printf_core(FILE *f, const char *fmt, va_list *ap, union arg *nl_arg,
 			a = fmt_u(arg.i, z);
 			}
 			if (xp && p<0) goto overflow;
-			if (p>=0) fl &= ~ZERO_PAD;
+			if (xp) fl &= ~ZERO_PAD;
 			if (!arg.i && !p) {
 				a=z;
 				break;
@@ -612,12 +620,14 @@ static int printf_core(FILE *f, const char *fmt, va_list *ap, union arg *nl_arg,
 			pad(f, ' ', w, p, fl^LEFT_ADJ);
 			l = w>p ? w : p;
 			continue;
+#ifdef WASM_FLOAT_SUPPORT
 		case 'e': case 'f': case 'g': case 'a':
 		case 'E': case 'F': case 'G': case 'A':
 			if (xp && p<0) goto overflow;
 			l = fmt_fp(f, arg.f, w, p, fl, t);
 			if (l<0) goto overflow;
 			continue;
+#endif
 		}
 
 		if (p < z-a) p = z-a;
@@ -673,11 +683,12 @@ int vfprintf(FILE *restrict f, const char *restrict fmt, va_list ap)
 	if (f->mode < 1) f->flags &= ~F_ERR;
 	if (!f->buf_size) {
 		saved_buf = f->buf;
-		f->wpos = f->wbase = f->buf = internal_buf;
+		f->buf = internal_buf;
 		f->buf_size = sizeof internal_buf;
-		f->wend = internal_buf + sizeof internal_buf;
+		f->wpos = f->wbase = f->wend = 0;
 	}
-	ret = printf_core(f, fmt, &ap2, nl_arg, nl_type);
+	if (!f->wend && __towrite(f)) ret = -1;
+	else ret = printf_core(f, fmt, &ap2, nl_arg, nl_type);
 	if (saved_buf) {
 		f->write(f, 0, 0);
 		if (!f->wpos) ret = -1;

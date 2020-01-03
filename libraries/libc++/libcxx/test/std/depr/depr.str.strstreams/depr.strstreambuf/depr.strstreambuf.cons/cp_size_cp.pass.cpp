@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -15,8 +14,9 @@
 
 #include <strstream>
 #include <cassert>
+#include <cstring>
 
-int main()
+int main(int, char**)
 {
     {
         char buf[] = "abcd";
@@ -71,8 +71,8 @@ int main()
     }
     {
         char buf[10] = "abcd";
-        int s = std::strlen(buf);
-        std::strstreambuf sb(buf, sizeof(buf)-s, buf + s);
+        std::size_t s = std::strlen(buf);
+        std::strstreambuf sb(buf, sizeof(buf) - s, buf + s);
         assert(sb.sgetc() == 'a');
         assert(sb.snextc() == 'b');
         assert(sb.snextc() == 'c');
@@ -93,4 +93,6 @@ int main()
         assert(sb.snextc() == 'j');
         assert(sb.snextc() == EOF);
     }
+
+  return 0;
 }

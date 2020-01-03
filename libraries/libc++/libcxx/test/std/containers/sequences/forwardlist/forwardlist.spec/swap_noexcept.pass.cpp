@@ -53,7 +53,7 @@ struct some_alloc2
     typedef std::true_type is_always_equal;
 };
 
-int main()
+int main(int, char**)
 {
     {
         typedef std::forward_list<MoveOnly> C;
@@ -72,7 +72,7 @@ int main()
     {
         typedef std::forward_list<MoveOnly, some_alloc<MoveOnly>> C;
 #if TEST_STD_VER >= 14
-    //  In c++14, if POCS is set, swapping the allocator is required not to throw
+    //  In C++14, if POCS is set, swapping the allocator is required not to throw
         static_assert( noexcept(swap(std::declval<C&>(), std::declval<C&>())), "");
 #else
         static_assert(!noexcept(swap(std::declval<C&>(), std::declval<C&>())), "");
@@ -85,4 +85,6 @@ int main()
         static_assert( noexcept(swap(std::declval<C&>(), std::declval<C&>())), "");
     }
 #endif
+
+  return 0;
 }

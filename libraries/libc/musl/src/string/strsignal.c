@@ -1,4 +1,4 @@
-/*
+#ifdef NO_ONTOLOGY_WASM
 #include <signal.h>
 #include <string.h>
 #include "locale_impl.h"
@@ -115,4 +115,4 @@ char *strsignal(int signum)
 
 	return (char *)LCTRANS_CUR(s);
 }
-*/
+#endif

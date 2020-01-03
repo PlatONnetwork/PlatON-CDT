@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -49,7 +48,7 @@ int g(int) { return 0; }
 int g2(int, int) { return 2; }
 int g3(int, int, int) { return 3; }
 
-int main() {
+int main(int, char**) {
   assert(globalMemCounter.checkOutstandingNewEq(0));
   {
     std::function<int(int)> f = A();
@@ -92,28 +91,28 @@ int main() {
   {
     typedef std::function<int()> Func;
     Func f = g0;
-    Func& fr = (f = f);
+    Func& fr = (f = (Func &)f);
     assert(&fr == &f);
     assert(*f.target<int(*)()>() == g0);
   }
   {
     typedef std::function<int(int)> Func;
     Func f = g;
-    Func& fr = (f = f);
+    Func& fr = (f = (Func &)f);
     assert(&fr == &f);
     assert(*f.target<int(*)(int)>() == g);
   }
   {
     typedef std::function<int(int, int)> Func;
     Func f = g2;
-    Func& fr = (f = f);
+    Func& fr = (f = (Func &)f);
     assert(&fr == &f);
     assert(*f.target<int(*)(int, int)>() == g2);
   }
   {
     typedef std::function<int(int, int, int)> Func;
     Func f = g3;
-    Func& fr = (f = f);
+    Func& fr = (f = (Func &)f);
     assert(&fr == &f);
     assert(*f.target<int(*)(int, int, int)>() == g3);
   }
@@ -135,4 +134,6 @@ int main() {
     assert(f.target<int (*)(int)>() == 0);
   }
 #endif
+
+  return 0;
 }
