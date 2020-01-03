@@ -40,6 +40,9 @@
 #include "llvm/Support/Program.h"
 #include "llvm/Support/Path.h"
 #include <memory>
+#include <string>
+#include "Option.h"
+
 using namespace llvm;
 
 // General options for llc.  Other pass-specific options are specified
@@ -299,16 +302,12 @@ int compileModule(Module* M) {
   return 0;
 }
 
-int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* output, llvm::Module* M){
+int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   llvm::sys::fs::createTemporaryFile("platon-cpp", "wasm", TempFilename);
   compileModule(M);
 
-  std::string binPath = llvm::sys::fs::getMainExecutable(symPath, nullptr);
-  SmallString<128> lld(binPath);
-   
-  llvm::sys::path::remove_filename(lld);
-  llvm::sys::path::append(lld, "platon-lld");
+  std::string lld = Option.bindir + "/platon-lld";
 
   std::vector<StringRef> lldArgs;
   lldArgs.push_back(lld);
@@ -317,13 +316,15 @@ int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* ou
   lldArgs.push_back(TempFilename);
   lldArgs.push_back("--import-memory");
   lldArgs.push_back("-L.");
-  for(unsigned i=0; i<ldArgs.size(); i++){
-    lldArgs.push_back(ldArgs[i].data());
+
+  for(unsigned i=0; i<Option.ldArgs.size(); i++){
+    lldArgs.push_back(Option.ldArgs[i].data());
   }
+
   lldArgs.push_back("--entry");
   lldArgs.push_back("invoke");
   lldArgs.push_back("-o");
-  lldArgs.push_back(output);
+  lldArgs.push_back(Option.Output.data());
 
   std::string ErrMsg;
   bool ExecutionFailed;

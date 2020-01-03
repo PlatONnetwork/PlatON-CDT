@@ -3,6 +3,7 @@
 
 class PCCOption {
 public:
+  std::string bindir;
   std::vector<std::string> InputFiles;
   std::string Output;
   bool Help;
@@ -11,4 +12,6 @@ public:
   std::vector<std::string> clangArgs;
 
   bool ParseArgs(int, char**);
+  void AdjustClangArgs(bool);
+  void AdjustLLDArgs(bool);
 };

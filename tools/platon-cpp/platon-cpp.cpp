@@ -21,7 +21,7 @@ using namespace tooling;
 
 
 bool ParseArgs(int, char *[], PCCOption &);
-int GenerateWASM(char* clangPath, vector<string> &ldArgs, const char* output, llvm::Module*);
+int GenerateWASM(PCCOption &, llvm::Module*);
 
 //void PCCPass(llvm::Module &);
 //bool GenFiles(llvm::Module*, PCCOption &Option);
@@ -42,7 +42,6 @@ public:
     Invocation->getHeaderSearchOpts().UseStandardSystemIncludes = 0;
     Invocation->getHeaderSearchOpts().UseBuiltinIncludes = 0;
 
-    Invocation->getCodeGenOpts().setDebugInfo(clang::codegenoptions::LimitedDebugInfo);
     IntrusiveRefCntPtr<clang::DiagnosticsEngine> Diags =
         CompilerInstance::createDiagnostics(&Invocation->getDiagnosticOpts(),
                                             DiagConsumer, false);
@@ -112,6 +111,6 @@ int main(int argc, char **argv) {
 
 	//link lib
     
-  GenerateWASM(argv[0], Option.ldArgs, Option.Output.data(), M.get());
+  GenerateWASM(Option, M.get());
   return 0;
 }

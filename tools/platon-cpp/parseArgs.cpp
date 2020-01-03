@@ -17,6 +17,11 @@ using namespace opt;
 
 bool PCCOption::ParseArgs(int argc, char** argv) {
 
+  string binPath = llvm::sys::fs::getMainExecutable(argv[0], nullptr);
+  SmallString<128> bindir0(binPath);
+  llvm::sys::path::remove_filename(bindir0);
+  bindir = bindir0.c_str();
+
   unsigned MissingArgIndex, MissingArgCount;
   unique_ptr<OptTable> clangOpts = clang::driver::createDriverOptTable();
 
@@ -26,6 +31,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
 
   Help = false;
   OutputIR = false;
+  bool NoStdlib = false;
 
   for (const Arg *A : Args) {
     const Option &Option = A->getOption();
@@ -35,6 +41,8 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       Help = true;
     else if(Option.matches(clang::driver::options::OPT_S))
       OutputIR = true;
+    else if(Option.matches(clang::driver::options::OPT_nostdlib))
+      NoStdlib = true;
     else if(Option.matches(clang::driver::options::OPT_o))
       Output = A->getValue();
     else if(Option.matches(clang::driver::options::OPT_L)) {
@@ -47,7 +55,6 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       for(unsigned i=0; i<A->getNumValues(); i++) {
         ldArgs.push_back(A->getValue(i));
       }
-
     } else {
       ArgStringList ASL;
       A->render(Args, ASL);
@@ -55,7 +62,6 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
         clangArgs.push_back(it);
     }
   }
-  clangArgs.push_back("--target=wasm32-wasm");
 
   if(Help){
     clangOpts->PrintHelp(
@@ -79,5 +85,42 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
     Output = (prefix + suffix).str();
   }
 
+  AdjustClangArgs(NoStdlib);
+  AdjustLLDArgs(NoStdlib);
   return true;
+}
+
+void PCCOption::AdjustClangArgs(bool NoStdlib){
+  clangArgs.push_back("--target=wasm32-wasm");
+  clangArgs.push_back("-fno-rtti");
+  clangArgs.push_back("-fno-exceptions");
+  clangArgs.push_back("-g");
+  clangArgs.push_back("-O0");
+
+  if(!NoStdlib){
+    string includedir = bindir + "/../../platon.cdt/include/";
+    clangArgs.push_back("-I");
+    clangArgs.push_back(includedir+"libcxx");
+    clangArgs.push_back("-I");
+    clangArgs.push_back(includedir+"libc");
+    clangArgs.push_back("-I");
+    clangArgs.push_back(includedir);
+  }
+}
+
+void PCCOption::AdjustLLDArgs(bool NoStdlib){
+  string libdir = bindir + "/../../platon.cdt/lib/";
+  string ExternSymbolFile = libdir + "extern_symbol";
+  
+  if(!NoStdlib) {
+    ldArgs.push_back("-L");
+    ldArgs.push_back(libdir);
+    ldArgs.push_back("-lc");
+    ldArgs.push_back("-lc++");
+    ldArgs.push_back("-lplatonlib");
+  }
+
+  if(llvm::sys::fs::exists(ExternSymbolFile.c_str())) {
+    ldArgs.push_back("--allow-undefined-file="+ExternSymbolFile);
+  }
 }
