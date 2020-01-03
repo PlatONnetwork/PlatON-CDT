@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.4.3)
 
-project(PlatON-CDT)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   message(WARNING "CMAKE_INSTALL_PREFIX is set to default path of ${CMAKE_INSTALL_PREFIX}, resetting to ${CMAKE_BINARY_DIR}/platon.cdt")
@@ -25,16 +24,20 @@ if(NOT DEFINED LLVM_CONFIG)
 
 endif()
 
-set(LLVM_CONFIG_FILE "${CMAKE_BINARY_DIR}/${LLVM_CONFIG}")
-execute_process(COMMAND dirname ${LLVM_CONFIG_FILE} OUTPUT_VARIABLE COMPILE_TOOLS_DIR)
-message(WARNING "Clang executable directory is ${COMPILE_TOOLS_DIR}.")
-
-add_subdirectory(libraries/)
+set(LLVM_CONFIG_FILE ${LLVM_CONFIG})
 
 execute_process(COMMAND ${LLVM_CONFIG} --bindir
   OUTPUT_VARIABLE LLVM_BINDIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+SET(CMAKE_C_COMPILER ${LLVM_BINDIR}/clang)
+SET(CMAKE_CXX_COMPILER ${LLVM_BINDIR}/clang++)
+SET(CMAKE_AR ${LLVM_BINDIR}/llvm-ar  CACHE FILEPATH "" FORCE)
+SET(CMAKE_RANLIB ${LLVM_BINDIR}/llvm-ranlib)
+
+project(PlatON-CDT)
+
 add_subdirectory(tools/platon-cpp)
+add_subdirectory(libraries)
 
 

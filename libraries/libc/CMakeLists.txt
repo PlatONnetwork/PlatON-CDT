@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.4.3)
 project(libc)
-
-SET(CMAKE_C_COMPILER "${COMPILE_TOOLS_DIR}/clang")
-SET(CMAKE_CXX_COMPILER "${COMPILE_TOOLS_DIR}/clang++")
-SET(CMAKE_AR "${COMPILE_TOOLS_DIR}/llvm-ar")
-SET(CMAKE_RANLIB "${COMPILE_TOOLS_DIR}/llvm-ranlib")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding -nostdinc  -nostdlibinc -fno-threadsafe-statics  -O3")
 

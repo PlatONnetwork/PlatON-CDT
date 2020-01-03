@@ -40,6 +40,9 @@
 #include "llvm/Support/Program.h"
 #include "llvm/Support/Path.h"
 #include <memory>
+#include <string>
+#include "Option.h"
+
 using namespace llvm;
 
 // General options for llc.  Other pass-specific options are specified
@@ -102,7 +105,7 @@ int init(){
   return 0;
 }
 
-static bool addPass(PassManagerBase &PM, const char *CompileBin,
+static bool addPass(PassManagerBase &PM, const char *_CompileBin,
                     StringRef PassName, TargetPassConfig &TPC) {
   if (PassName == "none")
     return false;
@@ -110,7 +113,7 @@ static bool addPass(PassManagerBase &PM, const char *CompileBin,
   const PassRegistry *PR = PassRegistry::getPassRegistry();
   const PassInfo *PI = PR->getPassInfo(PassName);
   if (!PI) {
-    WithColor::error(errs(), CompileBin)
+    WithColor::error(errs(), _CompileBin)
         << "run-pass " << PassName << " is not registered.\n";
     return true;
   }
@@ -119,7 +122,7 @@ static bool addPass(PassManagerBase &PM, const char *CompileBin,
   if (PI->getNormalCtor())
     P = PI->getNormalCtor()();
   else {
-    WithColor::error(errs(), CompileBin)
+    WithColor::error(errs(), _CompileBin)
         << "cannot create pass: " << PI->getPassName() << "\n";
     return true;
   }
@@ -217,7 +220,7 @@ int compileModule(Module* M) {
       OS = BOS.get();
     }
 
-    const char *CompileBin = CompileBin;
+    const char *_CompileBin = CompileBin;
     LLVMTargetMachine &LLVMTM = static_cast<LLVMTargetMachine&>(*Target);
     MachineModuleInfo *MMI = new MachineModuleInfo(&LLVMTM);
 
@@ -225,7 +228,7 @@ int compileModule(Module* M) {
     // selection.
     if (!RunPassNames->empty()) {
       if (!MIR) {
-        WithColor::warning(errs(), CompileBin)
+        WithColor::warning(errs(), _CompileBin)
             << "run-pass is for .mir file only.\n";
         return 1;
       }
@@ -235,7 +238,7 @@ int compileModule(Module* M) {
 
 
       if (TPC.hasLimitedCodeGenPipeline()) {
-        WithColor::warning(errs(), CompileBin)
+        WithColor::warning(errs(), _CompileBin)
             << "run-pass cannot be used with "
             << TPC.getLimitedCodeGenPipelineReason(" and ") << ".\n";
         return 1;
@@ -246,7 +249,7 @@ int compileModule(Module* M) {
       PM.add(MMI);
       TPC.printAndVerify("");
       for (const std::string &RunPassName : *RunPassNames) {
-        if (addPass(PM, CompileBin, RunPassName, TPC))
+        if (addPass(PM, _CompileBin, RunPassName, TPC))
           return 1;
       }
       TPC.setInitialized();
@@ -255,7 +258,7 @@ int compileModule(Module* M) {
     } else if (Target->addPassesToEmitFile(PM, *OS,
                                            DwoOut ? &DwoOut->os() : nullptr,
                                            TargetMachine::CGFT_ObjectFile, false, MMI)) {
-      WithColor::warning(errs(), CompileBin)
+      WithColor::warning(errs(), _CompileBin)
           << "target does not support generation of this"
           << " file type!\n";
       return 1;
@@ -299,16 +302,12 @@ int compileModule(Module* M) {
   return 0;
 }
 
-int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* output, llvm::Module* M){
+int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   llvm::sys::fs::createTemporaryFile("platon-cpp", "wasm", TempFilename);
   compileModule(M);
 
-  std::string binPath = llvm::sys::fs::getMainExecutable(symPath, nullptr);
-  SmallString<128> lld(binPath);
-   
-  llvm::sys::path::remove_filename(lld);
-  llvm::sys::path::append(lld, "platon-lld");
+  std::string lld = Option.bindir + "/platon-lld";
 
   std::vector<StringRef> lldArgs;
   lldArgs.push_back(lld);
@@ -317,13 +316,15 @@ int GenerateWASM(char* symPath, std::vector<std::string> &ldArgs, const char* ou
   lldArgs.push_back(TempFilename);
   lldArgs.push_back("--import-memory");
   lldArgs.push_back("-L.");
-  for(unsigned i=0; i<ldArgs.size(); i++){
-    lldArgs.push_back(ldArgs[i].data());
+
+  for(unsigned i=0; i<Option.ldArgs.size(); i++){
+    lldArgs.push_back(Option.ldArgs[i].data());
   }
+
   lldArgs.push_back("--entry");
   lldArgs.push_back("invoke");
   lldArgs.push_back("-o");
-  lldArgs.push_back(output);
+  lldArgs.push_back(Option.Output.data());
 
   std::string ErrMsg;
   bool ExecutionFailed;
