@@ -25,7 +25,8 @@ if(NOT DEFINED LLVM_CONFIG)
 
 endif()
 
-set(COMPILE_TOOLS_DIR "${CMAKE_BINARY_DIR}/${LLVM_CONFIG}/..")
+set(LLVM_CONFIG_FILE "${CMAKE_BINARY_DIR}/${LLVM_CONFIG}")
+execute_process(COMMAND dirname ${LLVM_CONFIG_FILE} OUTPUT_VARIABLE COMPILE_TOOLS_DIR)
 message(WARNING "Clang executable directory is ${COMPILE_TOOLS_DIR}.")
 
 add_subdirectory(libraries/)
