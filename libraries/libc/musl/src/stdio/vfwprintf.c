@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <wchar.h>
 #include <inttypes.h>
 
@@ -92,7 +93,9 @@ static const unsigned char states[]['z'-'A'+1] = {
 union arg
 {
 	uintmax_t i;
+#ifdef WASM_FLOAT_SUPPORT
 	long double f;
+#endif
 	void *p;
 };
 
@@ -115,10 +118,12 @@ static void pop_arg(union arg *arg, int type, va_list *ap)
 	break; case UMAX:	arg->i = va_arg(*ap, uintmax_t);
 	break; case PDIFF:	arg->i = va_arg(*ap, ptrdiff_t);
 	break; case UIPTR:	arg->i = (uintptr_t)va_arg(*ap, void *);
-        /*
+#ifdef NO_ONTOLOGY_WASM
+#ifdef WASM_FLOAT_SUPPORT
 	break; case DBL:	arg->f = va_arg(*ap, double);
 	break; case LDBL:	arg->f = va_arg(*ap, long double);
-        */
+#endif
+#endif
 	}
 }
 
@@ -257,8 +262,11 @@ static int wprintf_core(FILE *f, const wchar_t *fmt, va_list *ap, union arg *nl_
 			}
 			continue;
 		case 'c':
+			if (w<1) w=1;
+			if (w>1 && !(fl&LEFT_ADJ)) fprintf(f, "%*s", w-1, "");
 			fputwc(btowc(arg.i), f);
-			l = 1;
+			if (w>1 && (fl&LEFT_ADJ)) fprintf(f, "%*s", w-1, "");
+			l = w;
 			continue;
 		case 'C':
 			fputwc(arg.i, f);
@@ -307,9 +315,11 @@ static int wprintf_core(FILE *f, const wchar_t *fmt, va_list *ap, union arg *nl_
 			sizeprefix[(t|32)-'a'], t);
 
 		switch (t|32) {
+#ifdef WASM_FLOAT_SUPPORT
 		case 'a': case 'e': case 'f': case 'g':
 			l = fprintf(f, charfmt, w, p, arg.f);
 			break;
+#endif
 		case 'd': case 'i': case 'o': case 'u': case 'x': case 'p':
 			l = fprintf(f, charfmt, w, p, arg.i);
 			break;

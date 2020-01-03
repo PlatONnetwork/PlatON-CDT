@@ -9,6 +9,9 @@ weak_alias(dummy, __aio_close);
 
 int __stdio_close(FILE *f)
 {
-   return 0;
-   //return syscall(SYS_close, __aio_close(f->fd));
+#ifdef NO_ONTOLOGY_WASM
+	return syscall(SYS_close, __aio_close(f->fd));
+#else
+	return 0;
+#endif
 }

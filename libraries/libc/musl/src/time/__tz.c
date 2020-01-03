@@ -3,7 +3,11 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef NO_ONTOLOGY_WASM
+#include <sys/mman.h>
+#endif
 #include "libc.h"
+#include "lock.h"
 
 long  __timezone = 0;
 int   __daylight = 0;
@@ -27,7 +31,7 @@ static char old_tz_buf[32];
 static char *old_tz = old_tz_buf;
 static size_t old_tz_size = sizeof old_tz_buf;
 
-static volatile int lock[2];
+static volatile int lock[1];
 
 static int getint(const char **p)
 {
@@ -112,6 +116,131 @@ static size_t zi_dotprod(const unsigned char *z, const unsigned char *v, size_t 
 	}
 	return y;
 }
+
+#ifdef NO_ONTOLOGY_WASM
+static void do_tzset()
+{
+	char buf[NAME_MAX+25], *pathname=buf+24;
+	const char *try, *s, *p;
+	const unsigned char *map = 0;
+	size_t i;
+	static const char search[] =
+		"/usr/share/zoneinfo/\0/share/zoneinfo/\0/etc/zoneinfo/\0";
+
+	s = getenv("TZ");
+	if (!s) s = "/etc/localtime";
+	if (!*s) s = __utc;
+
+	if (old_tz && !strcmp(s, old_tz)) return;
+
+	for (i=0; i<5; i++) r0[i] = r1[i] = 0;
+
+	if (zi) __munmap((void *)zi, map_size);
+
+	/* Cache the old value of TZ to check if it has changed. Avoid
+	 * free so as not to pull it into static programs. Growth
+	 * strategy makes it so free would have minimal benefit anyway. */
+	i = strlen(s);
+	if (i > PATH_MAX+1) s = __utc, i = 3;
+	if (i >= old_tz_size) {
+		old_tz_size *= 2;
+		if (i >= old_tz_size) old_tz_size = i+1;
+		if (old_tz_size > PATH_MAX+2) old_tz_size = PATH_MAX+2;
+		old_tz = malloc(old_tz_size);
+	}
+	if (old_tz) memcpy(old_tz, s, i+1);
+
+	/* Non-suid can use an absolute tzfile pathname or a relative
+	 * pathame beginning with "."; in secure mode, only the
+	 * standard path will be searched. */
+	if (*s == ':' || ((p=strchr(s, '/')) && !memchr(s, ',', p-s))) {
+		if (*s == ':') s++;
+		if (*s == '/' || *s == '.') {
+			if (!libc.secure || !strcmp(s, "/etc/localtime"))
+				map = __map_file(s, &map_size);
+		} else {
+			size_t l = strlen(s);
+			if (l <= NAME_MAX && !strchr(s, '.')) {
+				memcpy(pathname, s, l+1);
+				pathname[l] = 0;
+				for (try=search; !map && *try; try+=l+1) {
+					l = strlen(try);
+					memcpy(pathname-l, try, l);
+					map = __map_file(pathname-l, &map_size);
+				}
+			}
+		}
+		if (!map) s = __utc;
+	}
+	if (map && (map_size < 44 || memcmp(map, "TZif", 4))) {
+		__munmap((void *)map, map_size);
+		map = 0;
+		s = __utc;
+	}
+
+	zi = map;
+	if (map) {
+		int scale = 2;
+		if (sizeof(time_t) > 4 && map[4]=='2') {
+			size_t skip = zi_dotprod(zi+20, VEC(1,1,8,5,6,1), 6);
+			trans = zi+skip+44+44;
+			scale++;
+		} else {
+			trans = zi+44;
+		}
+		index = trans + (zi_read32(trans-12) << scale);
+		types = index + zi_read32(trans-12);
+		abbrevs = types + 6*zi_read32(trans-8);
+		abbrevs_end = abbrevs + zi_read32(trans-4);
+		if (zi[map_size-1] == '\n') {
+			for (s = (const char *)zi+map_size-2; *s!='\n'; s--);
+			s++;
+		} else {
+			const unsigned char *p;
+			__tzname[0] = __tzname[1] = 0;
+			__daylight = __timezone = dst_off = 0;
+			for (p=types; p<abbrevs; p+=6) {
+				if (!p[4] && !__tzname[0]) {
+					__tzname[0] = (char *)abbrevs + p[5];
+					__timezone = -zi_read32(p);
+				}
+				if (p[4] && !__tzname[1]) {
+					__tzname[1] = (char *)abbrevs + p[5];
+					dst_off = -zi_read32(p);
+					__daylight = 1;
+				}
+			}
+			if (!__tzname[0]) __tzname[0] = __tzname[1];
+			if (!__tzname[0]) __tzname[0] = (char *)__utc;
+			if (!__daylight) {
+				__tzname[1] = __tzname[0];
+				dst_off = __timezone;
+			}
+			return;
+		}
+	}
+
+	if (!s) s = __utc;
+	getname(std_name, &s);
+	__tzname[0] = std_name;
+	__timezone = getoff(&s);
+	getname(dst_name, &s);
+	__tzname[1] = dst_name;
+	if (dst_name[0]) {
+		__daylight = 1;
+		if (*s == '+' || *s=='-' || *s-'0'<10U)
+			dst_off = getoff(&s);
+		else
+			dst_off = __timezone - 3600;
+	} else {
+		__daylight = 0;
+		dst_off = __timezone;
+	}
+
+	if (*s == ',') s++, getrule(&s, r0);
+	if (*s == ',') s++, getrule(&s, r1);
+}
+#endif
 
 /* Search zoneinfo rules to find the one that applies to the given time,
  * and determine alternate opposite-DST-status rule that may be needed. */
@@ -212,3 +341,88 @@ static long long rule_to_secs(const int *rule, int year)
 	t += rule[4];
 	return t;
 }
+
+#ifdef NO_ONTOLOGY_WASM
+/* Determine the time zone in effect for a given time in seconds since the
+ * epoch. It can be given in local or universal time. The results will
+ * indicate whether DST is in effect at the queried time, and will give both
+ * the GMT offset for the active zone/DST rule and the opposite DST. This
+ * enables a caller to efficiently adjust for the case where an explicit
+ * DST specification mismatches what would be in effect at the time. */
+
+void __secs_to_zone(long long t, int local, int *isdst, long *offset, long *oppoff, const char **zonename)
+{
+	LOCK(lock);
+
+	do_tzset();
+
+	if (zi) {
+		size_t alt, i = scan_trans(t, local, &alt);
+		if (i != -1) {
+			*isdst = types[6*i+4];
+			*offset = (int32_t)zi_read32(types+6*i);
+			*zonename = (const char *)abbrevs + types[6*i+5];
+			if (oppoff) *oppoff = (int32_t)zi_read32(types+6*alt);
+			UNLOCK(lock);
+			return;
+		}
+	}
+
+	if (!__daylight) goto std;
+
+	/* FIXME: may be broken if DST changes right at year boundary?
+	 * Also, this could be more efficient.*/
+	long long y = t / 31556952 + 70;
+	while (__year_to_secs(y, 0) > t) y--;
+	while (__year_to_secs(y+1, 0) < t) y++;
+
+	long long t0 = rule_to_secs(r0, y);
+	long long t1 = rule_to_secs(r1, y);
+
+	if (!local) {
+		t0 += __timezone;
+		t1 += dst_off;
+	}
+	if (t0 < t1) {
+		if (t >= t0 && t < t1) goto dst;
+		goto std;
+	} else {
+		if (t >= t1 && t < t0) goto std;
+		goto dst;
+	}
+std:
+	*isdst = 0;
+	*offset = -__timezone;
+	if (oppoff) *oppoff = -dst_off;
+	*zonename = __tzname[0];
+	UNLOCK(lock);
+	return;
+dst:
+	*isdst = 1;
+	*offset = -dst_off;
+	if (oppoff) *oppoff = -__timezone;
+	*zonename = __tzname[1];
+	UNLOCK(lock);
+}
+
+static void __tzset()
+{
+	LOCK(lock);
+	do_tzset();
+	UNLOCK(lock);
+}
+
+weak_alias(__tzset, tzset);
+
+const char *__tm_to_tzname(const struct tm *tm)
+{
+	const void *p = tm->__tm_zone;
+	LOCK(lock);
+	do_tzset();
+	if (p != __utc && p != __tzname[0] && p != __tzname[1] &&
+	    (!zi || (uintptr_t)p-(uintptr_t)abbrevs >= abbrevs_end - abbrevs))
+		p = "";
+	UNLOCK(lock);
+	return p;
+}
+#endif
