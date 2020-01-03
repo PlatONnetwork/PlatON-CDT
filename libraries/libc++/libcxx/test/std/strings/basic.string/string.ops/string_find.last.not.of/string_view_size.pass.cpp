@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -140,7 +139,7 @@ void test1()
     test(S("pniotcfrhqsmgdkjbael"), SV("htaobedqikfplcgjsmrn"), S::npos);
 }
 
-int main()
+int main(int, char**)
 {
     {
     typedef std::string S;
@@ -150,10 +149,12 @@ int main()
     }
 #if TEST_STD_VER >= 11
     {
-    typedef std::basic_string<char, std::char_traits<char>, min_allocator<char>> S;
-    typedef std::string_view SV;
+//     typedef std::basic_string<char, std::char_traits<char>, min_allocator<char>> S;
+//     typedef std::string_view SV;
 //     test0<S, SV>();
 //     test1<S, SV>();
     }
 #endif
+
+  return 0;
 }

@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -15,12 +14,14 @@
 
 #include <vector>
 #include <cassert>
+
+#include "test_macros.h"
 #include "MoveOnly.h"
 #include "test_allocator.h"
 #include "min_allocator.h"
 #include "asan_testing.h"
 
-int main()
+int main(int, char**)
 {
     {
         std::vector<MoveOnly, test_allocator<MoveOnly> > l(test_allocator<MoveOnly>(5));
@@ -98,4 +99,36 @@ int main()
         assert(*j == 3);
         assert(is_contiguous_container_asan_correct(c2));
     }
+    {
+      test_alloc_base::clear();
+      using Vect = std::vector<int, test_allocator<int> >;
+      Vect v(test_allocator<int>(42, 101));
+      assert(test_alloc_base::count == 1);
+      assert(test_alloc_base::copied == 1);
+      assert(test_alloc_base::moved == 0);
+      {
+        const test_allocator<int>& a = v.get_allocator();
+        assert(a.get_data() == 42);
+        assert(a.get_id() == 101);
+      }
+      assert(test_alloc_base::count == 1);
+      test_alloc_base::clear_ctor_counters();
+
+      Vect v2 = std::move(v);
+      assert(test_alloc_base::count == 2);
+      assert(test_alloc_base::copied == 0);
+      assert(test_alloc_base::moved == 1);
+      {
+        const test_allocator<int>& a = v.get_allocator();
+        assert(a.get_id() == test_alloc_base::moved_value);
+        assert(a.get_data() == test_alloc_base::moved_value);
+      }
+      {
+        const test_allocator<int>& a = v2.get_allocator();
+        assert(a.get_id() == 101);
+        assert(a.get_data() == 42);
+      }
+    }
+
+  return 0;
 }

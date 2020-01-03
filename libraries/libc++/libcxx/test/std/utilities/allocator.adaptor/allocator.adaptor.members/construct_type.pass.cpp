@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -26,7 +25,7 @@
 #include "uses_alloc_types.hpp"
 #include "controlled_allocators.hpp"
 
-// — If uses_allocator_v<T, inner_allocator_type> is false and
+// - If uses_allocator_v<T, inner_allocator_type> is false and
 //   is_constructible_v<T, Args...> is true, calls
 //   OUTERMOST_ALLOC_TRAITS(*this)::construct(
 //      OUTERMOST (*this), p, std::forward<Args>(args)...).
@@ -126,8 +125,10 @@ void test_bullet_three() {
     POuter.reset();
 }
 
-int main() {
+int main(int, char**) {
     test_bullet_one();
     test_bullet_two();
     test_bullet_three();
+
+  return 0;
 }

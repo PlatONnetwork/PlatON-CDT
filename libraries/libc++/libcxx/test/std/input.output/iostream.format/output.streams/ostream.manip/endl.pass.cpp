@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -37,18 +36,18 @@ public:
 protected:
 
     virtual typename base::int_type
-        overflow(typename base::int_type __c = base::traits_type::eof())
+        overflow(typename base::int_type ch = base::traits_type::eof())
         {
-            if (__c != base::traits_type::eof())
+            if (ch != base::traits_type::eof())
             {
                 int n = static_cast<int>(str_.size());
-                str_.push_back(static_cast<CharT>(__c));
+                str_.push_back(static_cast<CharT>(ch));
                 str_.resize(str_.capacity());
                 base::setp(const_cast<CharT*>(str_.data()),
                            const_cast<CharT*>(str_.data() + str_.size()));
                 base::pbump(n+1);
             }
-            return __c;
+            return ch;
         }
 
     virtual int
@@ -59,7 +58,7 @@ protected:
         }
 };
 
-int main()
+int main(int, char**)
 {
     {
         testbuf<char> sb;
@@ -77,4 +76,6 @@ int main()
         assert(sync_called == 2);
         assert(os.good());
     }
+
+  return 0;
 }

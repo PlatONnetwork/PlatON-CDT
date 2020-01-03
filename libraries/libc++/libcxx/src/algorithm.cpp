@@ -1,15 +1,16 @@
 //===----------------------- algorithm.cpp --------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 #include "algorithm"
-//include "random"
-//include "mutex"
+#ifdef NO_ONTOLOGY_WASM
+#include "random"
+#include "mutex"
+#endif
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
@@ -46,7 +47,8 @@ template bool __insertion_sort_incomplete<__less<double>&, double*>(double*, dou
 template bool __insertion_sort_incomplete<__less<long double>&, long double*>(long double*, long double*, __less<long double>&);
 
 template unsigned __sort5<__less<long double>&, long double*>(long double*, long double*, long double*, long double*, long double*, __less<long double>&);
-/*
+
+#ifdef NO_ONTOLOGY_WASM
 #ifndef _LIBCPP_HAS_NO_THREADS
 _LIBCPP_SAFE_STATIC static __libcpp_mutex_t __rs_mut = _LIBCPP_MUTEX_INITIALIZER;
 #endif
@@ -87,5 +89,6 @@ __rs_get()
 {
     return __rs_default();
 }
-*/
+#endif
+
 _LIBCPP_END_NAMESPACE_STD

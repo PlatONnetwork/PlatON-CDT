@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -120,9 +119,9 @@ struct some_alloc3
 };
 
 
-int main()
+int main(int, char**)
 {
-	typedef std::pair<const MoveOnly, MoveOnly> MapType;
+    typedef std::pair<const MoveOnly, MoveOnly> MapType;
     {
         typedef std::unordered_map<MoveOnly, MoveOnly> C;
         static_assert(noexcept(swap(std::declval<C&>(), std::declval<C&>())), "");
@@ -189,4 +188,6 @@ int main()
     }
 #endif // _LIBCPP_VERSION
 #endif
+
+  return 0;
 }

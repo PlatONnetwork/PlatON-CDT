@@ -1,9 +1,8 @@
 //===------------------------- locale.cpp ---------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -36,6 +35,7 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include "include/atomic_support.h"
 #include "__undef_macros"
 
 // On Linux, wint_t and wchar_t have different signed-ness, and this causes
@@ -43,6 +43,10 @@
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #endif
+
+extern "C" void platon_assert( unsigned int test, const char* msg  );
+size_t strftime(char*, size_t, const char*, const struct tm*) { platon_assert(false, "error: strftime called"); }
+size_t strftime_l(char*, size_t, const char*, const struct tm*, locale_t) { platon_assert(false, "error: strftime_l called"); }
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
@@ -468,10 +472,8 @@ locale::__imp::install(facet* f, long id)
 const locale::facet*
 locale::__imp::use_facet(long id) const
 {
-#ifndef _LIBCPP_NO_EXCEPTIONS
     if (!has_facet(id))
-        throw bad_cast();
-#endif  // _LIBCPP_NO_EXCEPTIONS
+        __throw_bad_cast();
     return facets_[static_cast<size_t>(id)];
 }
 
@@ -537,12 +539,8 @@ locale::operator=(const locale& other)  _NOEXCEPT
 }
 
 locale::locale(const char* name)
-#ifndef _LIBCPP_NO_EXCEPTIONS
     : __locale_(name ? new __imp(name)
-                     : throw runtime_error("locale constructed with null"))
-#else  // _LIBCPP_NO_EXCEPTIONS
-    : __locale_(new __imp(name))
-#endif
+                     : (__throw_runtime_error("locale constructed with null"), (__imp*)0))
 {
     __locale_->__add_shared();
 }
@@ -554,12 +552,8 @@ locale::locale(const string& name)
 }
 
 locale::locale(const locale& other, const char* name, category c)
-#ifndef _LIBCPP_NO_EXCEPTIONS
     : __locale_(name ? new __imp(*other.__locale_, name, c)
-                     : throw runtime_error("locale constructed with null"))
-#else  // _LIBCPP_NO_EXCEPTIONS
-    : __locale_(new __imp(*other.__locale_, name, c))
-#endif
+                     : (__throw_runtime_error("locale constructed with null"), (__imp*)0))
 {
     __locale_->__add_shared();
 }
@@ -667,7 +661,7 @@ locale::id::__get()
 void
 locale::id::__init()
 {
-    __id_ = __sync_add_and_fetch(&__next_id, 1);
+    __id_ = __libcpp_atomic_add(&__next_id, 1);
 }
 
 // template <> class collate_byname<char>
@@ -4239,6 +4233,7 @@ static bool checked_string_to_char_convert(char& dest,
   // FIXME: Work around specific multibyte sequences that we can reasonable
   // translate into a different single byte.
   switch (wout) {
+  case L'\u202F': // narrow non-breaking space
   case L'\u00A0': // non-breaking space
     dest = ' ';
     return true;
@@ -4658,7 +4653,7 @@ static
 string*
 init_am_pm()
 {
-    static string am_pm[24];
+    static string am_pm[2];
     am_pm[0]  = "AM";
     am_pm[1]  = "PM";
     return am_pm;
@@ -4668,7 +4663,7 @@ static
 wstring*
 init_wam_pm()
 {
-    static wstring am_pm[24];
+    static wstring am_pm[2];
     am_pm[0]  = L"AM";
     am_pm[1]  = L"PM";
     return am_pm;

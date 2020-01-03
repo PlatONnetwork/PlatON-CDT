@@ -1,15 +1,15 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 // test operator new nothrow by replacing only operator new
 
 // UNSUPPORTED: sanitizer-new-delete
+// XFAIL: libcpp-no-vcruntime
 
 #include <new>
 #include <cstddef>
@@ -43,15 +43,17 @@ struct A
     ~A() {A_constructed = false;}
 };
 
-A* volatile ap;
-
-int main()
+int main(int, char**)
 {
-    ap = new (std::nothrow) A;
+    A *ap = new (std::nothrow) A;
+    DoNotOptimize(ap);
     assert(ap);
     assert(A_constructed);
     assert(new_called);
     delete ap;
+    DoNotOptimize(ap);
     assert(!A_constructed);
     assert(!new_called);
+
+  return 0;
 }

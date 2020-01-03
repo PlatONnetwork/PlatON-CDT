@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -13,7 +12,7 @@
 
 // constexpr reverse_iterator();
 //
-// constexpr in c++17
+// constexpr in C++17
 
 #include <iterator>
 
@@ -25,9 +24,10 @@ void
 test()
 {
     std::reverse_iterator<It> r;
+    (void)r;
 }
 
-int main()
+int main(int, char**)
 {
     test<bidirectional_iterator<const char*> >();
     test<random_access_iterator<char*> >();
@@ -37,6 +37,9 @@ int main()
 #if TEST_STD_VER > 14
     {
         constexpr std::reverse_iterator<const char *> it;
+        (void)it;
     }
 #endif
+
+  return 0;
 }

@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -17,7 +16,7 @@
 #include <cassert>
 #include "test_macros.h"
 
-int main()
+int main(int, char**)
 {
     const std::shared_ptr<int> p1(new int);
     const std::shared_ptr<int> p2 = p1;
@@ -29,6 +28,7 @@ int main()
     assert(!w2.owner_before(p1));
     assert(w1.owner_before(p3) || w3.owner_before(p1));
     assert(w3.owner_before(p1) == w3.owner_before(p2));
-//  change to 'ASSERT_NOEXCEPT' when LWG2942 is adopted
-    LIBCPP_ASSERT_NOEXCEPT(w1.owner_before(p2));
+    ASSERT_NOEXCEPT(w1.owner_before(p2));
+
+  return 0;
 }

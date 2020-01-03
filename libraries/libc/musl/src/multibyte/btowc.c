@@ -1,4 +1,6 @@
-//include <stdio.h>
+#ifdef NO_ONTOLOGY_WASM
+#include <stdio.h>
+#endif
 #include <wchar.h>
 #include <stdlib.h>
 #include "internal.h"

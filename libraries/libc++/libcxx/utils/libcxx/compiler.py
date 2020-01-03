@@ -1,9 +1,8 @@
 #===----------------------------------------------------------------------===##
 #
-#                     The LLVM Compiler Infrastructure
-#
-# This file is dual licensed under the MIT and the University of Illinois Open
-# Source Licenses. See LICENSE.TXT for details.
+# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 #===----------------------------------------------------------------------===##
 
@@ -204,7 +203,7 @@ class CXXCompiler(object):
         flags = ['-dM'] + flags
         cmd, out, err, rc = self.preprocess(source_files, flags=flags, cwd=cwd)
         if rc != 0:
-            return None
+            return cmd, out, err, rc
         parsed_macros = {}
         lines = [l.strip() for l in out.split('\n') if l.strip()]
         for l in lines:

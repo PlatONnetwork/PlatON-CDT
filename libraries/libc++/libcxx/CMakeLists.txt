@@ -11,6 +11,10 @@ endif()
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 NEW) # Required when interacting with LLVM and Clang
 endif()
+if(POLICY CMP0068)
+  cmake_policy(SET CMP0068 NEW)
+  set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
+endif()
 
 # Add path for custom modules
 set(CMAKE_MODULE_PATH
@@ -19,11 +23,11 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   )
 
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR LIBCXX_STANDALONE_BUILD)
   project(libcxx CXX C)
 
   set(PACKAGE_NAME libcxx)
-  set(PACKAGE_VERSION 5.0.0)
+  set(PACKAGE_VERSION 9.0.0svn)
   set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
   set(PACKAGE_BUGREPORT "llvm-bugs@lists.llvm.org")
 
@@ -46,9 +50,14 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
  "${PROJECT_NAME} requires an out of source build. Please create a separate
  build directory and run 'cmake /path/to/${PROJECT_NAME} [options]' there."
  )
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+  message(STATUS "Configuring for clang-cl")
+  set(LIBCXX_TARGETING_CLANG_CL ON)
+endif()
 
 if (MSVC)
   set(LIBCXX_TARGETING_MSVC ON)
+  message(STATUS "Configuring for MSVC")
 else()
   set(LIBCXX_TARGETING_MSVC OFF)
 endif()
@@ -64,16 +73,21 @@ option(LIBCXX_ENABLE_ASSERTIONS "Enable assertions independent of build mode." O
 option(LIBCXX_ENABLE_SHARED "Build libc++ as a shared library." ON)
 option(LIBCXX_ENABLE_STATIC "Build libc++ as a static library." ON)
 option(LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY "Build libc++experimental.a" ON)
-set(ENABLE_FILESYSTEM_DEFAULT ${LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY})
+set(ENABLE_FILESYSTEM_DEFAULT ON)
 if (WIN32)
   set(ENABLE_FILESYSTEM_DEFAULT OFF)
 endif()
-option(LIBCXX_ENABLE_FILESYSTEM "Build filesystem as part of libc++experimental.a"
+option(LIBCXX_ENABLE_FILESYSTEM "Build filesystem as part of the main libc++ library"
     ${ENABLE_FILESYSTEM_DEFAULT})
 option(LIBCXX_INCLUDE_TESTS "Build the libc++ tests." ${LLVM_INCLUDE_TESTS})
 
 # Benchmark options -----------------------------------------------------------
-option(LIBCXX_INCLUDE_BENCHMARKS "Build the libc++ benchmarks and their dependancies" ON)
+option(LIBCXX_INCLUDE_BENCHMARKS "Build the libc++ benchmarks and their dependencies" ON)
+
+set(LIBCXX_BENCHMARK_TEST_ARGS_DEFAULT --benchmark_min_time=0.01)
+set(LIBCXX_BENCHMARK_TEST_ARGS "${LIBCXX_BENCHMARK_TEST_ARGS_DEFAULT}" CACHE STRING
+    "Arguments to pass when running the benchmarks using check-cxx-benchmarks")
+
 set(LIBCXX_BENCHMARK_NATIVE_STDLIB "" CACHE STRING
         "Build the benchmarks against the specified native STL.
          The value must be one of libc++/libstdc++")
@@ -93,13 +107,27 @@ set(LIBCXX_LIBDIR_SUFFIX "${LLVM_LIBDIR_SUFFIX}" CACHE STRING
     "Define suffix of library directory name (32/64)")
 option(LIBCXX_INSTALL_HEADERS "Install the libc++ headers." ON)
 option(LIBCXX_INSTALL_LIBRARY "Install the libc++ library." ON)
+cmake_dependent_option(LIBCXX_INSTALL_STATIC_LIBRARY
+  "Install the static libc++ library." ON
+  "LIBCXX_ENABLE_STATIC;LIBCXX_INSTALL_LIBRARY" OFF)
+cmake_dependent_option(LIBCXX_INSTALL_SHARED_LIBRARY
+  "Install the shared libc++ library." ON
+  "LIBCXX_ENABLE_SHARED;LIBCXX_INSTALL_LIBRARY" OFF)
 option(LIBCXX_INSTALL_SUPPORT_HEADERS "Install libc++ support headers." ON)
 cmake_dependent_option(LIBCXX_INSTALL_EXPERIMENTAL_LIBRARY
         "Install libc++experimental.a" ON
         "LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY;LIBCXX_INSTALL_LIBRARY" OFF)
-set(LIBCXX_ABI_VERSION 1 CACHE STRING "ABI version of libc++.")
+
+set(LIBCXX_ABI_VERSION "1" CACHE STRING "ABI version of libc++. Can be either 1 or 2, where 2 is currently not stable. Defaults to 1.")
+set(LIBCXX_ABI_NAMESPACE "" CACHE STRING "The inline ABI namespace used by libc++. It defaults to __n where `n` is the current ABI version.")
 option(LIBCXX_ABI_UNSTABLE "Unstable ABI of libc++." OFF)
+option(LIBCXX_ABI_FORCE_ITANIUM "Ignore auto-detection and force use of the Itanium ABI.")
+option(LIBCXX_ABI_FORCE_MICROSOFT "Ignore auto-detection and force use of the Microsoft ABI.")
+option(LIBCXX_HIDE_FROM_ABI_PER_TU_BY_DEFAULT "Enable per TU ABI insulation by default. To be used by vendors." OFF)
+set(LIBCXX_ABI_DEFINES "" CACHE STRING "A semicolon separated list of ABI macros to define in the site config header.")
 option(LIBCXX_USE_COMPILER_RT "Use compiler-rt instead of libgcc" OFF)
+set(LIBCXX_LIBCPPABI_VERSION "2" CACHE STRING "Version of libc++abi's ABI to re-export from libc++ when re-exporting is enabled.
+                                               Note that this is not related to the version of libc++'s ABI itself!")
 
 if (NOT LIBCXX_ENABLE_SHARED AND NOT LIBCXX_ENABLE_STATIC)
   message(FATAL_ERROR "libc++ must be built as either a shared or static library.")
@@ -120,6 +148,7 @@ if (LIBCXX_CXX_ABI STREQUAL "default")
           ${LLVM_MAIN_SRC_DIR}/runtimes/libcxxabi/include
           ${LLVM_MAIN_SRC_DIR}/../libcxxabi/include
     NO_DEFAULT_PATH
+    NO_CMAKE_FIND_ROOT_PATH
   )
   if (LIBCXX_TARGETING_MSVC)
     # FIXME: Figure out how to configure the ABI library on Windows.
@@ -132,6 +161,9 @@ if (LIBCXX_CXX_ABI STREQUAL "default")
   elseif (APPLE)
     set(LIBCXX_CXX_ABI_LIBNAME "libcxxabi")
     set(LIBCXX_CXX_ABI_SYSTEM 1)
+  elseif (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+    set(LIBCXX_CXX_ABI_LIBNAME "libcxxrt")
+    set(LIBCXX_CXX_ABI_INCLUDE_PATHS "/usr/include/c++/v1")
   else()
     set(LIBCXX_CXX_ABI_LIBNAME "default")
   endif()
@@ -139,9 +171,17 @@ else()
   set(LIBCXX_CXX_ABI_LIBNAME "${LIBCXX_CXX_ABI}")
 endif()
 
-# Use a static copy of the ABI library when linking libc++. This option
-# cannot be used with LIBCXX_ENABLE_ABI_LINKER_SCRIPT.
-option(LIBCXX_ENABLE_STATIC_ABI_LIBRARY "Statically link the ABI library" OFF)
+option(LIBCXX_ENABLE_STATIC_ABI_LIBRARY
+  "Use a static copy of the ABI library when linking libc++.
+   This option cannot be used with LIBCXX_ENABLE_ABI_LINKER_SCRIPT." OFF)
+
+cmake_dependent_option(LIBCXX_STATICALLY_LINK_ABI_IN_STATIC_LIBRARY
+  "Statically link the ABI library to static library" ON
+  "LIBCXX_ENABLE_STATIC_ABI_LIBRARY;LIBCXX_ENABLE_STATIC" OFF)
+
+cmake_dependent_option(LIBCXX_STATICALLY_LINK_ABI_IN_SHARED_LIBRARY
+  "Statically link the ABI library to shared library" ON
+  "LIBCXX_ENABLE_STATIC_ABI_LIBRARY;LIBCXX_ENABLE_SHARED" OFF)
 
 # Generate and install a linker script inplace of libc++.so. The linker script
 # will link libc++ to the correct ABI library. This option is on by default
@@ -149,7 +189,7 @@ option(LIBCXX_ENABLE_STATIC_ABI_LIBRARY "Statically link the ABI library" OFF)
 # is on. This option is also disabled when the ABI library is not specified
 # or is specified to be "none".
 set(ENABLE_LINKER_SCRIPT_DEFAULT_VALUE OFF)
-if (LLVM_HAVE_LINK_VERSION_SCRIPT AND NOT LIBCXX_ENABLE_STATIC_ABI_LIBRARY
+if (LLVM_HAVE_LINK_VERSION_SCRIPT AND NOT LIBCXX_STATICALLY_LINK_ABI_IN_SHARED_LIBRARY
       AND NOT LIBCXX_CXX_ABI_LIBNAME STREQUAL "none"
       AND NOT LIBCXX_CXX_ABI_LIBNAME STREQUAL "default"
       AND PYTHONINTERP_FOUND
@@ -183,6 +223,7 @@ option(LIBCXXABI_ENABLE_STATIC_UNWINDER "Statically link the LLVM unwinder." OFF
 
 # Target options --------------------------------------------------------------
 option(LIBCXX_BUILD_32_BITS "Build 32 bit libc++." ${LLVM_BUILD_32_BITS})
+set(LIBCXX_TARGET_TRIPLE "" CACHE STRING "Use alternate target triple.")
 set(LIBCXX_SYSROOT "" CACHE STRING "Use alternate sysroot.")
 set(LIBCXX_GCC_TOOLCHAIN "" CACHE STRING "Use alternate GCC toolchain.")
 
@@ -199,6 +240,7 @@ option(LIBCXX_ENABLE_MONOTONIC_CLOCK
    This option may only be set to OFF when LIBCXX_ENABLE_THREADS=OFF." ON)
 option(LIBCXX_HAS_MUSL_LIBC "Build libc++ with support for the Musl C library" OFF)
 option(LIBCXX_HAS_PTHREAD_API "Ignore auto-detection and force use of pthread API" OFF)
+option(LIBCXX_HAS_WIN32_THREAD_API "Ignore auto-detection and force use of win32 thread API" OFF)
 option(LIBCXX_HAS_EXTERNAL_THREAD_API
   "Build libc++ with an externalized threading API.
    This option may only be set to ON when LIBCXX_ENABLE_THREADS=ON." OFF)
@@ -241,14 +283,12 @@ endif()
 option(LIBCXX_CONFIGURE_IDE "Configure libcxx for use within an IDE"
       ${LIBCXX_CONFIGURE_IDE_DEFAULT})
 
+option(LIBCXX_HERMETIC_STATIC_LIBRARY
+  "Do not export any symbols from the static library." OFF)
+
 #===============================================================================
 # Check option configurations
 #===============================================================================
-
-if (LIBCXX_ENABLE_FILESYSTEM AND NOT LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY)
-  message(FATAL_ERROR
-    "LIBCXX_ENABLE_FILESYSTEM cannot be turned on when LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF")
-endif()
 
 # Ensure LIBCXX_ENABLE_MONOTONIC_CLOCK is set to ON only when
 # LIBCXX_ENABLE_THREADS is on.
@@ -270,6 +310,10 @@ if(NOT LIBCXX_ENABLE_THREADS)
     message(FATAL_ERROR "LIBCXX_BUILD_EXTERNAL_THREAD_LIBRARY can only be set "
                         "to ON when LIBCXX_ENABLE_THREADS is also set to ON.")
   endif()
+  if (LIBCXX_HAS_WIN32_THREAD_API)
+    message(FATAL_ERROR "LIBCXX_HAS_WIN32_THREAD_API can only be set to ON"
+                        " when LIBCXX_ENABLE_THREADS is also set to ON.")
+  endif()
 
 endif()
 
@@ -282,6 +326,19 @@ if (LIBCXX_HAS_EXTERNAL_THREAD_API)
   if (LIBCXX_HAS_PTHREAD_API)
     message(FATAL_ERROR "The options LIBCXX_HAS_EXTERNAL_THREAD_API"
                         "and LIBCXX_HAS_PTHREAD_API cannot be both"
+                        "set to ON at the same time.")
+  endif()
+  if (LIBCXX_HAS_WIN32_THREAD_API)
+    message(FATAL_ERROR "The options LIBCXX_HAS_EXTERNAL_THREAD_API"
+                        "and LIBCXX_HAS_WIN32_THREAD_API cannot be both"
+                        "set to ON at the same time.")
+  endif()
+endif()
+
+if (LIBCXX_HAS_PTHREAD_API)
+  if (LIBCXX_HAS_WIN32_THREAD_API)
+    message(FATAL_ERROR "The options LIBCXX_HAS_PTHREAD_API"
+                        "and LIBCXX_HAS_WIN32_THREAD_API cannot be both"
                         "set to ON at the same time.")
   endif()
 endif()
@@ -302,13 +359,9 @@ elseif(LIBCXX_BUILD_32_BITS)
   message(FATAL_ERROR "LIBCXX_BUILD_32_BITS=ON is not supported on this platform.")
 endif()
 
-# Check that this option is not enabled on Apple and emit a usage warning.
+# Warn users that LIBCXX_ENABLE_STATIC_ABI_LIBRARY is an experimental option.
 if (LIBCXX_ENABLE_STATIC_ABI_LIBRARY)
-  if (APPLE)
-    message(FATAL_ERROR "LIBCXX_ENABLE_STATIC_ABI_LIBRARY is not supported on OS X")
-  else()
-    message(WARNING "LIBCXX_ENABLE_STATIC_ABI_LIBRARY is an experimental option")
-  endif()
+  message(WARNING "LIBCXX_ENABLE_STATIC_ABI_LIBRARY is an experimental option")
   if (LIBCXX_ENABLE_STATIC AND NOT PYTHONINTERP_FOUND)
     message(FATAL_ERROR "LIBCXX_ENABLE_STATIC_ABI_LIBRARY requires python but it was not found.")
   endif()
@@ -326,7 +379,7 @@ if (LIBCXX_ENABLE_ABI_LINKER_SCRIPT)
     endif()
 endif()
 
-if (LIBCXX_ENABLE_STATIC_ABI_LIBRARY AND LIBCXX_ENABLE_ABI_LINKER_SCRIPT)
+if (LIBCXX_STATICALLY_LINK_ABI_IN_SHARED_LIBRARY AND LIBCXX_ENABLE_ABI_LINKER_SCRIPT)
     message(FATAL_ERROR "Conflicting options given.
         LIBCXX_ENABLE_STATIC_ABI_LIBRARY cannot be specified with
         LIBCXX_ENABLE_ABI_LINKER_SCRIPT")
@@ -337,6 +390,10 @@ if (LIBCXX_HAS_MUSL_LIBC AND NOT LIBCXX_INSTALL_SUPPORT_HEADERS)
                       "when building for Musl with LIBCXX_HAS_MUSL_LIBC.")
 endif()
 
+if (LIBCXX_ABI_FORCE_ITANIUM AND LIBCXX_ABI_FORCE_MICROSOFT)
+  message(FATAL_ERROR "Only one of LIBCXX_ABI_FORCE_ITANIUM and LIBCXX_ABI_FORCE_MICROSOFT can be specified.")
+endif ()
+
 #===============================================================================
 # Configure System
 #===============================================================================
@@ -345,19 +402,29 @@ set(LIBCXX_COMPILER    ${CMAKE_CXX_COMPILER})
 set(LIBCXX_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
 set(LIBCXX_BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR})
 set(LIBCXX_BINARY_INCLUDE_DIR "${LIBCXX_BINARY_DIR}/include/c++build")
-if (LLVM_LIBRARY_OUTPUT_INTDIR)
+
+string(REGEX MATCH "[0-9]+\\.[0-9]+(\\.[0-9]+)?" CLANG_VERSION
+       ${PACKAGE_VERSION})
+
+if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR AND NOT APPLE)
+  set(DEFAULT_INSTALL_PREFIX lib${LLVM_LIBDIR_SUFFIX}/clang/${CLANG_VERSION}/${LLVM_DEFAULT_TARGET_TRIPLE}/)
+  set(DEFAULT_INSTALL_HEADER_PREFIX lib${LLVM_LIBDIR_SUFFIX}/clang/${CLANG_VERSION}/)
+  set(LIBCXX_LIBRARY_DIR ${LLVM_LIBRARY_OUTPUT_INTDIR}/clang/${CLANG_VERSION}/${LLVM_DEFAULT_TARGET_TRIPLE}/lib${LIBCXX_LIBDIR_SUFFIX})
+  set(LIBCXX_HEADER_DIR ${LLVM_LIBRARY_OUTPUT_INTDIR}/clang/${CLANG_VERSION})
+elseif(LLVM_LIBRARY_OUTPUT_INTDIR)
   set(LIBCXX_LIBRARY_DIR ${LLVM_LIBRARY_OUTPUT_INTDIR})
+  set(LIBCXX_HEADER_DIR  ${LLVM_BINARY_DIR})
 else()
   set(LIBCXX_LIBRARY_DIR ${CMAKE_BINARY_DIR}/lib${LIBCXX_LIBDIR_SUFFIX})
 endif()
+
 file(MAKE_DIRECTORY "${LIBCXX_BINARY_INCLUDE_DIR}")
 
-set(LIBCXX_INSTALL_PREFIX "" CACHE STRING
+set(LIBCXX_INSTALL_PREFIX ${DEFAULT_INSTALL_PREFIX} CACHE STRING
     "Define libc++ destination prefix.")
 
-if (NOT LIBCXX_INSTALL_PREFIX MATCHES "^$|.*/")
-  message(FATAL_ERROR "LIBCXX_INSTALL_PREFIX has to end with \"/\".")
-endif()
+set(LIBCXX_INSTALL_HEADER_PREFIX ${DEFAULT_INSTALL_HEADER_PREFIX} CACHE STRING
+    "Define libc++ header destination prefix.")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBCXX_LIBRARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBCXX_LIBRARY_DIR})
@@ -384,19 +451,29 @@ include(HandleLibcxxFlags)
 # 'config-ix' use them during feature checks. It also adds them to both
 # 'LIBCXX_COMPILE_FLAGS' and 'LIBCXX_LINK_FLAGS'
 add_target_flags_if(LIBCXX_BUILD_32_BITS "-m32")
-add_target_flags_if(LIBCXX_TARGET_TRIPLE "--target=${LIBCXX_TARGET_TRIPLE}")
-add_target_flags_if(LIBCXX_SYSROOT "--sysroot=${LIBCXX_SYSROOT}")
-add_target_flags_if(LIBCXX_GCC_TOOLCHAIN "--gcc-toolchain=${LIBCXX_GCC_TOOLCHAIN}")
-if (LIBCXX_TARGET_TRIPLE)
+
+if(LIBCXX_TARGET_TRIPLE)
+  add_target_flags("--target=${LIBCXX_TARGET_TRIPLE}")
+elseif(CMAKE_CXX_COMPILER_TARGET)
+  set(LIBCXX_TARGET_TRIPLE "${CMAKE_CXX_COMPILER_TARGET}")
+endif()
+if(LIBCXX_SYSROOT)
+  add_target_flags("--sysroot=${LIBCXX_SYSROOT}")
+elseif(CMAKE_SYSROOT)
+  set(LIBCXX_SYSROOT "${CMAKE_SYSROOT}")
+endif()
+if(LIBCXX_GCC_TOOLCHAIN)
+  add_target_flags("--gcc-toolchain=${LIBCXX_GCC_TOOLCHAIN}")
+elseif(CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN)
+  set(LIBCXX_GCC_TOOLCHAIN "${CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN}")
+endif()
+
+if(LIBCXX_TARGET_TRIPLE)
   set(TARGET_TRIPLE "${LIBCXX_TARGET_TRIPLE}")
 endif()
 
 # Configure compiler.
 include(config-ix)
-
-if (LIBCXX_USE_COMPILER_RT)
-  list(APPEND LIBCXX_LINK_FLAGS "-rtlib=compiler-rt")
-endif()
 
 # Configure coverage options.
 if (LIBCXX_GENERATE_COVERAGE)
@@ -435,15 +512,18 @@ remove_flags("/D_DEBUG" "/MTd" "/MDd" "/MT" "/Md")
 remove_flags(-Wno-pedantic -pedantic-errors -pedantic)
 
 # Required flags ==============================================================
-set(LIBCXX_STANDARD_VER c++11 CACHE INTERNAL "internal option to change build dialect")
-if (LIBCXX_HAS_MUSL_LIBC)
+if (LIBCXX_HAS_MUSL_LIBC OR LIBCXX_TARGETING_CLANG_CL)
   # musl's pthread implementations uses volatile types in their structs which is
   # not a constexpr in C++11 but is in C++14, so we use C++14 with musl.
-  set(LIBCXX_STANDARD_VER c++14 CACHE INTERNAL "internal option to change build dialect")
+  set(LIBCXX_STANDARD_VER c++14 CACHE STRING "internal option to change build dialect")
+else()
+  set(LIBCXX_STANDARD_VER c++11 CACHE STRING "internal option to change build dialect")
 endif()
 add_compile_flags_if_supported(-std=${LIBCXX_STANDARD_VER})
+add_compile_flags_if_supported("/std:${LIBCXX_STANDARD_VER}")
 mangle_name("LIBCXX_SUPPORTS_STD_EQ_${LIBCXX_STANDARD_VER}_FLAG" SUPPORTS_DIALECT_NAME)
-if(NOT ${SUPPORTS_DIALECT_NAME})
+mangle_name("LIBCXX_SUPPORTS_STD_COLON_${LIBCXX_STANDARD_VER}_FLAG" SUPPORTS_DIALECT_NAME_MSVC)
+if(NOT ${SUPPORTS_DIALECT_NAME} AND NOT ${SUPPORTS_DIALECT_NAME_MSVC})
   if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" AND NOT "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     message(FATAL_ERROR "C++11 or greater is required but the compiler does not support ${LIBCXX_STANDARD_VER}")
   endif()
@@ -478,11 +558,29 @@ add_definitions(-D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
 add_compile_flags_if_supported(
     -Wall -Wextra -W -Wwrite-strings
     -Wno-unused-parameter -Wno-long-long
-    -Werror=return-type)
+    -Werror=return-type -Wextra-semi)
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     add_compile_flags_if_supported(
         -Wno-user-defined-literals
         -Wno-covered-switch-default)
+    if (LIBCXX_TARGETING_CLANG_CL)
+      add_compile_flags_if_supported(
+        -Wno-c++98-compat
+        -Wno-c++98-compat-pedantic
+        -Wno-c++11-compat
+        -Wno-undef
+        -Wno-reserved-id-macro
+        -Wno-gnu-include-next
+        -Wno-gcc-compat # For ignoring "'diagnose_if' is a clang extension" warnings
+        -Wno-zero-as-null-pointer-constant # FIXME: Remove this and fix all occurrences.
+        -Wno-deprecated-dynamic-exception-spec # For auto_ptr
+        -Wno-sign-conversion
+        -Wno-old-style-cast
+        -Wno-deprecated # FIXME: Remove this and fix all occurrences.
+        -Wno-shift-sign-overflow # FIXME: Why do we need this with clang-cl but not clang?
+        -Wno-double-promotion # FIXME: remove me
+      )
+    endif()
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     add_compile_flags_if_supported(
         -Wno-literal-suffix
@@ -555,45 +653,67 @@ endif()
 
 # Sanitizer flags =============================================================
 
+function(get_sanitizer_flags OUT_VAR  USE_SANITIZER)
+  set(SANITIZER_FLAGS)
+  set(USE_SANITIZER "${USE_SANITIZER}")
+  # NOTE: LLVM_USE_SANITIZER checks for a UNIX like system instead of MSVC.
+  # But we don't have LLVM_ON_UNIX so checking for MSVC is the best we can do.
+  if (USE_SANITIZER AND NOT MSVC)
+    append_flags_if_supported(SANITIZER_FLAGS "-fno-omit-frame-pointer")
+    append_flags_if_supported(SANITIZER_FLAGS "-gline-tables-only")
+
+    if (NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG" AND
+            NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
+      append_flags_if_supported(SANITIZER_FLAGS "-gline-tables-only")
+    endif()
+    if (USE_SANITIZER STREQUAL "Address")
+      append_flags(SANITIZER_FLAGS "-fsanitize=address")
+    elseif (USE_SANITIZER MATCHES "Memory(WithOrigins)?")
+      append_flags(SANITIZER_FLAGS -fsanitize=memory)
+      if (USE_SANITIZER STREQUAL "MemoryWithOrigins")
+        append_flags(SANITIZER_FLAGS "-fsanitize-memory-track-origins")
+      endif()
+    elseif (USE_SANITIZER STREQUAL "Undefined")
+      append_flags(SANITIZER_FLAGS "-fsanitize=undefined -fno-sanitize=vptr,function -fno-sanitize-recover=all")
+    elseif (USE_SANITIZER STREQUAL "Thread")
+      append_flags(SANITIZER_FLAGS -fsanitize=thread)
+    else()
+      message(WARNING "Unsupported value of LLVM_USE_SANITIZER: ${USE_SANITIZER}")
+    endif()
+  elseif(USE_SANITIZER AND MSVC)
+    message(WARNING "LLVM_USE_SANITIZER is not supported on this platform.")
+  endif()
+  set(${OUT_VAR} "${SANITIZER_FLAGS}" PARENT_SCOPE)
+endfunction()
+
 # Configure for sanitizers. If LIBCXX_STANDALONE_BUILD then we have to do
 # the flag translation ourselves. Othewise LLVM's CMakeList.txt will handle it.
 if (LIBCXX_STANDALONE_BUILD)
   set(LLVM_USE_SANITIZER "" CACHE STRING
       "Define the sanitizer used to build the library and tests")
-  # NOTE: LLVM_USE_SANITIZER checks for a UNIX like system instead of MSVC.
-  # But we don't have LLVM_ON_UNIX so checking for MSVC is the best we can do.
-  if (LLVM_USE_SANITIZER AND NOT MSVC)
-    add_flags_if_supported("-fno-omit-frame-pointer")
-    add_flags_if_supported("-gline-tables-only")
-
-    if (NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG" AND
-        NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
-        add_flags_if_supported("-gline-tables-only")
-    endif()
-    if (LLVM_USE_SANITIZER STREQUAL "Address")
-      add_flags("-fsanitize=address")
-    elseif (LLVM_USE_SANITIZER MATCHES "Memory(WithOrigins)?")
-      add_flags(-fsanitize=memory)
-      if (LLVM_USE_SANITIZER STREQUAL "MemoryWithOrigins")
-        add_flags("-fsanitize-memory-track-origins")
-      endif()
-    elseif (LLVM_USE_SANITIZER STREQUAL "Undefined")
-      add_flags("-fsanitize=undefined -fno-sanitize=vptr,function -fno-sanitize-recover=all")
-    elseif (LLVM_USE_SANITIZER STREQUAL "Thread")
-      add_flags(-fsanitize=thread)
-    else()
-      message(WARNING "Unsupported value of LLVM_USE_SANITIZER: ${LLVM_USE_SANITIZER}")
-    endif()
-  elseif(LLVM_USE_SANITIZER AND MSVC)
-    message(WARNING "LLVM_USE_SANITIZER is not supported on this platform.")
-  endif()
+endif()
+get_sanitizer_flags(SANITIZER_FLAGS "${LLVM_USE_SANITIZER}")
+if (LIBCXX_STANDALONE_BUILD AND SANITIZER_FLAGS)
+  add_flags(${SANITIZER_FLAGS})
 endif()
 
 # Configuration file flags =====================================================
-if (NOT LIBCXX_ABI_VERSION EQUAL "1")
+if (NOT LIBCXX_ABI_VERSION EQUAL 1)
   config_define(${LIBCXX_ABI_VERSION} _LIBCPP_ABI_VERSION)
 endif()
+if (NOT LIBCXX_ABI_NAMESPACE STREQUAL "")
+  if (NOT LIBCXX_ABI_NAMESPACE MATCHES "__.*")
+    message(WARNING "LIBCXX_ABI_NAMESPACE must be a reserved identifier.")
+  endif()
+  if (LIBCXX_ABI_NAMESPACE MATCHES "__[0-9]+$")
+    message(FATAL_ERROR "LIBCXX_ABI_NAMESPACE '${LIBCXX_ABI_NAMESPACE}' is reserved for use by libc++.")
+  endif()
+  config_define(${LIBCXX_ABI_NAMESPACE} _LIBCPP_ABI_NAMESPACE)
+endif()
 config_define_if(LIBCXX_ABI_UNSTABLE _LIBCPP_ABI_UNSTABLE)
+config_define_if(LIBCXX_ABI_FORCE_ITANIUM _LIBCPP_ABI_FORCE_ITANIUM)
+config_define_if(LIBCXX_ABI_FORCE_MICROSOFT _LIBCPP_ABI_FORCE_MICROSOFT)
+config_define_if(LIBCXX_HIDE_FROM_ABI_PER_TU_BY_DEFAULT _LIBCPP_HIDE_FROM_ABI_PER_TU_BY_DEFAULT)
 
 config_define_if_not(LIBCXX_ENABLE_GLOBAL_FILESYSTEM_NAMESPACE _LIBCPP_HAS_NO_GLOBAL_FILESYSTEM_NAMESPACE)
 config_define_if_not(LIBCXX_ENABLE_STDIN _LIBCPP_HAS_NO_STDIN)
@@ -604,8 +724,22 @@ config_define_if_not(LIBCXX_ENABLE_THREAD_UNSAFE_C_FUNCTIONS _LIBCPP_HAS_NO_THRE
 
 config_define_if(LIBCXX_HAS_PTHREAD_API _LIBCPP_HAS_THREAD_API_PTHREAD)
 config_define_if(LIBCXX_HAS_EXTERNAL_THREAD_API _LIBCPP_HAS_THREAD_API_EXTERNAL)
+config_define_if(LIBCXX_HAS_WIN32_THREAD_API _LIBCPP_HAS_THREAD_API_WIN32)
 config_define_if(LIBCXX_BUILD_EXTERNAL_THREAD_LIBRARY _LIBCPP_HAS_THREAD_LIBRARY_EXTERNAL)
 config_define_if(LIBCXX_HAS_MUSL_LIBC _LIBCPP_HAS_MUSL_LIBC)
+config_define_if(LIBCXX_NO_VCRUNTIME _LIBCPP_NO_VCRUNTIME)
+
+if (LIBCXX_ABI_DEFINES)
+  set(abi_defines)
+  foreach (abi_define ${LIBCXX_ABI_DEFINES})
+    if (NOT abi_define MATCHES "^_LIBCPP_ABI_")
+      message(SEND_ERROR "Invalid ABI macro ${abi_define} in LIBCXX_ABI_DEFINES")
+    endif()
+    list(APPEND abi_defines "#define ${abi_define}")
+  endforeach()
+  string(REPLACE ";" "\n" abi_defines "${abi_defines}")
+  config_define(${abi_defines} _LIBCPP_ABI_DEFINES)
+endif()
 
 # By default libc++ on Windows expects to use a shared library, which requires
 # the headers to use DLL import/export semantics. However when building a
@@ -615,9 +749,10 @@ if (DEFINED WIN32 AND LIBCXX_ENABLE_STATIC AND NOT LIBCXX_ENABLE_SHARED)
   config_define(ON _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS)
 endif()
 
+set(site_config_path "${LIBCXX_BINARY_DIR}/__config_site")
 if (LIBCXX_NEEDS_SITE_CONFIG)
   configure_file("include/__config_site.in"
-                 "${LIBCXX_BINARY_DIR}/__config_site"
+                 "${site_config_path}"
                  @ONLY)
 
   # Provide the config definitions by included the generated __config_site
@@ -626,6 +761,11 @@ if (LIBCXX_NEEDS_SITE_CONFIG)
     add_compile_flags("/FI\"${LIBCXX_BINARY_DIR}/__config_site\"")
   else()
     add_compile_flags("-include ${LIBCXX_BINARY_DIR}/__config_site")
+  endif()
+else()
+  if (EXISTS "${site_config_path}")
+    message(STATUS "Removing stale site configuration ${site_config_path}")
+    file(REMOVE "${site_config_path}")
   endif()
 endif()
 
@@ -636,6 +776,15 @@ include_directories(include)
 add_subdirectory(include)
 add_subdirectory(lib)
 
+set(LIBCXX_TEST_DEPS "")
+
+if (LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY)
+  list(APPEND LIBCXX_TEST_DEPS cxx_experimental)
+endif()
+
+if (LIBCXX_BUILD_EXTERNAL_THREAD_LIBRARY)
+  list(APPEND LIBCXX_TEST_DEPS cxx_external_threads)
+endif()
 
 if (LIBCXX_INCLUDE_BENCHMARKS)
   add_subdirectory(benchmarks)
@@ -647,11 +796,22 @@ endif()
 #
 # However, since some submission systems strip test/ subdirectories, check for
 # it before adding it.
+
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test")
   add_subdirectory(test)
 endif()
 if (LIBCXX_INCLUDE_TESTS)
   add_subdirectory(lib/abi)
+endif()
+
+if (LIBCXX_STANDALONE_BUILD AND EXISTS "${LLVM_MAIN_SRC_DIR}/utils/llvm-lit")
+  include(AddLLVM) # for get_llvm_lit_path
+  # Make sure the llvm-lit script is generated into the bin directory, and do
+  # it after adding all tests, since the generated script will only work
+  # correctly discovered tests against test locations from the source tree that
+  # have already been discovered.
+  add_subdirectory(${LLVM_MAIN_SRC_DIR}/utils/llvm-lit
+                   ${CMAKE_CURRENT_BINARY_DIR}/llvm-lit)
 endif()
 
 if (LIBCXX_INCLUDE_DOCS)

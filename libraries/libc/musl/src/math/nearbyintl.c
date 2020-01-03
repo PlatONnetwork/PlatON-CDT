@@ -7,7 +7,9 @@ long double nearbyintl(long double x)
 	return nearbyint(x);
 }
 #else
-//include <fenv.h>
+#ifdef NO_ONTOLOGY_WASM
+#include <fenv.h>
+#endif
 long double nearbyintl(long double x)
 {
 #ifdef FE_INEXACT

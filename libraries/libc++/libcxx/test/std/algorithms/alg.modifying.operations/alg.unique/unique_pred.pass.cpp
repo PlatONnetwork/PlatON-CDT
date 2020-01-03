@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -12,7 +11,7 @@
 // template<ForwardIterator Iter, EquivalenceRelation<auto, Iter::value_type> Pred>
 //   requires OutputIterator<Iter, RvalueOf<Iter::reference>::type>
 //         && CopyConstructible<Pred>
-//   Iter
+//   constexpr Iter        // constexpr after C++17
 //   unique(Iter first, Iter last, Pred pred);
 
 #include <algorithm>
@@ -21,6 +20,19 @@
 
 #include "test_macros.h"
 #include "test_iterators.h"
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+          int ia[]       = {0, 1, 1, 3, 4};
+    const int expected[] = {0, 1, 3, 4};
+    const size_t N = 4;
+
+    auto it = std::unique(std::begin(ia), std::end(ia), [](int a, int b) {return a == b; });
+    return it == (std::begin(ia) + N)
+        && std::equal(std::begin(ia), it, std::begin(expected), std::end(expected))
+        ;
+    }
+#endif
 
 struct count_equal
 {
@@ -211,7 +223,7 @@ test1()
 }
 #endif // TEST_STD_VER >= 11
 
-int main()
+int main(int, char**)
 {
     test<forward_iterator<int*> >();
     test<bidirectional_iterator<int*> >();
@@ -224,4 +236,10 @@ int main()
     test1<random_access_iterator<Ptr*> >();
     test1<Ptr*>();
 #endif
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

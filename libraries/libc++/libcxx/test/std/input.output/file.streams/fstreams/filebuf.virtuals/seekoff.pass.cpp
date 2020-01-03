@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -14,12 +13,12 @@
 // pos_type seekpos(pos_type sp,
 //                  ios_base::openmode which = ios_base::in | ios_base::out);
 
-// This test is not entirely portable
-
 #include <fstream>
 #include <cassert>
 
-int main()
+#include "test_macros.h"
+
+int main(int, char**)
 {
     {
         char buf[10];
@@ -30,7 +29,7 @@ int main()
                                                        | std::ios_base::trunc) != 0);
         assert(f.is_open());
         f.sputn("abcdefghijklmnopqrstuvwxyz", 26);
-        assert(buf[0] == 'v');
+        LIBCPP_ASSERT(buf[0] == 'v');
         pos_type p = f.pubseekoff(-15, std::ios_base::cur);
         assert(p == 11);
         assert(f.sgetc() == 'l');
@@ -51,7 +50,7 @@ int main()
                                                        | std::ios_base::trunc) != 0);
         assert(f.is_open());
         f.sputn(L"abcdefghijklmnopqrstuvwxyz", 26);
-        assert(buf[0] == L'v');
+        LIBCPP_ASSERT(buf[0] == L'v');
         pos_type p = f.pubseekoff(-15, std::ios_base::cur);
         assert(p == 11);
         assert(f.sgetc() == L'l');
@@ -63,4 +62,6 @@ int main()
         assert(f.sgetc() == L'l');
     }
     std::remove("seekoff.dat");
+
+  return 0;
 }

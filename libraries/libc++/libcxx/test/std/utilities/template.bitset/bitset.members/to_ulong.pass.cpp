@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -37,9 +36,17 @@ void test_to_ulong()
         std::bitset<N> v(j);
         assert(j == v.to_ulong());
     }
+
+    { // test values bigger than can fit into the bitset
+    const unsigned long val = 0x5AFFFFA5UL;
+    const bool canFit = N < sizeof(unsigned long) * CHAR_BIT;
+    const unsigned long mask = canFit ? (1UL << (canFit ? N : 0)) - 1 : (unsigned long)(-1); // avoid compiler warnings
+    std::bitset<N> v(val);
+    assert(v.to_ulong() == (val & mask)); // we shouldn't return bit patterns from outside the limits of the bitset.
+    }
 }
 
-int main()
+int main(int, char**)
 {
     test_to_ulong<0>();
     test_to_ulong<1>();
@@ -50,4 +57,6 @@ int main()
     test_to_ulong<64>();
     test_to_ulong<65>();
     test_to_ulong<1000>();
+
+  return 0;
 }

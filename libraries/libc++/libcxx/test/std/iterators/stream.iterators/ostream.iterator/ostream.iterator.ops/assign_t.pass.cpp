@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -17,15 +16,17 @@
 #include <sstream>
 #include <cassert>
 
-#if defined(__clang__)
+#include "test_macros.h"
+
+#if defined(TEST_COMPILER_CLANG)
 #pragma clang diagnostic ignored "-Wliteral-conversion"
 #endif
 
-#ifdef _MSC_VER
+#ifdef TEST_COMPILER_C1XX
 #pragma warning(disable: 4244) // conversion from 'X' to 'Y', possible loss of data
 #endif
 
-int main()
+int main(int, char**)
 {
     {
         std::ostringstream outf;
@@ -51,4 +52,6 @@ int main()
         i = 2.4;
         assert(outf.str() == L"2, ");
     }
+
+  return 0;
 }

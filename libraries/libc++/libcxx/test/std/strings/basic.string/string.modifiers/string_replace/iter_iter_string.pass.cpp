@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -265,7 +264,7 @@ void test2()
     test(S("abcdefghijklmnopqrst"), 20, 0, S("12345678901234567890"), S("abcdefghijklmnopqrst12345678901234567890"));
 }
 
-int main()
+int main(int, char**)
 {
     {
     typedef std::string S;
@@ -281,4 +280,15 @@ int main()
     test2<S>();
     }
 #endif
+
+#if TEST_STD_VER > 3
+    {   // LWG 2946
+    std::string s = "  ";
+    s.replace(s.cbegin(), s.cend(), {"abc", 1});
+    assert(s.size() == 1);
+    assert(s == "a");
+    }
+#endif
+
+  return 0;
 }

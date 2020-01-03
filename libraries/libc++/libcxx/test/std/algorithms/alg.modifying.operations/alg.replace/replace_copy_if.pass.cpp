@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -14,16 +13,33 @@
 //   requires OutputIterator<OutIter, InIter::reference>
 //         && OutputIterator<OutIter, const T&>
 //         && CopyConstructible<Pred>
-//   OutIter
+//   constexpr OutIter      // constexpr after C++17
 //   replace_copy_if(InIter first, InIter last, OutIter result, Pred pred, const T& new_value);
 
 #include <algorithm>
 #include <functional>
 #include <cassert>
 
+#include "test_macros.h"
 #include "test_iterators.h"
 
-bool equalToTwo(int v) { return v == 2; }
+TEST_CONSTEXPR bool equalToTwo(int v) { return v == 2; }
+
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int ia[] = {0, 1, 2, 3, 4};
+    int ib[] = {0, 0, 0, 0, 0, 0}; // one bigger
+    const int expected[] = {0, 1, 5, 3, 4};
+
+    auto it = std::replace_copy_if(std::begin(ia), std::end(ia), std::begin(ib), equalToTwo, 5);
+
+    return it == (std::begin(ib) + std::size(ia))
+        && *it == 0 // don't overwrite the last value in the output array
+        && std::equal(std::begin(ib), it, std::begin(expected), std::end(expected))
+        ;
+    }
+#endif
 
 template <class InIter, class OutIter>
 void
@@ -42,7 +58,7 @@ test()
     assert(ib[4] == 4);
 }
 
-int main()
+int main(int, char**)
 {
     test<input_iterator<const int*>, output_iterator<int*> >();
     test<input_iterator<const int*>, forward_iterator<int*> >();
@@ -73,4 +89,10 @@ int main()
     test<const int*, bidirectional_iterator<int*> >();
     test<const int*, random_access_iterator<int*> >();
     test<const int*, int*>();
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

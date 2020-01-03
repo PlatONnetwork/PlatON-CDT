@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -17,7 +16,9 @@
 
 #include <numeric>
 #include <cassert>
+#include <iterator>
 
+#include "MoveOnly.h"
 #include "test_iterators.h"
 
 template <class Iter1, class Iter2, class T>
@@ -56,7 +57,15 @@ void test_return_type()
                        decltype(std::transform_reduce(p, p, p, Init{}))> );
 }
 
-int main()
+void test_move_only_types()
+{
+    MoveOnly ia[] = {{1}, {2}, {3}};
+    MoveOnly ib[] = {{1}, {2}, {3}};
+    assert(14 ==
+        std::transform_reduce(std::begin(ia), std::end(ia), std::begin(ib), MoveOnly{0}).get());
+}
+
+int main(int, char**)
 {
     test_return_type<char, int>();
     test_return_type<int, int>();
@@ -92,4 +101,8 @@ int main()
     test<const int*,       unsigned int *>();
     test<      int*, const unsigned int *>();
     test<      int*,       unsigned int *>();
+
+    test_move_only_types();
+
+  return 0;
 }

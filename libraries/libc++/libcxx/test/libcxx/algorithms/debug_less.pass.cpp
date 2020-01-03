@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -21,7 +20,10 @@ struct DebugException {};
 #define _LIBCPP_ASSERT(x, m) ((x) ? (void)0 : throw ::DebugException())
 
 #include <algorithm>
+#include <iterator>
 #include <cassert>
+
+#include "test_macros.h"
 
 template <int ID>
 struct MyType {
@@ -161,7 +163,82 @@ void test_failing() {
     }
 }
 
-int main() {
+template <int>
+struct Tag {
+  explicit Tag(int v) : value(v) {}
+  int value;
+};
+
+template <class = void>
+struct FooImp {
+  explicit FooImp(int x) : x_(x) {}
+  int x_;
+};
+
+template <class T>
+inline bool operator<(FooImp<T> const& x, Tag<0> y) {
+    return x.x_ < y.value;
+}
+
+template <class T>
+inline bool operator<(Tag<0>, FooImp<T> const&) {
+    static_assert(sizeof(FooImp<T>) != sizeof(FooImp<T>), "should not be instantiated");
+}
+
+template <class T>
+inline bool operator<(Tag<1> x, FooImp<T> const& y) {
+    return x.value < y.x_;
+}
+
+template <class T>
+inline bool operator<(FooImp<T> const&, Tag<1>) {
+    static_assert(sizeof(FooImp<T>) != sizeof(FooImp<T>), "should not be instantiated");
+}
+
+typedef FooImp<> Foo;
+
+// Test that we don't attempt to call the comparator with the arguments reversed
+// for upper_bound and lower_bound since the comparator or type is not required
+// to support it, nor does it require the range to have a strict weak ordering.
+// See llvm.org/PR39458
+void test_upper_and_lower_bound() {
+    Foo table[] = {Foo(1), Foo(2), Foo(3), Foo(4), Foo(5)};
+    {
+        Foo* iter = std::lower_bound(std::begin(table), std::end(table), Tag<0>(3));
+        assert(iter == (table + 2));
+    }
+    {
+        Foo* iter = std::upper_bound(std::begin(table), std::end(table), Tag<1>(3));
+        assert(iter == (table + 3));
+    }
+}
+
+struct NonConstArgCmp {
+    bool operator()(int& x, int &y) const {
+        return x < y;
+    }
+};
+
+void test_non_const_arg_cmp() {
+    {
+        NonConstArgCmp cmp;
+        __debug_less<NonConstArgCmp> dcmp(cmp);
+        int x = 0, y = 1;
+        assert(dcmp(x, y));
+        assert(!dcmp(y, x));
+    }
+    {
+        NonConstArgCmp cmp;
+        int arr[] = {5, 4, 3, 2, 1};
+        std::sort(std::begin(arr), std::end(arr), cmp);
+        assert(std::is_sorted(std::begin(arr), std::end(arr)));
+    }
+}
+
+int main(int, char**) {
     test_passing();
     test_failing();
+    test_upper_and_lower_bound();
+    test_non_const_arg_cmp();
+    return 0;
 }

@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -11,10 +10,10 @@
 
 // int_type pbackfail(int_type c = traits::eof());
 
-// This test is not entirely portable
-
 #include <fstream>
 #include <cassert>
+
+#include "test_macros.h"
 
 template <class CharT>
 struct test_buf
@@ -33,7 +32,7 @@ struct test_buf
     virtual int_type pbackfail(int_type c = traits_type::eof()) {return base::pbackfail(c);}
 };
 
-int main()
+int main(int, char**)
 {
     {
         test_buf<char> f;
@@ -41,7 +40,12 @@ int main()
         assert(f.is_open());
         assert(f.sbumpc() == '1');
         assert(f.sgetc() == '2');
-        assert(f.pbackfail('a') == -1);
+        typename test_buf<char>::int_type pbackResult = f.pbackfail('a');
+        LIBCPP_ASSERT(pbackResult == -1);
+        if (pbackResult != -1) {
+            assert(f.sbumpc() == 'a');
+            assert(f.sgetc() == '2');
+        }
     }
     {
         test_buf<char> f;
@@ -49,8 +53,13 @@ int main()
         assert(f.is_open());
         assert(f.sbumpc() == '1');
         assert(f.sgetc() == '2');
-        assert(f.pbackfail('a') == 'a');
-        assert(f.sbumpc() == 'a');
-        assert(f.sgetc() == '2');
+        typename test_buf<char>::int_type pbackResult = f.pbackfail('a');
+        LIBCPP_ASSERT(pbackResult == 'a');
+        if (pbackResult != -1) {
+            assert(f.sbumpc() == 'a');
+            assert(f.sgetc() == '2');
+        }
     }
+
+  return 0;
 }

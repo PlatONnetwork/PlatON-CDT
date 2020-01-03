@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -27,8 +26,8 @@
 
 #include "test_macros.h"
 
-template <class _Tp>
-void where(const _Tp &) {}
+template <class T>
+void where(const T &) {}
 
 template <class T, T a, T c, T m>
 void
@@ -45,10 +44,10 @@ test1()
     assert((LCE::min() == (c == 0u ? 1u: 0u)));
 #endif
 
-#ifdef _MSC_VER
+#ifdef TEST_COMPILER_C1XX
     #pragma warning(push)
     #pragma warning(disable: 4310) // cast truncates constant value
-#endif // _MSC_VER
+#endif // TEST_COMPILER_C1XX
 
 #if TEST_STD_VER >= 11
     static_assert((LCE::max() == result_type(m - 1u)), "");
@@ -56,9 +55,9 @@ test1()
     assert((LCE::max() == result_type(m - 1u)));
 #endif
 
-#ifdef _MSC_VER
+#ifdef TEST_COMPILER_C1XX
     #pragma warning(pop)
-#endif // _MSC_VER
+#endif // TEST_COMPILER_C1XX
 
     static_assert((LCE::default_seed == 1), "");
     where(LCE::multiplier);
@@ -86,10 +85,12 @@ test()
     test1<T, M-1, M-1, M>();
 }
 
-int main()
+int main(int, char**)
 {
     test<unsigned short>();
     test<unsigned int>();
     test<unsigned long>();
     test<unsigned long long>();
+
+  return 0;
 }

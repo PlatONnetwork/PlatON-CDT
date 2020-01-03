@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -19,12 +18,12 @@
 #include "min_allocator.h"
 
 #ifndef TEST_HAS_NO_EXCEPTIONS
-template <class T>
 struct alloc_imp {
     bool active;
 
     alloc_imp() : active(true) {}
 
+    template <class T>
     T* allocate(std::size_t n)
     {
         if (active)
@@ -33,6 +32,7 @@ struct alloc_imp {
             throw std::bad_alloc();
     }
 
+    template <class T>
     void deallocate(T* p, std::size_t) { std::free(p); }
     void activate  ()                  { active = true; }
     void deactivate()                  { active = false; }
@@ -43,14 +43,14 @@ struct poca_alloc {
     typedef T value_type;
     typedef std::true_type propagate_on_container_copy_assignment;
 
-    alloc_imp<T> *imp;
+    alloc_imp *imp;
 
-    poca_alloc(alloc_imp<T> *imp_) : imp (imp_) {}
+    poca_alloc(alloc_imp *imp_) : imp (imp_) {}
 
     template <class U>
     poca_alloc(const poca_alloc<U>& other) : imp(other.imp) {}
 
-    T*   allocate  (std::size_t n)       { return imp->allocate(n);}
+    T*   allocate  (std::size_t n)       { return imp->allocate<T>(n);}
     void deallocate(T* p, std::size_t n) { imp->deallocate(p, n); }
 };
 
@@ -69,9 +69,9 @@ bool operator!=(const poca_alloc<T>& lhs, const poca_alloc<U>& rhs)
 template <class S>
 void test_assign(S &s1, const S& s2)
 {
-	try { s1 = s2; }
-	catch ( std::bad_alloc &) { return; }
-	assert(false);
+    try { s1 = s2; }
+    catch ( std::bad_alloc &) { return; }
+    assert(false);
 }
 #endif
 
@@ -88,7 +88,7 @@ test(S s1, const typename S::allocator_type& a)
     assert(s2.get_allocator() == a);
 }
 
-int main()
+int main(int, char**)
 {
     {
     typedef test_allocator<char> A;
@@ -110,22 +110,24 @@ int main()
     {
     typedef poca_alloc<char> A;
     typedef std::basic_string<char, std::char_traits<char>, A> S;
-	const char * p1 = "This is my first string";
-	const char * p2 = "This is my second string";
+    const char * p1 = "This is my first string";
+    const char * p2 = "This is my second string";
 
-    alloc_imp<char> imp1;
-    alloc_imp<char> imp2;
-	S s1(p1, A(&imp1));
-	S s2(p2, A(&imp2));
+    alloc_imp imp1;
+    alloc_imp imp2;
+    S s1(p1, A(&imp1));
+    S s2(p2, A(&imp2));
 
-	assert(s1 == p1);
-	assert(s2 == p2);
+    assert(s1 == p1);
+    assert(s2 == p2);
 
-	imp2.deactivate();
-	test_assign(s1, s2);
-	assert(s1 == p1);
-	assert(s2 == p2);
+    imp2.deactivate();
+    test_assign(s1, s2);
+    assert(s1 == p1);
+    assert(s2 == p2);
     }
 #endif
 #endif
+
+  return 0;
 }

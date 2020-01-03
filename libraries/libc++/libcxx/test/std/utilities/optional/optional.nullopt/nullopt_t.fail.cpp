@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -11,17 +10,17 @@
 // <optional>
 
 // struct nullopt_t{see below};
-// constexpr nullopt_t nullopt(unspecified);
+// inline constexpr nullopt_t nullopt(unspecified);
 
 // [optional.nullopt]/2:
-//   Type nullopt_t shall not have a default constructor or an initializer-list constructor.
-//   It shall not be an aggregate and shall be a literal type.
-//   Constant nullopt shall be initialized with an argument of literal type.
+//   Type nullopt_t shall not have a default constructor or an initializer-list
+//   constructor, and shall not be an aggregate.
 
 #include <optional>
-#include "test_macros.h"
 
-int main()
+int main(int, char**)
 {
-	std::nullopt_t n = {};
+    std::nullopt_t n = {};
+
+  return 0;
 }

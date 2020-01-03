@@ -1,11 +1,19 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+
+// In macosx10.9 to macosx10.14, streams are provided in the dylib AND they
+// have a bug in how they handle null-termination in case of errors (see D40677).
+// XFAIL: with_system_cxx_lib=macosx10.14
+// XFAIL: with_system_cxx_lib=macosx10.13
+// XFAIL: with_system_cxx_lib=macosx10.12
+// XFAIL: with_system_cxx_lib=macosx10.11
+// XFAIL: with_system_cxx_lib=macosx10.10
+// XFAIL: with_system_cxx_lib=macosx10.9
 
 // <istream>
 
@@ -13,6 +21,8 @@
 
 #include <istream>
 #include <cassert>
+
+#include "test_macros.h"
 
 template <class CharT>
 struct testbuf
@@ -38,7 +48,7 @@ public:
     CharT* egptr() const {return base::egptr();}
 };
 
-int main()
+int main(int, char**)
 {
     {
         testbuf<char> sb("  *    * ");
@@ -59,7 +69,33 @@ int main()
         assert(!is.fail());
         assert(std::string(s) == " ");
         assert(is.gcount() == 1);
+        // Check that even in error case the buffer is properly 0-terminated.
+        is.getline(s, 5, '*');
+        assert( is.eof());
+        assert( is.fail());
+        assert(std::string(s) == "");
+        assert(is.gcount() == 0);
     }
+#ifndef TEST_HAS_NO_EXCEPTIONS
+    {
+        testbuf<char> sb(" ");
+        std::istream is(&sb);
+        char s[5] = "test";
+        is.exceptions(std::istream::eofbit | std::istream::badbit);
+        try
+        {
+            is.getline(s, 5, '*');
+            assert(false);
+        }
+        catch (std::ios_base::failure&)
+        {
+        }
+        assert( is.eof());
+        assert( is.fail());
+        assert(std::string(s) == " ");
+        assert(is.gcount() == 1);
+    }
+#endif
     {
         testbuf<wchar_t> sb(L"  *    * ");
         std::wistream is(&sb);
@@ -79,5 +115,33 @@ int main()
         assert(!is.fail());
         assert(std::wstring(s) == L" ");
         assert(is.gcount() == 1);
+        // Check that even in error case the buffer is properly 0-terminated.
+        is.getline(s, 5, L'*');
+        assert( is.eof());
+        assert( is.fail());
+        assert(std::wstring(s) == L"");
+        assert(is.gcount() == 0);
     }
+#ifndef TEST_HAS_NO_EXCEPTIONS
+    {
+        testbuf<wchar_t> sb(L" ");
+        std::wistream is(&sb);
+        wchar_t s[5] = L"test";
+        is.exceptions(std::wistream::eofbit | std::wistream::badbit);
+        try
+        {
+            is.getline(s, 5, L'*');
+            assert(false);
+        }
+        catch (std::ios_base::failure&)
+        {
+        }
+        assert( is.eof());
+        assert( is.fail());
+        assert(std::wstring(s) == L" ");
+        assert(is.gcount() == 1);
+    }
+#endif
+
+  return 0;
 }

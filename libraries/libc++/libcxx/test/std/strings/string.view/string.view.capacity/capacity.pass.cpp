@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -35,6 +34,10 @@ void test1 () {
 
     {
     SV sv1;
+    ASSERT_NOEXCEPT(sv1.size());
+    ASSERT_NOEXCEPT(sv1.empty());
+    ASSERT_NOEXCEPT(sv1.max_size());
+    ASSERT_NOEXCEPT(sv1.length());
     assert ( sv1.size() == 0 );
     assert ( sv1.empty());
     assert ( sv1.size() == sv1.length());
@@ -51,19 +54,22 @@ void test2 ( const CharT *s, size_t len ) {
     assert ( sv1.empty() == (len == 0));
     assert ( sv1.size() == sv1.length());
     assert ( sv1.max_size() > sv1.size());
+#if TEST_STD_VER > 14
+//  make sure we pick up std::size, too!
+    assert ( sv1.size() == std::size(sv1));
+    assert ( sv1.empty() == std::empty(sv1));
+#endif
     }
 }
 
-int main () {
-    typedef std::string_view    string_view;
-    typedef std::u16string_view u16string_view;
-    typedef std::u32string_view u32string_view;
-    typedef std::wstring_view   wstring_view;
-
-    test1<string_view> ();
-    test1<u16string_view> ();
-    test1<u32string_view> ();
-    test1<wstring_view> ();
+int main(int, char**) {
+    test1<std::string_view> ();
+#if defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201811L
+    test1<std::u8string_view> ();
+#endif
+    test1<std::u16string_view> ();
+    test1<std::u32string_view> ();
+    test1<std::wstring_view> ();
 
     test2 ( "ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE", 105 );
     test2 ( "ABCDE", 5 );
@@ -74,6 +80,13 @@ int main () {
     test2 ( L"ABCDE", 5 );
     test2 ( L"a", 1 );
     test2 ( L"", 0 );
+
+#if defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201811L
+    test2 ( u8"ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE", 105 );
+    test2 ( u8"ABCDE", 5 );
+    test2 ( u8"a", 1 );
+    test2 ( u8"", 0 );
+#endif
 
 #if TEST_STD_VER >= 11
     test2 ( u"ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE", 105 );
@@ -86,4 +99,6 @@ int main () {
     test2 ( U"a", 1 );
     test2 ( U"", 0 );
 #endif
+
+  return 0;
 }

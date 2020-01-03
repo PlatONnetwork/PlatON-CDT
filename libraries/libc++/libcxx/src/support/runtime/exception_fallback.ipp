@@ -1,10 +1,9 @@
 // -*- C++ -*-
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -13,20 +12,25 @@
 namespace std {
 
 _LIBCPP_SAFE_STATIC static std::terminate_handler  __terminate_handler;
+#ifdef NO_ONTOLOGY_WASM
 _LIBCPP_SAFE_STATIC static std::unexpected_handler __unexpected_handler;
+#else
+typedef void (*unexpected_handler)();
+_LIBCPP_SAFE_STATIC static unexpected_handler __unexpected_handler;
+#endif
 
 
 // libcxxrt provides implementations of these functions itself.
 unexpected_handler
 set_unexpected(unexpected_handler func) _NOEXCEPT
 {
-  return __sync_lock_test_and_set(&__unexpected_handler, func);
+  return __libcpp_atomic_exchange(&__unexpected_handler, func);
 }
 
 unexpected_handler
 get_unexpected() _NOEXCEPT
 {
-  return __sync_fetch_and_add(&__unexpected_handler, (unexpected_handler)0);
+  return __libcpp_atomic_load(&__unexpected_handler);
 
 }
 
@@ -41,14 +45,13 @@ void unexpected()
 terminate_handler
 set_terminate(terminate_handler func) _NOEXCEPT
 {
-  return __sync_lock_test_and_set(&__terminate_handler, func);
+  return __libcpp_atomic_exchange(&__terminate_handler, func);
 }
 
 terminate_handler
 get_terminate() _NOEXCEPT
 {
-  return __sync_fetch_and_add(&__terminate_handler, (terminate_handler)0);
-
+  return __libcpp_atomic_load(&__terminate_handler);
 }
 
 #ifndef __EMSCRIPTEN__ // We provide this in JS
@@ -134,22 +137,6 @@ bad_array_new_length::what() const _NOEXCEPT
 {
     return "bad_array_new_length";
 }
-
-
-bad_array_length::bad_array_length() _NOEXCEPT
-{
-}
-
-bad_array_length::~bad_array_length() _NOEXCEPT
-{
-}
-
-const char*
-bad_array_length::what() const _NOEXCEPT
-{
-    return "bad_array_length";
-}
-
 
 bad_cast::bad_cast() _NOEXCEPT
 {

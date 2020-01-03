@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -23,13 +22,16 @@
 template<typename CharT>
 void test ( const CharT *s, size_t sz ) {
     {
-    std::basic_string_view<CharT> sv1 ( s, sz );
+    typedef std::basic_string_view<CharT> SV;
+    LIBCPP_ASSERT_NOEXCEPT(SV(s, sz));
+
+    SV sv1 ( s, sz );
     assert ( sv1.size() == sz );
     assert ( sv1.data() == s );
     }
 }
 
-int main () {
+int main(int, char**) {
 
     test ( "QBCDE", 5 );
     test ( "QBCDE", 2 );
@@ -80,4 +82,6 @@ int main () {
     }
 #endif
 #endif
+
+  return 0;
 }
