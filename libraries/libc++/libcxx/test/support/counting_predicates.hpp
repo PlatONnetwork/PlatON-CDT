@@ -1,19 +1,22 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef __COUNTING_PREDICATES_H
-#define __COUNTING_PREDICATES_H
+#ifndef TEST_SUPPORT_COUNTING_PREDICATES_H
+#define TEST_SUPPORT_COUNTING_PREDICATES_H
 
+#include <cstddef>
 
 template <typename Predicate, typename Arg>
-struct unary_counting_predicate : public std::unary_function<Arg, bool>  {
+struct unary_counting_predicate {
 public:
+    typedef Arg argument_type;
+    typedef bool result_type;
+
     unary_counting_predicate(Predicate p) : p_(p), count_(0) {}
     ~unary_counting_predicate() {}
 
@@ -24,12 +27,15 @@ public:
 private:
     Predicate p_;
     mutable size_t count_;
-    };
+};
 
 
 template <typename Predicate, typename Arg1, typename Arg2=Arg1>
-struct binary_counting_predicate : public std::binary_function<Arg1, Arg2, bool> {
+struct binary_counting_predicate {
 public:
+    typedef Arg1 first_argument_type;
+    typedef Arg2 second_argument_type;
+    typedef bool result_type;
 
     binary_counting_predicate ( Predicate p ) : p_(p), count_(0) {}
     ~binary_counting_predicate() {}
@@ -41,6 +47,6 @@ public:
 private:
     Predicate p_;
     mutable size_t count_;
-    };
+};
 
-#endif // __COUNTING_PREDICATES_H
+#endif // TEST_SUPPORT_COUNTING_PREDICATES_H

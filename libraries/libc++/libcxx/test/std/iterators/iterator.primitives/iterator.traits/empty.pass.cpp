@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -20,19 +19,21 @@ struct not_an_iterator
 {
 };
 
-template <class _Tp>
+template <class T>
 struct has_value_type
 {
 private:
     struct two {char lx; char lxx;};
-    template <class _Up> static two test(...);
-    template <class _Up> static char test(typename _Up::value_type* = 0);
+    template <class U> static two test(...);
+    template <class U> static char test(typename U::value_type* = 0);
 public:
-    static const bool value = sizeof(test<_Tp>(0)) == 1;
+    static const bool value = sizeof(test<T>(0)) == 1;
 };
 
-int main()
+int main(int, char**)
 {
     typedef std::iterator_traits<not_an_iterator> It;
     static_assert(!(has_value_type<It>::value), "");
+
+  return 0;
 }

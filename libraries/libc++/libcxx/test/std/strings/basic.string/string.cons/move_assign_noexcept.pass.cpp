@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -16,7 +15,7 @@
 //         allocator_traits<allocator_type>::propagate_on_container_move_assignment::value ||
 //         allocator_traits<allocator_type>::is_always_equal::value); // C++17
 //
-//	before C++17, we use the conforming extension
+//  before C++17, we use the conforming extension
 //     noexcept(
 //         allocator_type::propagate_on_container_move_assignment::value &&
 //         is_nothrow_move_assignable<allocator_type>::value);
@@ -32,6 +31,7 @@ struct some_alloc
 {
     typedef T value_type;
     some_alloc(const some_alloc&);
+    T *allocate(size_t);
 };
 
 template <class T>
@@ -41,6 +41,7 @@ struct some_alloc2
 
     some_alloc2() {}
     some_alloc2(const some_alloc2&);
+    T *allocate(size_t);
     void deallocate(void*, unsigned) {}
 
     typedef std::false_type propagate_on_container_move_assignment;
@@ -54,13 +55,14 @@ struct some_alloc3
 
     some_alloc3() {}
     some_alloc3(const some_alloc3&);
+    T *allocate(size_t);
     void deallocate(void*, unsigned) {}
 
     typedef std::false_type propagate_on_container_move_assignment;
     typedef std::false_type is_always_equal;
 };
 
-int main()
+int main(int, char**)
 {
     {
         typedef std::string C;
@@ -81,14 +83,16 @@ int main()
     }
 #if TEST_STD_VER > 14
     {
-    //	POCMA is false, always equal
+    //  POCMA is false, always equal
         typedef std::basic_string<char, std::char_traits<char>, some_alloc2<char>> C;
         static_assert( std::is_nothrow_move_assignable<C>::value, "");
     }
     {
-    //	POCMA is false, not always equal
+    //  POCMA is false, not always equal
         typedef std::basic_string<char, std::char_traits<char>, some_alloc3<char>> C;
         static_assert(!std::is_nothrow_move_assignable<C>::value, "");
     }
 #endif
+
+  return 0;
 }

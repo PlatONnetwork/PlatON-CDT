@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -13,7 +12,7 @@
 
 //  Hashing a struct w/o a defined hash should *not* fail, but it should
 // create a type that is not constructible and not callable.
-// See also: http://cplusplus.github.io/LWG/lwg-active.html#2543
+// See also: https://cplusplus.github.io/LWG/lwg-defects.html#2543
 
 #include <functional>
 #include <cassert>
@@ -23,7 +22,7 @@
 
 struct X {};
 
-int main()
+int main(int, char**)
 {
     using H = std::hash<X>;
     static_assert(!std::is_default_constructible<H>::value, "");
@@ -32,7 +31,9 @@ int main()
     static_assert(!std::is_copy_assignable<H>::value, "");
     static_assert(!std::is_move_assignable<H>::value, "");
 #if TEST_STD_VER > 14
-    static_assert(!std::is_callable<H(X&)>::value, "");
-    static_assert(!std::is_callable<H(X const&)>::value, "");
+    static_assert(!std::is_invocable<H, X&>::value, "");
+    static_assert(!std::is_invocable<H, X const&>::value, "");
 #endif
+
+  return 0;
 }

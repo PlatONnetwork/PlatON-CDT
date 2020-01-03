@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -22,16 +21,16 @@
 #include "allocators.h"
 #include "min_allocator.h"
 
-int main()
+int main(int, char**)
 {
     // sanity checks
     static_assert( (std::is_same<
-    		std::allocator_traits<A1<int>>::is_always_equal, std::false_type>::value
-    		), "" );
+            std::allocator_traits<A1<int>>::is_always_equal, std::false_type>::value
+            ), "" );
 
     static_assert( (std::is_same<
-    		std::allocator_traits<min_allocator<int>>::is_always_equal, std::true_type>::value
-    		), "" );
+            std::allocator_traits<min_allocator<int>>::is_always_equal, std::true_type>::value
+            ), "" );
 
     // wrapping one allocator
     static_assert(
@@ -69,4 +68,6 @@ int main()
               std::allocator_traits<A2<int>>::is_always_equal::value &&
               std::allocator_traits<A3<int>>::is_always_equal::value)
         ), "");
+
+  return 0;
 }

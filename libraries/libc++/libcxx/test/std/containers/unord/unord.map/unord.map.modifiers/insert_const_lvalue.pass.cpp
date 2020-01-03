@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -37,35 +36,36 @@ void do_insert_cv_test()
     assert(r.first->first == 2.5);
     assert(r.first->second == 2);
 
-    r = m.insert(VT(2.5, 3)); // test rvalue insertion works in C++03
+    const VT v2(2.5, 3);
+    r = m.insert(v2);
     assert(!r.second);
     assert(m.size() == 1);
     assert(r.first->first == 2.5);
     assert(r.first->second == 2);
 
-    const VT v2(1.5, 1);
-    r = m.insert(v2);
+    const VT v3(1.5, 1);
+    r = m.insert(v3);
     assert(r.second);
     assert(m.size() == 2);
     assert(r.first->first == 1.5);
     assert(r.first->second == 1);
 
-    const VT v3(3.5, 3);
-    r = m.insert(v3);
+    const VT v4(3.5, 3);
+    r = m.insert(v4);
     assert(r.second);
     assert(m.size() == 3);
     assert(r.first->first == 3.5);
     assert(r.first->second == 3);
 
-    const VT v4(3.5, 4);
-    r = m.insert(v4);
+    const VT v5(3.5, 4);
+    r = m.insert(v5);
     assert(!r.second);
     assert(m.size() == 3);
     assert(r.first->first == 3.5);
     assert(r.first->second == 3);
 }
 
-int main()
+int main(int, char**)
 {
     {
         typedef std::unordered_map<double, int> M;
@@ -78,4 +78,6 @@ int main()
         do_insert_cv_test<M>();
     }
 #endif
+
+  return 0;
 }

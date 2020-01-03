@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -17,14 +16,16 @@
 // These functions shall not participate in overload resolution unless
 //   is_integral_v<IntegerType> is true.
 
-int main () {
-	constexpr std::byte b1{static_cast<std::byte>(1)};
-	constexpr std::byte b3{static_cast<std::byte>(3)};
+int main(int, char**) {
+    constexpr std::byte b1{static_cast<std::byte>(1)};
+    constexpr std::byte b3{static_cast<std::byte>(3)};
 
-	static_assert(noexcept(b3 << 2), "" );
+    static_assert(noexcept(b3 << 2), "" );
 
-	static_assert(std::to_integer<int>(b1 << 1) ==   2, "");
-	static_assert(std::to_integer<int>(b1 << 2) ==   4, "");
-	static_assert(std::to_integer<int>(b3 << 4) ==  48, "");
-	static_assert(std::to_integer<int>(b3 << 6) == 192, "");
+    static_assert(std::to_integer<int>(b1 << 1) ==   2, "");
+    static_assert(std::to_integer<int>(b1 << 2) ==   4, "");
+    static_assert(std::to_integer<int>(b3 << 4) ==  48, "");
+    static_assert(std::to_integer<int>(b3 << 6) == 192, "");
+
+  return 0;
 }

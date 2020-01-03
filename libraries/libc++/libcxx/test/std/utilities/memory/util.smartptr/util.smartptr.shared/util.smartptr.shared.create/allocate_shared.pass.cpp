@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -23,6 +22,12 @@
 #include "test_allocator.h"
 #include "min_allocator.h"
 
+#if TEST_STD_VER >= 11
+#define DELETE_FUNCTION = delete
+#else
+#define DELETE_FUNCTION
+#endif
+
 int new_count = 0;
 
 struct A
@@ -37,6 +42,8 @@ struct A
 
     int get_int() const {return int_;}
     char get_char() const {return char_;}
+
+    A* operator& () DELETE_FUNCTION;
 private:
     int int_;
     char char_;
@@ -44,7 +51,7 @@ private:
 
 int A::count = 0;
 
-int main()
+int main(int, char**)
 {
     {
     int i = 67;
@@ -75,4 +82,6 @@ int main()
     assert(p->get_char() == 'f');
     }
     assert(A::count == 0);
+
+  return 0;
 }

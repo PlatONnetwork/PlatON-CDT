@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -15,7 +14,7 @@
 //         && OutputIterator<OutIter, InIter2::reference>
 //         && Predicate<Compare, InIter1::value_type, InIter2::value_type>
 //         && Predicate<Compare, InIter2::value_type, InIter1::value_type>
-//   OutIter
+//   constpexr OutIter       // constexpr after C++17
 //   set_intersection(InIter1 first1, InIter1 last1, InIter2 first2, InIter2 last2,
 //                    OutIter result, Compare comp);
 
@@ -23,7 +22,27 @@
 #include <functional>
 #include <cassert>
 
+#include "test_macros.h"
 #include "test_iterators.h"
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    const int ia[] = {1, 2, 2, 3, 3, 3, 4, 4, 4, 4};
+    const int ib[] = {2, 4, 4, 6};
+          int results[std::size(ia)] = {0};
+
+    auto comp = [](int a, int b) {return a < b; };
+    auto it = std::set_intersection(std::begin(ia), std::end(ia),
+                                    std::begin(ib), std::end(ib), std::begin(results), comp);
+
+    return std::includes(std::begin(ia), std::end(ia), std::begin(results), it)
+        && std::includes(std::begin(ib), std::end(ib), std::begin(results), it)
+        && std::is_sorted(std::begin(results), it, comp)
+        && std::all_of(it, std::end(results), [](int a) {return a == 0; })
+           ;
+    }
+#endif
+
 
 template <class Iter1, class Iter2, class OutIter>
 void
@@ -46,7 +65,7 @@ test()
     assert(std::lexicographical_compare(ic, base(ce), ir, ir+sr) == 0);
 }
 
-int main()
+int main(int, char**)
 {
     test<input_iterator<const int*>, input_iterator<const int*>, output_iterator<int*> >();
     test<input_iterator<const int*>, input_iterator<const int*>, forward_iterator<int*> >();
@@ -197,4 +216,10 @@ int main()
     test<const int*, const int*, bidirectional_iterator<int*> >();
     test<const int*, const int*, random_access_iterator<int*> >();
     test<const int*, const int*, int*>();
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }

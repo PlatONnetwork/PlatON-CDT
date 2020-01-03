@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -21,6 +20,7 @@
 #include <cassert>
 
 #include "test_macros.h"
+#include "incomplete_type_helper.h"
 
 template <class T>
 struct A
@@ -52,12 +52,31 @@ struct B
     }
 };
 
-int main()
+
+int main(int, char**)
 {
 #if TEST_STD_VER >= 11
+  {
     A<int> a;
     assert(std::allocator_traits<A<int> >::allocate(a, 10, nullptr) == reinterpret_cast<int*>(static_cast<std::uintptr_t>(0xDEADBEEF)));
+  }
+  {
+    typedef IncompleteHolder* VT;
+    typedef A<VT> Alloc;
+    Alloc a;
+    assert(std::allocator_traits<Alloc >::allocate(a, 10, nullptr) == reinterpret_cast<VT*>(static_cast<std::uintptr_t>(0xDEADBEEF)));
+  }
 #endif
+  {
     B<int> b;
     assert(std::allocator_traits<B<int> >::allocate(b, 11, nullptr) == reinterpret_cast<int*>(static_cast<std::uintptr_t>(0xFEADBEEF)));
+  }
+  {
+    typedef IncompleteHolder* VT;
+    typedef B<VT> Alloc;
+    Alloc b;
+    assert(std::allocator_traits<Alloc >::allocate(b, 11, nullptr) == reinterpret_cast<VT*>(static_cast<std::uintptr_t>(0xFEADBEEF)));
+  }
+
+  return 0;
 }

@@ -1,15 +1,16 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
  // test cfloat
 
 #include <cfloat>
+
+#include "test_macros.h"
 
 #ifndef FLT_ROUNDS
 #error FLT_ROUNDS not defined
@@ -21,6 +22,20 @@
 
 #ifndef FLT_RADIX
 #error FLT_RADIX not defined
+#endif
+
+#if TEST_STD_VER > 14 && defined(TEST_HAS_C11_FEATURES) && 0
+#ifndef FLT_HAS_SUBNORM
+#error FLT_HAS_SUBNORM not defined
+#endif
+
+#ifndef DBL_HAS_SUBNORM
+#error DBL_HAS_SUBNORM not defined
+#endif
+
+#ifndef LDBL_HAS_SUBNORM
+#error LDBL_HAS_SUBNORM not defined
+#endif
 #endif
 
 #ifndef FLT_MANT_DIG
@@ -37,6 +52,20 @@
 
 #ifndef DECIMAL_DIG
 #error DECIMAL_DIG not defined
+#endif
+
+#if TEST_STD_VER > 14 && defined(TEST_HAS_C11_FEATURES) && 0
+#ifndef FLT_DECIMAL_DIG
+#error FLT_DECIMAL_DIG not defined
+#endif
+
+#ifndef DBL_DECIMAL_DIG
+#error DBL_DECIMAL_DIG not defined
+#endif
+
+#ifndef LDBL_DECIMAL_DIG
+#error LDBL_DECIMAL_DIG not defined
+#endif
 #endif
 
 #ifndef FLT_DIG
@@ -135,6 +164,22 @@
 #error LDBL_MIN not defined
 #endif
 
-int main()
+#if TEST_STD_VER > 14 && defined(TEST_HAS_C11_FEATURES) && 0
+#ifndef FLT_TRUE_MIN
+#error FLT_TRUE_MIN not defined
+#endif
+
+#ifndef DBL_TRUE_MIN
+#error DBL_TRUE_MIN not defined
+#endif
+
+#ifndef LDBL_TRUE_MIN
+#error LDBL_TRUE_MIN not defined
+#endif
+#endif
+
+int main(int, char**)
 {
+
+  return 0;
 }

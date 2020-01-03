@@ -1,15 +1,14 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 // type_traits
 // XFAIL: apple-clang-6.0
-//	The Apple-6 compiler gets is_constructible<void ()> wrong.
+//  The Apple-6 compiler gets is_constructible<void ()> wrong.
 
 // template <class T, class... Args>
 //   struct is_constructible;
@@ -30,6 +29,7 @@ struct A
 {
     explicit A(int);
     A(int, double);
+    A(int, long, double);
 #if TEST_STD_VER >= 11
 private:
 #endif
@@ -106,6 +106,16 @@ void test_is_constructible()
 #endif
 }
 
+template <class T, class A0, class A1, class A2>
+void test_is_constructible()
+{
+    static_assert(( std::is_constructible<T, A0, A1, A2>::value), "");
+    LIBCPP11_STATIC_ASSERT((std::__libcpp_is_constructible<T, A0, A1, A2>::type::value), "");
+#if TEST_STD_VER > 14
+    static_assert(( std::is_constructible_v<T, A0, A1, A2>), "");
+#endif
+}
+
 template <class T>
 void test_is_not_constructible()
 {
@@ -137,7 +147,7 @@ static constexpr bool clang_disallows_valid_static_cast_bug =
 #endif
 
 
-int main()
+int main(int, char**)
 {
     typedef Base B;
     typedef Derived D;
@@ -146,6 +156,7 @@ int main()
     test_is_constructible<int, const int> ();
     test_is_constructible<A, int> ();
     test_is_constructible<A, int, double> ();
+    test_is_constructible<A, int, long, double> ();
     test_is_constructible<int&, int&> ();
 
     test_is_not_constructible<A> ();
@@ -290,4 +301,6 @@ int main()
     test_is_not_constructible<void() &&> ();
 #endif
 #endif // TEST_STD_VER >= 11
+
+  return 0;
 }

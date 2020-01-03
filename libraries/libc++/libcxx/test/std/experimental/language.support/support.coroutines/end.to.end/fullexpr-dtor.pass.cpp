@@ -1,10 +1,9 @@
 // -*- C++ -*-
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -33,7 +32,7 @@ struct Noisy {
   Noisy(Noisy const&) = delete;
 #else
   // FIXME: This test depends on copy elision taking place in C++14
-  // (pre-c++17 guaranteed copy elision)
+  // (pre-C++17 guaranteed copy elision)
   Noisy(Noisy const&);
 #endif
 };
@@ -109,9 +108,11 @@ coro2 d() {
   assert(dtor_called == 1);
 }
 
-int main() {
+int main(int, char**) {
   a();
   b();
   c();
   d();
+
+  return 0;
 }

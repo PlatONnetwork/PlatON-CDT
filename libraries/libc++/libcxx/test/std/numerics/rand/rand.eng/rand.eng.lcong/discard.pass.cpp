@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -47,17 +46,17 @@ other()
     assert(e1 == e2);
     e1.discard(1);
     assert(e1 != e2);
-    e2();
+    (void)e2();
     assert(e1 == e2);
     e1.discard(3);
     assert(e1 != e2);
-    e2();
-    e2();
-    e2();
+    (void)e2();
+    (void)e2();
+    (void)e2();
     assert(e1 == e2);
 }
 
-int main()
+int main(int, char**)
 {
     rand0<unsigned int>();
     rand0<unsigned long>();
@@ -70,4 +69,6 @@ int main()
     other<unsigned int>();
     other<unsigned long>();
     other<unsigned long long>();
+
+  return 0;
 }

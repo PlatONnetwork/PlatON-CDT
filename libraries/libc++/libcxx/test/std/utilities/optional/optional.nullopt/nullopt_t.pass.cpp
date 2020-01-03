@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -11,33 +10,32 @@
 // <optional>
 
 // struct nullopt_t{see below};
-// constexpr nullopt_t nullopt(unspecified);
+// inline constexpr nullopt_t nullopt(unspecified);
 
 // [optional.nullopt]/2:
-//   Type nullopt_t shall not have a default constructor or an initializer-list constructor.
-//   It shall not be an aggregate and shall be a literal type.
-//   Constant nullopt shall be initialized with an argument of literal type.
+//   Type nullopt_t shall not have a default constructor or an initializer-list
+//   constructor, and shall not be an aggregate.
 
 #include <optional>
 #include <type_traits>
 
-using std::optional;
 using std::nullopt_t;
 using std::nullopt;
 
-constexpr
-int
-test(const nullopt_t&)
+constexpr bool test()
 {
-    return 3;
+    nullopt_t foo{nullopt};
+    (void)foo;
+    return true;
 }
 
-int main()
+int main(int, char**)
 {
-    static_assert(( std::is_class<nullopt_t>::value), "");
-    static_assert(( std::is_empty<nullopt_t>::value), "");
-    static_assert(( std::is_literal_type<nullopt_t>::value), "");
-    static_assert((!std::is_default_constructible<nullopt_t>::value), "");
+    static_assert(std::is_empty_v<nullopt_t>);
+    static_assert(!std::is_default_constructible_v<nullopt_t>);
 
-    static_assert(test(nullopt) == 3, "");
+    static_assert(std::is_same_v<const nullopt_t, decltype(nullopt)>);
+    static_assert(test());
+
+  return 0;
 }

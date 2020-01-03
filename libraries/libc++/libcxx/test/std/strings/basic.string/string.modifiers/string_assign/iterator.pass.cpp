@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -33,10 +32,10 @@ template <class S, class It>
 void
 test_exceptions(S s, It first, It last)
 {
-	S aCopy = s;
+    S aCopy = s;
     try {
-   	    s.assign(first, last);
-    	assert(false);
+        s.assign(first, last);
+        assert(false);
     }
     catch (...) {}
     LIBCPP_ASSERT(s.__invariants());
@@ -44,7 +43,7 @@ test_exceptions(S s, It first, It last)
 }
 #endif
 
-int main()
+int main(int, char**)
 {
     {
     typedef std::string S;
@@ -165,7 +164,7 @@ int main()
     }
 #endif
 #ifndef TEST_HAS_NO_EXCEPTIONS
-	{ // test iterator operations that throw
+    { // test iterator operations that throw
     typedef std::string S;
     typedef ThrowingIterator<char> TIter;
     typedef input_iterator<TIter> IIter;
@@ -177,32 +176,34 @@ int main()
     test_exceptions(S(), TIter(s, s+10, 4, TIter::TAIncrement), TIter());
     test_exceptions(S(), TIter(s, s+10, 5, TIter::TADereference), TIter());
     test_exceptions(S(), TIter(s, s+10, 6, TIter::TAComparison), TIter());
-	}
+    }
 #endif
 
-	{ // test assigning to self
+    { // test assigning to self
     typedef std::string S;
-	S s_short = "123/";
-	S s_long  = "Lorem ipsum dolor sit amet, consectetur/";
+    S s_short = "123/";
+    S s_long  = "Lorem ipsum dolor sit amet, consectetur/";
 
-	s_short.assign(s_short.begin(), s_short.end());
-	assert(s_short == "123/");
-	s_short.assign(s_short.begin() + 2, s_short.end());
-	assert(s_short == "3/");
+    s_short.assign(s_short.begin(), s_short.end());
+    assert(s_short == "123/");
+    s_short.assign(s_short.begin() + 2, s_short.end());
+    assert(s_short == "3/");
 
-	s_long.assign(s_long.begin(), s_long.end());
-	assert(s_long == "Lorem ipsum dolor sit amet, consectetur/");
+    s_long.assign(s_long.begin(), s_long.end());
+    assert(s_long == "Lorem ipsum dolor sit amet, consectetur/");
 
-	s_long.assign(s_long.begin() + 30, s_long.end());
-	assert(s_long == "nsectetur/");
-	}
+    s_long.assign(s_long.begin() + 30, s_long.end());
+    assert(s_long == "nsectetur/");
+    }
 
-	{ // test assigning a different type
+    { // test assigning a different type
     typedef std::string S;
-	const uint8_t p[] = "ABCD";
+    const uint8_t p[] = "ABCD";
 
-	S s;
-	s.assign(p, p + 4);
-	assert(s == "ABCD");
-	}
+    S s;
+    s.assign(p, p + 4);
+    assert(s == "ABCD");
+    }
+
+  return 0;
 }

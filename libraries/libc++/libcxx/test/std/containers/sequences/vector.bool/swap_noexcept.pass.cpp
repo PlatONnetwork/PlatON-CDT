@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -53,7 +52,7 @@ struct some_alloc2
     typedef std::true_type is_always_equal;
 };
 
-int main()
+int main(int, char**)
 {
 #if defined(_LIBCPP_VERSION)
     {
@@ -72,7 +71,7 @@ int main()
     {
 #if TEST_STD_VER >= 14
 #if defined(_LIBCPP_VERSION)
-    //  In c++14, if POCS is set, swapping the allocator is required not to throw
+    //  In C++14, if POCS is set, swapping the allocator is required not to throw
         typedef std::vector<bool, some_alloc<bool>> C;
         static_assert( noexcept(swap(std::declval<C&>(), std::declval<C&>())), "");
 #endif // _LIBCPP_VERSION
@@ -90,4 +89,6 @@ int main()
     }
 #endif // _LIBCPP_VERSION
 #endif
+
+  return 0;
 }

@@ -9,7 +9,7 @@ cd C:\projects\deps
 :: Setup Compiler
 ::###########################################################################
 if NOT EXIST llvm-installer.exe (
-  appveyor DownloadFile http://llvm.org/pre-releases/win-snapshots/LLVM-5.0.0-r303050-win32.exe -FileName llvm-installer.exe
+  appveyor DownloadFile https://prereleases.llvm.org/win-snapshots/LLVM-8.0.0-r345380-win32.exe -FileName llvm-installer.exe
 )
 if "%CLANG_VERSION%"=="ToT" (
     START /WAIT llvm-installer.exe /S /D=C:\"Program Files\LLVM"

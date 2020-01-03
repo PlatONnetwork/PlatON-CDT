@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -75,13 +74,13 @@ struct incomplete_type;
 
 typedef void (*FunctionPtr)();
 
-int main()
+int main(int, char**)
 {
-	test_is_function<void(void)>();
-	test_is_function<int(int)>();
-	test_is_function<int(int, double)>();
-	test_is_function<int(Abstract *)>();
-	test_is_function<void(...)>();
+    test_is_function<void(void)>();
+    test_is_function<int(int)>();
+    test_is_function<int(int, double)>();
+    test_is_function<int(Abstract *)>();
+    test_is_function<void(...)>();
 
   test_is_not_function<std::nullptr_t>();
   test_is_not_function<void>();
@@ -106,4 +105,6 @@ int main()
   test_is_function<void() noexcept>();
   test_is_function<void() const && noexcept>();
 #endif
+
+  return 0;
 }

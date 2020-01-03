@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -20,7 +19,7 @@
 
 #include "test_macros.h"
 
-int main()
+int main(int, char**)
 {
     typedef std::codecvt_utf8<wchar_t> Codecvt;
     typedef std::wstring_convert<Codecvt> Myconv;
@@ -33,7 +32,7 @@ int main()
         Myconv myconv;
         try
         {
-            myconv.to_bytes(L"\xDA83");
+            TEST_IGNORE_NODISCARD myconv.to_bytes(L"\xDA83");
             assert(false);
         }
         catch (const std::range_error&)
@@ -41,7 +40,7 @@ int main()
         }
         try
         {
-            myconv.from_bytes('\xA5');
+            TEST_IGNORE_NODISCARD myconv.from_bytes('\xA5');
             assert(false);
         }
         catch (const std::range_error&)
@@ -56,7 +55,7 @@ int main()
 #ifndef TEST_HAS_NO_EXCEPTIONS
         try
         {
-            myconv.from_bytes('\xA5');
+            TEST_IGNORE_NODISCARD myconv.from_bytes('\xA5');
             assert(false);
         }
         catch (const std::range_error&)
@@ -71,4 +70,6 @@ int main()
         std::wstring ws = myconv.from_bytes('\xA5');
         assert(ws == L"wide error");
     }
+
+  return 0;
 }

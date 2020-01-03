@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -57,7 +56,7 @@ public:
         : std::moneypunct_byname<wchar_t, true>(nm, refs) {}
 };
 
-int main()
+int main(int, char**)
 {
     {
         Fnf f("C", 1);
@@ -110,7 +109,11 @@ int main()
         assert(f.decimal_point() == L',');
     }
 // GLIBC 2.23 uses '.' as the decimal point while other C libraries use ','
-#ifndef TEST_HAS_GLIBC
+// GLIBC 2.27 corrects this
+#ifndef TEST_GLIBC_PREREQ
+#define TEST_GLIBC_PREREQ(x, y) 0
+#endif
+#if !defined(TEST_HAS_GLIBC) || TEST_GLIBC_PREREQ(2, 27)
     const char sep = ',';
     const wchar_t wsep = L',';
 #else
@@ -150,4 +153,6 @@ int main()
         Fwt f(LOCALE_zh_CN_UTF_8, 1);
         assert(f.decimal_point() == L'.');
     }
+
+  return 0;
 }

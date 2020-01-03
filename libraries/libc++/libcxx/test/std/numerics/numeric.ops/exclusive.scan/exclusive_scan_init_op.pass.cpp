@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -17,8 +16,11 @@
 //                    T init, BinaryOperation binary_op); // C++17
 
 #include <numeric>
-#include <vector>
+#include <algorithm>
 #include <cassert>
+#include <functional>
+#include <iterator>
+#include <vector>
 
 #include "test_iterators.h"
 
@@ -57,7 +59,7 @@ test()
         }
 }
 
-int main()
+int main(int, char**)
 {
 //  All the iterator categories
     test<input_iterator        <const int*> >();
@@ -70,12 +72,12 @@ int main()
 //  Make sure that the calculations are done using the init typedef
     {
     std::vector<unsigned char> v(10);
-    std::iota(v.begin(), v.end(), 1);
-    std::vector<int> res;
+    std::iota(v.begin(), v.end(), static_cast<unsigned char>(1));
+    std::vector<size_t> res;
     std::exclusive_scan(v.begin(), v.end(), std::back_inserter(res), 1, std::multiplies<>());
 
     assert(res.size() == 10);
-    int j = 1;
+    size_t j = 1;
     assert(res[0] == 1);
     for (size_t i = 1; i < v.size(); ++i)
     {
@@ -83,4 +85,6 @@ int main()
         assert(res[i] == j);
     }
     }
+
+  return 0;
 }

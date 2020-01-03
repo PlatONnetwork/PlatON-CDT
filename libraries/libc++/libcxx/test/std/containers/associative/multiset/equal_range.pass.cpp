@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -21,7 +20,7 @@
 #include "min_allocator.h"
 #include "private_constructor.hpp"
 
-int main()
+int main(int, char**)
 {
     {
     typedef int V;
@@ -77,7 +76,7 @@ int main()
             9,
             9
         };
-        M m(ar, ar+sizeof(ar)/sizeof(ar[0]));
+        const M m(ar, ar+sizeof(ar)/sizeof(ar[0]));
         R r = m.equal_range(4);
         assert(r.first  == next(m.begin(), 0));
         assert(r.second == next(m.begin(), 0));
@@ -156,7 +155,7 @@ int main()
             9,
             9
         };
-        M m(ar, ar+sizeof(ar)/sizeof(ar[0]));
+        const M m(ar, ar+sizeof(ar)/sizeof(ar[0]));
         R r = m.equal_range(4);
         assert(r.first  == next(m.begin(), 0));
         assert(r.second == next(m.begin(), 0));
@@ -261,4 +260,6 @@ int main()
     assert(r.second == next(m.begin(), 9));
     }
 #endif
+
+  return 0;
 }

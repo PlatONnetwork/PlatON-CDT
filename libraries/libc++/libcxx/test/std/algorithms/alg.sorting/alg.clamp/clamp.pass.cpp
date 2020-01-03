@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -18,13 +17,13 @@
 #include <cassert>
 
 struct Tag {
-	Tag() : val(0), tag("Default") {}
-	Tag(int a, const char *b) : val(a), tag(b) {}
-	~Tag() {}
+    Tag() : val(0), tag("Default") {}
+    Tag(int a, const char *b) : val(a), tag(b) {}
+    ~Tag() {}
 
-	int val;
-	const char *tag;
-	};
+    int val;
+    const char *tag;
+    };
 
 bool eq(const Tag& rhs, const Tag& lhs) { return rhs.val == lhs.val && rhs.tag == lhs.tag; }
 // bool operator==(const Tag& rhs, const Tag& lhs) { return rhs.val == lhs.val; }
@@ -37,7 +36,7 @@ test(const T& a, const T& lo, const T& hi, const T& x)
     assert(&std::clamp(a, lo, hi) == &x);
 }
 
-int main()
+int main(int, char**)
 {
     {
     int x = 0;
@@ -122,4 +121,6 @@ int main()
     static_assert(std::clamp(x, y, z) == x, "" );
     static_assert(std::clamp(y, x, z) == x, "" );
     }
+
+  return 0;
 }

@@ -1,9 +1,8 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -16,6 +15,7 @@
 
 #include "test_macros.h"
 #include "hexfloat.h"
+#include "truncate_fp.h"
 
 // convertible to int/float/double/etc
 template <class T, int N=0>
@@ -661,11 +661,12 @@ void test_isinf()
     static_assert((std::is_same<decltype(std::isinf((float)0)), bool>::value), "");
 
     typedef decltype(std::isinf((double)0)) DoubleRetType;
-#ifndef __linux__
+#if !defined(__linux__) || defined(__clang__)
     static_assert((std::is_same<DoubleRetType, bool>::value), "");
 #else
-    // GLIBC < 2.26 defines 'isinf(double)' with a return type of 'int' in
-    // all C++ dialects. The test should tolerate this.
+    // GLIBC < 2.23 defines 'isinf(double)' with a return type of 'int' in
+    // all C++ dialects. The test should tolerate this when libc++ can't work
+    // around it.
     // See: https://sourceware.org/bugzilla/show_bug.cgi?id=19439
     static_assert((std::is_same<DoubleRetType, bool>::value
                 || std::is_same<DoubleRetType, int>::value), "");
@@ -746,11 +747,12 @@ void test_isnan()
     static_assert((std::is_same<decltype(std::isnan((float)0)), bool>::value), "");
 
     typedef decltype(std::isnan((double)0)) DoubleRetType;
-#ifndef __linux__
+#if !defined(__linux__) || defined(__clang__)
     static_assert((std::is_same<DoubleRetType, bool>::value), "");
 #else
-    // GLIBC < 2.26 defines 'isnan(double)' with a return type of 'int' in
-    // all C++ dialects. The test should tolerate this.
+    // GLIBC < 2.23 defines 'isinf(double)' with a return type of 'int' in
+    // all C++ dialects. The test should tolerate this when libc++ can't work
+    // around it.
     // See: https://sourceware.org/bugzilla/show_bug.cgi?id=19439
     static_assert((std::is_same<DoubleRetType, bool>::value
                 || std::is_same<DoubleRetType, int>::value), "");
@@ -858,7 +860,7 @@ void test_cbrt()
     static_assert((std::is_same<decltype(std::cbrtf(0)), float>::value), "");
     static_assert((std::is_same<decltype(std::cbrtl(0)), long double>::value), "");
     static_assert((std::is_same<decltype(cbrt(Ambiguous())), Ambiguous>::value), "");
-    assert(std::cbrt(1) == 1);
+    assert(truncate_fp(std::cbrt(1)) == 1);
 }
 
 void test_copysign()
@@ -1512,7 +1514,7 @@ void test_trunc()
     assert(std::trunc(1) == 1);
 }
 
-int main()
+int main(int, char**)
 {
     test_abs();
     test_acos();
@@ -1584,4 +1586,6 @@ int main()
     test_scalbn();
     test_tgamma();
     test_trunc();
+
+  return 0;
 }

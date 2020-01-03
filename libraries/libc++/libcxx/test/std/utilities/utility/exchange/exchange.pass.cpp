@@ -1,22 +1,45 @@
 //===----------------------------------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is dual licensed under the MIT and the University of Illinois Open
-// Source Licenses. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
 // UNSUPPORTED: c++98, c++03, c++11
-// utilities
+// <utility>
 
 // exchange
+
+// template<class T, class U=T>
+//    constexpr T            // constexpr after C++17
+//    exchange(T& obj, U&& new_value);
 
 #include <utility>
 #include <cassert>
 #include <string>
 
-int main()
+#include "test_macros.h"
+
+#if TEST_STD_VER > 17
+TEST_CONSTEXPR bool test_constexpr() {
+    int v = 12;
+
+    if (12 != std::exchange(v,23) || v != 23)
+        return false;
+
+    if (23 != std::exchange(v,static_cast<short>(67)) || v != 67)
+        return false;
+
+    if (67 != std::exchange<int, short>(v, {}) || v != 0)
+        return false;
+    return true;
+    }
+#endif
+
+
+
+int main(int, char**)
 {
     {
     int v = 12;
@@ -53,4 +76,10 @@ int main()
     assert ( std::exchange ( s3, "" ) == s2 );
     assert ( s3.size () == 0 );
     }
+
+#if TEST_STD_VER > 17
+    static_assert(test_constexpr());
+#endif
+
+  return 0;
 }
