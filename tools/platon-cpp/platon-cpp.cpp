@@ -64,10 +64,10 @@ public:
     if(!succ)return false;
    
     if(Mod == nullptr){
-      Mod = std::move(Act.takeModule());
+      Mod = Act.takeModule();
       return true;
     } else {
-      bool Err = Linker::linkModules(*Mod, std::move(Act.takeModule()));
+      bool Err = Linker::linkModules(*Mod, Act.takeModule());
       return !Err;
     }
   }

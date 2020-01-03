@@ -105,7 +105,7 @@ int init(){
   return 0;
 }
 
-static bool addPass(PassManagerBase &PM, const char *CompileBin,
+static bool addPass(PassManagerBase &PM, const char *_CompileBin,
                     StringRef PassName, TargetPassConfig &TPC) {
   if (PassName == "none")
     return false;
@@ -113,7 +113,7 @@ static bool addPass(PassManagerBase &PM, const char *CompileBin,
   const PassRegistry *PR = PassRegistry::getPassRegistry();
   const PassInfo *PI = PR->getPassInfo(PassName);
   if (!PI) {
-    WithColor::error(errs(), CompileBin)
+    WithColor::error(errs(), _CompileBin)
         << "run-pass " << PassName << " is not registered.\n";
     return true;
   }
@@ -122,7 +122,7 @@ static bool addPass(PassManagerBase &PM, const char *CompileBin,
   if (PI->getNormalCtor())
     P = PI->getNormalCtor()();
   else {
-    WithColor::error(errs(), CompileBin)
+    WithColor::error(errs(), _CompileBin)
         << "cannot create pass: " << PI->getPassName() << "\n";
     return true;
   }
@@ -220,7 +220,7 @@ int compileModule(Module* M) {
       OS = BOS.get();
     }
 
-    const char *CompileBin = CompileBin;
+    const char *_CompileBin = CompileBin;
     LLVMTargetMachine &LLVMTM = static_cast<LLVMTargetMachine&>(*Target);
     MachineModuleInfo *MMI = new MachineModuleInfo(&LLVMTM);
 
@@ -228,7 +228,7 @@ int compileModule(Module* M) {
     // selection.
     if (!RunPassNames->empty()) {
       if (!MIR) {
-        WithColor::warning(errs(), CompileBin)
+        WithColor::warning(errs(), _CompileBin)
             << "run-pass is for .mir file only.\n";
         return 1;
       }
@@ -238,7 +238,7 @@ int compileModule(Module* M) {
 
 
       if (TPC.hasLimitedCodeGenPipeline()) {
-        WithColor::warning(errs(), CompileBin)
+        WithColor::warning(errs(), _CompileBin)
             << "run-pass cannot be used with "
             << TPC.getLimitedCodeGenPipelineReason(" and ") << ".\n";
         return 1;
@@ -249,7 +249,7 @@ int compileModule(Module* M) {
       PM.add(MMI);
       TPC.printAndVerify("");
       for (const std::string &RunPassName : *RunPassNames) {
-        if (addPass(PM, CompileBin, RunPassName, TPC))
+        if (addPass(PM, _CompileBin, RunPassName, TPC))
           return 1;
       }
       TPC.setInitialized();
@@ -258,7 +258,7 @@ int compileModule(Module* M) {
     } else if (Target->addPassesToEmitFile(PM, *OS,
                                            DwoOut ? &DwoOut->os() : nullptr,
                                            TargetMachine::CGFT_ObjectFile, false, MMI)) {
-      WithColor::warning(errs(), CompileBin)
+      WithColor::warning(errs(), _CompileBin)
           << "target does not support generation of this"
           << " file type!\n";
       return 1;
