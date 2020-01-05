@@ -21,10 +21,10 @@ using namespace tooling;
 
 
 bool ParseArgs(int, char *[], PCCOption &);
+int GenerateABI(PCCOption &, llvm::Module*);
 int GenerateWASM(PCCOption &, llvm::Module*);
 
 //void PCCPass(llvm::Module &);
-//bool GenFiles(llvm::Module*, PCCOption &Option);
 
 class BuilderAction : public ToolAction {
 public:
@@ -111,6 +111,7 @@ int main(int argc, char **argv) {
 
 	//link lib
     
+  GenerateABI(Option, M.get());
   GenerateWASM(Option, M.get());
   return 0;
 }

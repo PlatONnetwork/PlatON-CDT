@@ -34,6 +34,9 @@ add_custom_command(
   )
 
 
+add_subdirectory(MakeAbi)
+target_link_libraries(platon-cpp MakeAbi)
+
 
 target_link_libraries(platon-cpp
   clangCodeGen 
