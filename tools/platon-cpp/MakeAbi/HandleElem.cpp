@@ -23,12 +23,8 @@ bool isString(DIType* DT){
     if (DerT->getTag() == llvm::dwarf::DW_TAG_typedef) {
       if (DerT->getName() == "string") {
         if (DICompositeType *CT = dyn_cast<DICompositeType>(DerT->getBaseType().resolve())) {
-          if (DINamespace *NS = dyn_cast<DINamespace>(CT->getScope().resolve())) {
-            if (NS->getName() == "__cxx11") {
-              if (CT->getIdentifier() == "_ZTSNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE") {
-                return true;
-              }
-            }
+          if (CT->getIdentifier() == "_ZTSNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE"){
+            return true;
           }
         }
       }
@@ -40,15 +36,11 @@ bool isString(DIType* DT){
 bool isVector(DIType* DT){
   if(DICompositeType* CT = dyn_cast<DICompositeType>(DT)) {
     if (CT->getTemplateParams().get() != nullptr) {
-      if (DINamespace *NS = dyn_cast<DINamespace>(CT->getScope().resolve())) {
-        if (NS->getName() == "std") {
-          if (CT->getElements().size() > 1) {
-            const MDOperand &Op = CT->getElements()->getOperand(1);
-            if (const DISubprogram *SP = dyn_cast<DISubprogram>(Op.get())) {
-              if (SP->getName() == "vector") {
-                return true;
-              }
-            }
+      if (CT->getElements().size() > 1) {
+        const MDOperand &Op = CT->getElements()->getOperand(1);
+        if (const DISubprogram *SP = dyn_cast<DISubprogram>(Op.get())) {
+          if (SP->getName() == "vector") {
+            return true;
           }
         }
       }
@@ -88,10 +80,13 @@ json::Value handleElem(StringRef Name, DIType* DT){
         {"components", handleCompositeType(CT)}};
 
   } else if(isa<DIDerivedType>(DT)){
+    DT->print(llvm::outs());
     report_fatal_error("can not pass pointer type");
   } else if(isa<DISubroutineType>(DT)){
+    DT->print(llvm::outs());
     report_fatal_error("can not pass function");
   } else {
+    DT->print(llvm::outs());
     llvm_unreachable("have not DIType SubClass");
   }
 }
