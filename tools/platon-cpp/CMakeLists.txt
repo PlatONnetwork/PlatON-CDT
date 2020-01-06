@@ -21,8 +21,19 @@ add_executable(platon-cpp
   Backend.cpp
   )
 
+
+
 file(COPY ${LLVM_BINDIR}/lld DESTINATION ${EXECUTABLE_OUTPUT_PATH}) 
 file(RENAME ${EXECUTABLE_OUTPUT_PATH}/lld ${EXECUTABLE_OUTPUT_PATH}/platon-lld)
+
+
+install(TARGETS platon-cpp RUNTIME DESTINATION bin)
+install(FILES ${EXECUTABLE_OUTPUT_PATH}/platon-lld
+    PERMISSIONS 
+      OWNER_EXECUTE OWNER_WRITE OWNER_READ
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+    DESTINATION bin)
 
 add_subdirectory(MakeAbi)
 target_link_libraries(platon-cpp MakeAbi)

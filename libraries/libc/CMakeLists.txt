@@ -101,5 +101,5 @@ set_target_properties(c
 )
 
 file(COPY ${INC_SRC_FILES} DESTINATION ${INC_OUTPUT}/libc)
-file(COPY "musl/include/sys/stat.h" "musl/include/sys/types.h" DESTINATION ${INC_OUTPUT}/libc)
+file(COPY "musl/include/sys/stat.h" "musl/include/sys/types.h" DESTINATION ${INC_OUTPUT}/libc/sys)
 file(COPY "musl/arch/platon/bits" DESTINATION ${INC_OUTPUT}/libc)
