@@ -30,8 +30,9 @@ SET(CMAKE_RANLIB ${LLVM_BINDIR}/llvm-ranlib)
 
 project(PlatON-CDT)
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/)
 
-add_subdirectory(tools)
+add_subdirectory(tools/platon-cpp)
 add_subdirectory(libraries)
 
 
