@@ -25,8 +25,9 @@ target_include_directories(c++
 
 target_link_libraries(c++ c)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libcxx/include/
-		DESTINATION include/libcxx)
+set_target_properties(c++
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUTPUT}
+)
 
-INSTALL(TARGETS c++
-		ARCHIVE DESTINATION lib)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/libcxx/include/ DESTINATION ${INC_OUTPUT}/libcxx)

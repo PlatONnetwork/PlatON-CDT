@@ -17,5 +17,10 @@ target_include_directories(platonlib
 
 target_link_libraries( platonlib c c++ )
 
-INSTALL(TARGETS platonlib
-		ARCHIVE DESTINATION lib)
+
+set_target_properties(platonlib
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUTPUT}
+)
+
+

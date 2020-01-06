@@ -15,24 +15,17 @@ include_directories(${LLVM_INCLUDEDIR})
 
 link_directories(${LLVM_LIBDIR})
 
-
-
-
-
-
-
 add_executable(platon-cpp
   parseArgs.cpp
   platon-cpp.cpp
   Backend.cpp
   )
 
-add_custom_command(
-  TARGET platon-cpp
-  PRE_BUILD
-  COMMAND cp ${LLVM_BINDIR}/lld ./platon-lld
-  )
+file(COPY ${LLVM_BINDIR}/lld DESTINATION ${EXECUTABLE_OUTPUT_PATH}) 
+file(RENAME ${EXECUTABLE_OUTPUT_PATH}/lld ${EXECUTABLE_OUTPUT_PATH}/platon-lld)
 
+add_subdirectory(MakeAbi)
+target_link_libraries(platon-cpp MakeAbi)
 
 
 target_link_libraries(platon-cpp
