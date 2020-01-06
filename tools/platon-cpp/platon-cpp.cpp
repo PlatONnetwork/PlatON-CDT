@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
 
 	//link lib
     
-  GenerateABI(Option, M.get());
+  //GenerateABI(Option, M.get());
   GenerateWASM(Option, M.get());
   return 0;
 }
