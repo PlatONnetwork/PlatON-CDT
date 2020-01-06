@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.4.3)
 project(platonlib)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding  -fno-threadsafe-statics  -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding  -fno-threadsafe-statics -O3 -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding  -fno-threadsafe-statics -fno-exceptions -O3 -fno-rtti")
 
-SET(SRC_FILENAMES RLP.cpp malloc.cpp)
+SET(SRC_FILENAMES RLP.cpp malloc.cpp assert.cpp)
 
 add_library(platonlib ${SRC_FILENAMES})
 

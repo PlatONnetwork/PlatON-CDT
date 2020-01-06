@@ -55,19 +55,16 @@ class hello {
         hello(){m_info["jatel"] = "jatel_info";}
         void init(){}
 
-        int set_message(const std::string &name, const std::string &one_message){
+        void set_message(const std::string &name, const std::string &one_message){
             m_info[name] = one_message;
-            return 0;
         }
 
-        int change_message(const std::string &name, const std::string  &one_message){
+        void change_message(const std::string &name, const std::string  &one_message){
             m_info[name] = one_message;
-            return 0;
         }
 
-        int delete_message(const std::string &name){
+        void delete_message(const std::string &name){
             m_info.erase(name);
-            return 0;
         }
 
         std::string get_message(const std::string &name){

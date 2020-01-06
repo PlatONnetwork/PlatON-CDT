@@ -30,7 +30,7 @@ namespace platon
     template <class _T> struct intTraits { static const unsigned maxSize = sizeof(_T); };
 //    template <> struct intTraits<u160> { static const unsigned maxSize = 20; };
 //    template <> struct intTraits<u256> { static const unsigned maxSize = 32; };
-    template <> struct intTraits<bigint> { static const unsigned maxSize = ~(unsigned)0; };
+//    template <> struct intTraits<bigint> { static const unsigned maxSize = ~(unsigned)0; };
 
     static const byte c_rlpMaxLengthBytes = 8;
     static const byte c_rlpDataImmLenStart = 0x80;
@@ -116,10 +116,10 @@ namespace platon
         template <unsigned _N> bool operator!=(FixedHash<_N> const& _s) const { return isData() && toHash<_N>() != _s; }
         bool operator==(unsigned const& _i) const { return isInt() && toInt<unsigned>() == _i; }
         bool operator!=(unsigned const& _i) const { return isInt() && toInt<unsigned>() != _i; }
-        bool operator==(u256 const& _i) const { return isInt() && toInt<u256>() == _i; }
-        bool operator!=(u256 const& _i) const { return isInt() && toInt<u256>() != _i; }
-        bool operator==(bigint const& _i) const { return isInt() && toInt<bigint>() == _i; }
-        bool operator!=(bigint const& _i) const { return isInt() && toInt<bigint>() != _i; }
+        // bool operator==(u256 const& _i) const { return isInt() && toInt<u256>() == _i; }
+        // bool operator!=(u256 const& _i) const { return isInt() && toInt<u256>() != _i; }
+        // bool operator==(bigint const& _i) const { return isInt() && toInt<bigint>() == _i; }
+        // bool operator!=(bigint const& _i) const { return isInt() && toInt<bigint>() != _i; }
 
         /// Subscript operator.
         /// @returns the list item @a _i if isList() and @a _i < listItems(), or RLP() otherwise.
@@ -166,9 +166,9 @@ namespace platon
         explicit operator uint16_t() const { return toInt<uint16_t>(); }
         explicit operator uint32_t() const { return toInt<uint32_t>(); }
         explicit operator uint64_t() const { return toInt<uint64_t>(); }
-        explicit operator u160() const { return toInt<u160>(); }
-        explicit operator u256() const { return toInt<u256>(); }
-        explicit operator bigint() const { return toInt<bigint>(); }
+        // explicit operator u160() const { return toInt<u160>(); }
+        // explicit operator u256() const { return toInt<u256>(); }
+        // explicit operator bigint() const { return toInt<bigint>(); }
         template <unsigned N> explicit operator FixedHash<N>() const { return toHash<FixedHash<N>>(); }
         template <class T, class U> explicit operator std::pair<T, U>() const { return toPair<T, U>(); }
         template <class T> explicit operator std::vector<T>() const { return toVector<T>(); }
@@ -351,9 +351,9 @@ namespace platon
     template <> struct Converter<uint16_t> { static uint16_t convert(RLP const& _r, int _flags) { return _r.toInt<uint16_t>(_flags); } };
     template <> struct Converter<uint32_t> { static uint32_t convert(RLP const& _r, int _flags) { return _r.toInt<uint32_t>(_flags); } };
     template <> struct Converter<uint64_t> { static uint64_t convert(RLP const& _r, int _flags) { return _r.toInt<uint64_t>(_flags); } };
-    template <> struct Converter<u160> { static u160 convert(RLP const& _r, int _flags) { return _r.toInt<u160>(_flags); } };
-    template <> struct Converter<u256> { static u256 convert(RLP const& _r, int _flags) { return _r.toInt<u256>(_flags); } };
-    template <> struct Converter<bigint> { static bigint convert(RLP const& _r, int _flags) { return _r.toInt<bigint>(_flags); } };
+    // template <> struct Converter<u160> { static u160 convert(RLP const& _r, int _flags) { return _r.toInt<u160>(_flags); } };
+    // template <> struct Converter<u256> { static u256 convert(RLP const& _r, int _flags) { return _r.toInt<u256>(_flags); } };
+    // template <> struct Converter<bigint> { static bigint convert(RLP const& _r, int _flags) { return _r.toInt<bigint>(_flags); } };
     template <unsigned N> struct Converter<FixedHash<N>> { static FixedHash<N> convert(RLP const& _r, int _flags) { return _r.toHash<FixedHash<N>>(_flags); } };
 template <class T, class U> struct Converter<std::pair<T, U>> { static std::pair<T, U> convert(RLP const& _r, int _flags) { return _r.toPair<T, U>(_flags); } };
 template <class T> struct Converter<std::vector<T>> { static std::vector<T> convert(RLP const& _r, int _flags) { return _r.toVector<T>(_flags); } };
@@ -378,10 +378,10 @@ public:
     ~RLPStream() {}
 
     /// Append given datum to the byte stream.
-    RLPStream& append(unsigned _s) { return append(bigint(_s)); }
-    RLPStream& append(u160 _s) { return append(bigint(_s)); }
-    RLPStream& append(u256 _s) { return append(bigint(_s)); }
-    RLPStream& append(bigint _i);
+    // RLPStream& append(unsigned _s) { return append(uint64_t(_s)); }
+    // RLPStream& append(u160 _s) { return append(bigint(_s)); }
+    // RLPStream& append(u256 _s) { return append(bigint(_s)); }
+    RLPStream& append(uint64_t _i);
     RLPStream& append(bytesConstRef _s, bool _compact = false);
     RLPStream& append(bytes const& _s) { return append(bytesConstRef(&_s)); }
     RLPStream& append(std::string const& _s) { return append(bytesConstRef(_s)); }

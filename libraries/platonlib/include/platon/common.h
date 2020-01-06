@@ -7,7 +7,6 @@
 #include <iterator>
 #include <vector>
 #include <string>
-#include <boost/multiprecision/cpp_int.hpp>
 #include "vector_ref.h"
 
 extern "C" {
@@ -25,29 +24,29 @@ namespace platon {
     /**
      * @brief An bigint represents a signed multi-precision integer.
      */
-    using bigint = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
+ //   using bigint = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
     /**
      * @brief An u64 represents a 64-bit unsigned integer.
      */
-    using u64 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<64, 64, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
+ //   using u64 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<64, 64, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
     /**
      * @brief An u128 represents a 128-bit unsigned integer.
      */
-    using u128 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<128, 128, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
+ //   using u128 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<128, 128, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
     /**
      * @brief An u256 represents a 256-bit unsigned integer.
      */
-    using u256 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<256, 256, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
+ //   using u256 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<256, 256, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
     //using s256 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<256, 256, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, void>>;
     /**
      * @brief An u160 represents a 160-bit unsigned integer.
      */
-    using u160 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<160, 160, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
+ //   using u160 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<160, 160, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
     //using s160 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<160, 160, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, void>>;
     /**
      * @brief An u512 represents a 512-bit unsigned integer.
      */
-    using u512 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<512, 512, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
+ //   using u512 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<512, 512, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
     //using s512 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<512, 512, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, void>>;
 
     typedef uint8_t byte;
@@ -156,7 +155,7 @@ namespace platon {
     template <class T>
     inline unsigned bytesRequired(T _i)
     {
-        static_assert(std::is_same<bigint, T>::value || !std::numeric_limits<T>::is_signed, "only unsigned types or bigint supported"); //bigint does not carry sign bit on shift
+        static_assert(!std::numeric_limits<T>::is_signed, "only unsigned types or bigint supported"); //bigint does not carry sign bit on shift
         unsigned i = 0;
         for (; _i != 0; ++i, _i >>= 8) {}
         return i;
@@ -170,7 +169,7 @@ namespace platon {
     template <class T, class Out>
     inline void toBigEndian(T _val, Out& o_out)
     {
-        static_assert(std::is_same<bigint, T>::value || !std::numeric_limits<T>::is_signed, "only unsigned types or bigint supported"); //bigint does not carry sign bit on shift
+        static_assert(!std::numeric_limits<T>::is_signed, "only unsigned types or bigint supported"); //bigint does not carry sign bit on shift
         for (auto i = o_out.size(); i != 0; _val >>= 8, i--)
         {
             T v = _val & (T)0xff;
