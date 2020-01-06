@@ -98,7 +98,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
   clangArgs.push_back("-O0");
 
   if(!NoStdlib){
-    string includedir = bindir + "/../../platon.cdt/include/";
+    string includedir = bindir + "/../platon.cdt/include/";
     clangArgs.push_back("-I");
     clangArgs.push_back(includedir+"libcxx");
     clangArgs.push_back("-I");
@@ -109,7 +109,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
 }
 
 void PCCOption::AdjustLLDArgs(bool NoStdlib){
-  string libdir = bindir + "/../../platon.cdt/lib/";
+  string libdir = bindir + "/../platon.cdt/lib/";
   string ExternSymbolFile = libdir + "extern_symbol";
   
   if(!NoStdlib) {

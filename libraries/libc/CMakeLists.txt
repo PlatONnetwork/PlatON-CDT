@@ -95,11 +95,11 @@ target_include_directories(c
 						   ${CMAKE_CURRENT_SOURCE_DIR}/musl/src/internal
 						   ${CMAKE_CURRENT_SOURCE_DIR}/musl/arch/platon)
 
-INSTALL(FILES ${INC_SRC_FILES}
-		DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libc/)
-INSTALL(FILES "musl/include/sys/stat.h" "musl/include/sys/types.h"
-		DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libc/sys/)
-INSTALL(DIRECTORY "musl/arch/platon/bits" DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libc/)
+set_target_properties(c
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUTPUT}
+)
 
-INSTALL(TARGETS c
-		ARCHIVE DESTINATION lib)
+file(COPY ${INC_SRC_FILES} DESTINATION ${INC_OUTPUT}/libc)
+file(COPY "musl/include/sys/stat.h" "musl/include/sys/types.h" DESTINATION ${INC_OUTPUT}/libc)
+file(COPY "musl/arch/platon/bits" DESTINATION ${INC_OUTPUT}/libc)

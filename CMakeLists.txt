@@ -1,13 +1,5 @@
 cmake_minimum_required(VERSION 3.4.3)
 
-
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  message(WARNING "CMAKE_INSTALL_PREFIX is set to default path of ${CMAKE_INSTALL_PREFIX}, resetting to ${CMAKE_BINARY_DIR}/platon.cdt")
-  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/platon.cdt")
- elseif ("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
-   message(WARNING "CMAKE_INSTALL_PREFIX is explicitly set to /usr/local. This is not recommanded.")
-endif()
-
 if(NOT DEFINED LLVM_CONFIG)
   find_program(LLVM_CONFIG NAMES llvm-config-8.0)
 
@@ -35,7 +27,10 @@ SET(CMAKE_CXX_COMPILER ${LLVM_BINDIR}/clang++)
 SET(CMAKE_AR ${LLVM_BINDIR}/llvm-ar  CACHE FILEPATH "" FORCE)
 SET(CMAKE_RANLIB ${LLVM_BINDIR}/llvm-ranlib)
 
+
 project(PlatON-CDT)
+
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/)
 
 add_subdirectory(tools/platon-cpp)
 add_subdirectory(libraries)
