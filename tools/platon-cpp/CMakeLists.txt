@@ -23,9 +23,6 @@ add_executable(platon-cpp
   RemoveAttrs.cpp
   )
 
-file(COPY ${LLVM_BINDIR}/lld DESTINATION ${EXECUTABLE_OUTPUT_PATH}) 
-file(RENAME ${EXECUTABLE_OUTPUT_PATH}/lld ${EXECUTABLE_OUTPUT_PATH}/platon-lld)
-
 add_subdirectory(MakeAbi)
 target_link_libraries(platon-cpp MakeAbi)
 
@@ -50,6 +47,9 @@ target_link_libraries(platon-cpp
   )
 
 target_link_libraries(platon-cpp
+  lldDriver
+  lldWasm
+  lldCommon
   LLVMLTO 
   LLVMPasses 
   LLVMObjCARCOpts 
@@ -61,7 +61,6 @@ target_link_libraries(platon-cpp
   LLVMTableGen 
   LLVMDlltoolDriver 
   LLVMOrcJIT 
-
   LLVMOption
 
   LLVMWebAssemblyDisassembler
@@ -71,8 +70,104 @@ target_link_libraries(platon-cpp
   LLVMWebAssemblyAsmParser
   LLVMWebAssemblyInfo
 
-  LLVMAggressiveInstCombine
+  LLVMXCoreDisassembler
+  LLVMXCoreCodeGen
+  LLVMXCoreDesc
+  LLVMXCoreInfo
+  LLVMXCoreAsmPrinter
+  LLVMSystemZDisassembler
+  LLVMSystemZCodeGen
+  LLVMSystemZAsmParser
+  LLVMSystemZDesc
+  LLVMSystemZInfo
+  LLVMSystemZAsmPrinter
+  LLVMSparcDisassembler
+  LLVMSparcCodeGen
+  LLVMSparcAsmParser
+  LLVMSparcDesc
+  LLVMSparcInfo
+  LLVMSparcAsmPrinter
+  LLVMPowerPCDisassembler
+  LLVMPowerPCCodeGen
+  LLVMPowerPCAsmParser
+  LLVMPowerPCDesc
+  LLVMPowerPCInfo
+  LLVMPowerPCAsmPrinter
+  LLVMNVPTXCodeGen
+  LLVMNVPTXDesc
+  LLVMNVPTXInfo
+  LLVMNVPTXAsmPrinter
+  LLVMMSP430Disassembler
+  LLVMMSP430CodeGen
+  LLVMMSP430AsmParser
+  LLVMMSP430Desc
+  LLVMMSP430Info
+  LLVMMSP430AsmPrinter
+  LLVMMipsDisassembler
+  LLVMMipsCodeGen
+  LLVMMipsAsmParser
+  LLVMMipsDesc
+  LLVMMipsInfo
+  LLVMMipsAsmPrinter
+  LLVMLanaiDisassembler
+  LLVMLanaiCodeGen
+  LLVMLanaiAsmParser
+  LLVMLanaiDesc
+  LLVMLanaiAsmPrinter
+  LLVMLanaiInfo
+  LLVMHexagonDisassembler
+  LLVMHexagonCodeGen
+  LLVMHexagonAsmParser
+  LLVMHexagonDesc
+  LLVMHexagonInfo
+  LLVMBPFDisassembler
+  LLVMBPFCodeGen
+  LLVMBPFAsmParser
+  LLVMBPFDesc
+  LLVMBPFInfo
+  LLVMBPFAsmPrinter
+  LLVMARMDisassembler
+  LLVMARMCodeGen
+  LLVMARMAsmParser
+  LLVMARMDesc
+  LLVMARMInfo
+  LLVMARMAsmPrinter
+  LLVMARMUtils
+  LLVMAMDGPUDisassembler
+  LLVMAMDGPUCodeGen
+  LLVMAMDGPUAsmParser
+  LLVMAMDGPUDesc
+  LLVMAMDGPUInfo
+  LLVMAMDGPUAsmPrinter
+  LLVMAMDGPUUtils
+  LLVMAArch64Disassembler
+  LLVMAArch64CodeGen
+  LLVMAArch64AsmParser
+  LLVMAArch64Desc
+  LLVMAArch64Info
+  LLVMAArch64AsmPrinter
+  LLVMAArch64Utils
+  LLVMObjectYAML
+  LLVMLibDriver
+  LLVMOption
+  LLVMOptRemarks
+  LLVMWindowsManifest
+  LLVMTextAPI
+  LLVMFuzzMutate
+  LLVMX86Disassembler
+  LLVMX86AsmParser
+  LLVMX86CodeGen
+  LLVMGlobalISel
+  LLVMSelectionDAG
+  LLVMAsmPrinter
+  LLVMX86Desc
+  LLVMMCDisassembler
+  LLVMX86Info
+  LLVMX86AsmPrinter
+  LLVMX86Utils
 
+
+  LLVMAggressiveInstCombine
   LLVMGlobalISel 
   LLVMSelectionDAG 
   LLVMAsmPrinter 
@@ -107,8 +202,6 @@ target_link_libraries(platon-cpp
   LLVMBinaryFormat 
   LLVMSupport 
   LLVMDemangle
-  
-
 )
 
 target_link_libraries(platon-cpp
