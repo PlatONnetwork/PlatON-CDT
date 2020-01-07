@@ -23,8 +23,7 @@ using namespace tooling;
 bool ParseArgs(int, char *[], PCCOption &);
 int GenerateABI(PCCOption &, llvm::Module*);
 int GenerateWASM(PCCOption &, llvm::Module*);
-
-//void PCCPass(llvm::Module &);
+void PCCPass(llvm::Module &);
 
 class BuilderAction : public ToolAction {
 public:
@@ -103,15 +102,14 @@ int main(int argc, char **argv) {
   if(Tool.run(&Builder))return 0;
 
   std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
+
+  PCCPass(*M);
+
   if(Option.OutputIR){
     OutputIRFile(M.get(), Option.Output);
     return 0;
   }
-//  PCCPass(*M);
-
-	//link lib
     
-  //GenerateABI(Option, M.get());
   GenerateWASM(Option, M.get());
   return 0;
 }
