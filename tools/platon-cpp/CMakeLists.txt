@@ -19,6 +19,8 @@ add_executable(platon-cpp
   parseArgs.cpp
   platon-cpp.cpp
   Backend.cpp
+  PCCPass.cpp
+  RemoveAttrs.cpp
   )
 
 file(COPY ${LLVM_BINDIR}/lld DESTINATION ${EXECUTABLE_OUTPUT_PATH}) 
