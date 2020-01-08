@@ -23,6 +23,8 @@ add_executable(platon-cpp
   RemoveAttrs.cpp
   )
 
+install(TARGETS platon-cpp RUNTIME DESTINATION bin)
+
 add_subdirectory(MakeAbi)
 target_link_libraries(platon-cpp MakeAbi)
 
