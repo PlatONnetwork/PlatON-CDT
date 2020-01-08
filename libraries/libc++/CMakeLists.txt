@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.4.3)
 project(libc++)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding  -fno-threadsafe-statics  -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything --target=wasm32 -nostdlib -nostdinc -fno-builtin -ffreestanding  -fno-threadsafe-statics  -O3  -fno-rtti -fno-exceptions -std=c++17")
 
 SET(SRC_FILENAMES algorithm.cpp any.cpp bind.cpp condition_variable.cpp functional.cpp
                   future.cpp ios.cpp iostream.cpp locale.cpp memory.cpp mutex.cpp new.cpp optional.cpp

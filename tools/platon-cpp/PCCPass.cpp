@@ -59,9 +59,9 @@ static void AddOptimizationPasses(legacy::PassManagerBase &MPM,
 
   Builder.DisableUnrollLoops = true;
 
-  Builder.LoopVectorize = true;
+  Builder.LoopVectorize = false;
 
-  Builder.SLPVectorize = true;
+  Builder.SLPVectorize = false;
 
 
   Builder.populateFunctionPassManager(FPM);
@@ -102,7 +102,7 @@ void PCCPass(llvm::Module &M){
 
   FPasses.add(createTargetTransformInfoWrapperPass(TargetIRAnalysis()));
   
-  AddOptimizationPasses(Passes, FPasses, 2, 0);
+  AddOptimizationPasses(Passes, FPasses, 2, 2);
 
   FPasses.doInitialization();
   for (Function &F : M)

@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.4.3)
 project(libc)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding -nostdinc  -nostdlibinc -fno-threadsafe-statics  -O3")
-
 SET(INC_SRC_FILENAMES alloca.h assert.h byteswap.h crypt.h ctype.h endian.h errno.h features.h float.h inttypes.h iso646.h 
 					  langinfo.h libintl.h limits.h locale.h malloc.h math.h memory.h monetary.h nl_types.h search.h stdalign.h 
 					  stdarg.h stdbool.h stdc-predef.h stddef.h stdint.h stdio_ext.h stdio.h stdlib.h stdnoreturn.h string.h 
