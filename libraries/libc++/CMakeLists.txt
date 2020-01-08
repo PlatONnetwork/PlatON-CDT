@@ -20,7 +20,7 @@ add_library(c++
 target_include_directories(c++
                            PUBLIC 
                            ${CMAKE_CURRENT_SOURCE_DIR}/libcxx/include
-						   ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/arch/platon
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/arch/platon
                            ${CMAKE_CURRENT_SOURCE_DIR}/../libc/musl/include)
 
 target_link_libraries(c++ c)
