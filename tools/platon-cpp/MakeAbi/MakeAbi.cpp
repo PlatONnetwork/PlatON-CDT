@@ -20,7 +20,11 @@ using namespace std;
 json::Value handleType(DIType* DT);
 json::Value handleElem(StringRef Name, DIType* DT);
 
-json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, StringRef SPType){
+typedef bool isEvent;
+typedef bool isConst;
+typedef pair<isEvent, isConst> Attr;
+
+json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, Attr SPKind){
   
   DISubroutineType* ST = cast<DISubroutineType>(SP->getType());
   DITypeRefArray TRA = ST->getTypeArray();
@@ -36,10 +40,12 @@ json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, S
     Params.getAsArray()->push_back(handleElem(LV->getName(), LV->getType().resolve()));
   }
 
+
   return Object{{"name", SP->getName()},
-                {"type", SPType},
                 {"input", Params},
-                {"output", Ret}
+                {"output", Ret},
+                {"type", SPKind.first?"event":"function"},
+                {"constant", SPKind.second}
                 };
 }
 
@@ -67,8 +73,7 @@ DISubprogram* getFuncInfo(llvm::Value* cs){
   return nullptr;
 }
 
-
-typedef map<llvm::DISubprogram*, StringRef> SubprogramMap;
+typedef map<llvm::DISubprogram*, Attr> SubprogramMap;
 typedef multimap<llvm::DISubprogram*, llvm::DILocalVariable*> ParamsMap;
 
 void exportParams(DISubprogram* SP, ParamsMap &PMap, vector<DILocalVariable*> &Params){
@@ -103,15 +108,15 @@ void collectAnnote(GlobalVariable* annote, SubprogramMap &SPMap){
   if(annote==nullptr)return;
   if(ConstantArray* annotes = dyn_cast<ConstantArray>(annote->getInitializer())) {
     for (auto cs:annotes->operand_values()) {
-      StringRef kind = getAnnoteKind(cs);
       DISubprogram* SP = getFuncInfo(cs);
-      if(kind=="Action"){
-        SPMap[SP] = "function";
-      } else if(kind=="Event"){
-        SPMap[SP] = "event";
-      } else if(kind=="Const"){
-        SPMap[SP] = "const";
-      } 
+      StringRef kind = getAnnoteKind(cs);
+
+      if(kind == "Action")
+        SPMap[SP].first = false;
+      else if(kind == "Event")
+        SPMap[SP].first = true;
+      else if(kind == "Const")
+        SPMap[SP].second = true;
     }
   }
 }
@@ -135,11 +140,11 @@ json::Value makeAbi(Module* M){
 
   for(auto iter : SPMap){
     DISubprogram* SP = iter.first;
-    StringRef SPType = iter.second;
+    auto SPKind = iter.second;
 
     vector<DILocalVariable*> Params;
     exportParams(SP, PMap, Params);
-    json::Value func = handleSubprogram(SP, Params, SPType);
+    json::Value func = handleSubprogram(SP, Params, SPKind);
 
     Funcs.getAsArray()->push_back(func);
   }
