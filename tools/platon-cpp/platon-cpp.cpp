@@ -21,7 +21,7 @@ using namespace tooling;
 
 
 bool ParseArgs(int, char *[], PCCOption &);
-int GenerateABI(PCCOption &, llvm::Module*);
+int GenerateABI(std::string &, llvm::Module*);
 int GenerateWASM(PCCOption &, llvm::Module*);
 void PCCPass(llvm::Module &);
 
@@ -102,6 +102,8 @@ int main(int argc, char **argv) {
   if(Tool.run(&Builder))return 0;
 
   std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
+
+  GenerateABI(Option.Output, M.get());
 
   PCCPass(*M);
 

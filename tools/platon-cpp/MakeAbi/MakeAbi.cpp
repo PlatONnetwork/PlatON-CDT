@@ -10,16 +10,38 @@
 #include "llvm/Support/JSON.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/FileSystem.h"
-#include <set>
 #include <map>
 #include <vector>
-#include "../Option.h"
 
 using namespace llvm;
 using namespace json;
 using namespace std;
 
-json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, StringRef SPType);
+json::Value handleType(DIType* DT);
+json::Value handleElem(StringRef Name, DIType* DT);
+
+json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, StringRef SPType){
+  
+  DISubroutineType* ST = cast<DISubroutineType>(SP->getType());
+  DITypeRefArray TRA = ST->getTypeArray();
+  Metadata* RetType = TRA->getOperand(0).get();
+  json::Value Ret = {};
+  if(RetType){
+    DIType* RetType1 = cast<DIType>(RetType);
+    Ret = json::Array{handleType(RetType1)};
+  }
+
+  json::Value Params = {};
+  for(DILocalVariable* LV : LVs){
+    Params.getAsArray()->push_back(handleElem(LV->getName(), LV->getType().resolve()));
+  }
+
+  return Object{{"name", SP->getName()},
+                {"type", SPType},
+                {"input", Params},
+                {"output", Ret}
+                };
+}
 
 StringRef getAnnoteKind(llvm::Value* cs) {
   if(ConstantStruct* CS=dyn_cast<ConstantStruct>(cs))
@@ -87,6 +109,8 @@ void collectAnnote(GlobalVariable* annote, SubprogramMap &SPMap){
         SPMap[SP] = "function";
       } else if(kind=="Event"){
         SPMap[SP] = "event";
+      } else if(kind=="Const"){
+        SPMap[SP] = "const";
       } 
     }
   }
@@ -123,13 +147,11 @@ json::Value makeAbi(Module* M){
   return Funcs;
 }
 
-int GenerateABI(PCCOption &Option, llvm::Module* M){
-  SmallString<128> abiPath(Option.Output);
+int GenerateABI(std::string &WasmOutput, llvm::Module* M){
+  SmallString<128> abiPath(WasmOutput);
   llvm::sys::path::replace_extension(abiPath, "abi.json");
 
   json::Value v = makeAbi(M);
-
-//  .str();
 
   std::error_code EC;
   ToolOutputFile Out(abiPath, EC, sys::fs::F_None);
@@ -142,3 +164,4 @@ int GenerateABI(PCCOption &Option, llvm::Module* M){
 
   return 0;
 }
+
