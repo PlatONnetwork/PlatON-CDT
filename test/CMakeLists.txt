@@ -1,0 +1,1 @@
+execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build_test.sh)
