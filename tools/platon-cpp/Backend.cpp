@@ -298,6 +298,8 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
     lldArgs.push_back(Option.ldArgs[i].data());
   }
 
+  lldArgs.push_back("--strip-all");
+  lldArgs.push_back("--no-threads");
   lldArgs.push_back("--entry");
   lldArgs.push_back("invoke");
   lldArgs.push_back("-o");
