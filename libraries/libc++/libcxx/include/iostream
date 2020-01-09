@@ -9,6 +9,7 @@
 
 #ifndef _LIBCPP_IOSTREAM
 #define _LIBCPP_IOSTREAM
+#error "iostream currently unavailable"
 
 /*
     iostream synopsis

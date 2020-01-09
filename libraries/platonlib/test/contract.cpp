@@ -1,5 +1,4 @@
 #include <platon/platon.hpp>
-#include <iostream>
 #include <string>
 using namespace platon;
 
@@ -32,7 +31,6 @@ CONTRACT hello : public platon::Contract{
           return info.self();
       }
       CONST std::vector<my_message> get_message(const std::string &name){
-          std::cout << name << std::endl;
           return info.self();
       }
    private:
