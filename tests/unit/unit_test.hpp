@@ -3,6 +3,7 @@
 //
 #include <vector>
 #include "print.hpp"
+#include "platon/contract.hpp"
 
 class TestResult {
   public:
@@ -79,7 +80,7 @@ class TestResult {
 //    void testSuit(TestResult &testResult)
 
 #define UNITTEST_MAIN()                                                     \
-void testSuit(TestResult &testResult);                                    \
+ACTION void testSuit(TestResult &testResult);                                    \
 extern "C" {                                                                \
     int invoke() {                                                          \
         TestResult testResult;                                              \
@@ -90,4 +91,4 @@ extern "C" {                                                                \
         return 0;                                                           \
     }                                                                       \
 }                                                                           \
-void testSuit(TestResult &testResult)
+ACTION void testSuit(TestResult &testResult)
