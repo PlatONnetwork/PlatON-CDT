@@ -13,7 +13,7 @@ extern "C" {
 #endif
     void platon_set_state(const uint8_t* key, size_t klen, const uint8_t *value, size_t vlen);
     size_t platon_get_state_length(const uint8_t* key, size_t klen);
-    void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen);
+    size_t platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen);
 #ifdef __cplusplus
 }
 #endif

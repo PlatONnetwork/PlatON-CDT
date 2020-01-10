@@ -1,12 +1,9 @@
-//
-// Created by zhou.yang on 2018/11/22.
-//
-
+#include "unit_test.hpp"
 #include "platon/RLP.h"
 #include "platon/fixedhash.hpp"
-#include "unittest.hpp"
 
 using namespace platon;
+
 TEST_CASE(rlp, int) {
   std::string data = "c3010203";
   RLPStream stream(3);
