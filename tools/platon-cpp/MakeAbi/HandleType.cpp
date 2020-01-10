@@ -18,15 +18,12 @@ using namespace std;
 json::Value handleType(DIType* DT);
 
 bool isString(DIDerivedType* DerT){
-  if (DerT->getTag() == llvm::dwarf::DW_TAG_typedef) {
-    if (DerT->getName() == "string") {
-      if (DICompositeType *CT = dyn_cast<DICompositeType>(DerT->getBaseType().resolve())) {
-        if (CT->getIdentifier() == "_ZTSNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE"){
-          return true;
-        }
-      }
-    }
-  }
+  if (DerT->getTag() == llvm::dwarf::DW_TAG_typedef)
+    if (DerT->getName() == "string") 
+      if(auto M = DerT->getBaseType().resolve())
+        if (DICompositeType *CT = dyn_cast<DICompositeType>(M)) 
+          if (CT->getIdentifier() == "_ZTSNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE")
+            return true;
   return false;
 }
 
@@ -34,11 +31,9 @@ bool isVector(DICompositeType* CT){
   if (CT->getTemplateParams().get() != nullptr) {
     if (CT->getElements().size() > 1) {
       const MDOperand &Op = CT->getElements()->getOperand(1);
-      if (const DISubprogram *SP = dyn_cast<DISubprogram>(Op.get())) {
-        if (SP->getName() == "vector") {
+      if (const DISubprogram *SP = dyn_cast<DISubprogram>(Op.get()))
+        if (SP->getName() == "vector")
           return true;
-        }
-      }
     }
   }
   return false;

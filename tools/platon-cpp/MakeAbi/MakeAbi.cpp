@@ -37,9 +37,9 @@ json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, A
 
   json::Value Params = {};
   for(DILocalVariable* LV : LVs){
-    Params.getAsArray()->push_back(handleElem(LV->getName(), LV->getType().resolve()));
+    json::Value elem = handleElem(LV->getName(), LV->getType().resolve());
+    Params.getAsArray()->push_back(elem);
   }
-
 
   return Object{{"name", SP->getName()},
                 {"input", Params},
@@ -55,8 +55,9 @@ StringRef getAnnoteKind(llvm::Value* cs) {
       if(ConstantExpr* CE = dyn_cast<ConstantExpr>(CS->getAggregateElement(1)))
         if(CE->getNumOperands()>0)
           if(GlobalVariable* ActionString = dyn_cast<GlobalVariable>(CE->getOperand(0)))
-            if (ConstantDataArray *arr = dyn_cast<ConstantDataArray>(ActionString->getInitializer()))
-              return arr->getAsCString();
+            if(ActionString->hasInitializer())
+              if (ConstantDataArray *arr = dyn_cast<ConstantDataArray>(ActionString->getInitializer()))
+                return arr->getAsCString();
 
   return "";
 }
@@ -65,10 +66,11 @@ DISubprogram* getFuncInfo(llvm::Value* cs){
   if(ConstantStruct* CS=dyn_cast<ConstantStruct>(cs)) {
     if (CS->getNumOperands() > 0)
       if (ConstantExpr *CE = dyn_cast<ConstantExpr>(CS->getAggregateElement((unsigned) 0)))
-        if(CE->getNumOperands()>0)
+        if(CE->getNumOperands() > 0)
           if(Function* F = dyn_cast<Function>(CE->getOperand(0)))
-            if(DISubprogram* DI = dyn_cast<DISubprogram>(F->getMetadata(LLVMContext::MD_dbg)))
-              return DI;
+            if(auto M = F->getMetadata(LLVMContext::MD_dbg))
+              if(DISubprogram* DI = dyn_cast<DISubprogram>(M))
+                return DI;
   }
   return nullptr;
 }
@@ -84,39 +86,37 @@ void exportParams(DISubprogram* SP, ParamsMap &PMap, vector<DILocalVariable*> &P
     DILocalVariable* LV = iter->second;
     Params[LV->getArg()-2] = LV;
   }
-
 }
 
 void collectParams(Function* DbgDecl, SubprogramMap &SPMap, ParamsMap &PMap){
-  if(DbgDecl==nullptr)return;
-  for(User* U : DbgDecl->users()){
-    if(CallInst* CI = dyn_cast<CallInst>(U)){
-      MetadataAsValue* MV = cast<MetadataAsValue>(CI->getOperand(1));
-      DILocalVariable* LV = cast<DILocalVariable>(MV->getMetadata());
-      if(LV->isParameter() && LV->getArg()>1){
-        if(DISubprogram* SP = dyn_cast<DISubprogram>(LV->getScope())){
-          if(SPMap.find(SP) != SPMap.end()){
-            PMap.insert(make_pair(SP, LV));
-          }
-        }
+  if(DbgDecl){
+    for(User* U : DbgDecl->users()){
+      if(CallInst* CI = dyn_cast<CallInst>(U)){
+        MetadataAsValue* MV = cast<MetadataAsValue>(CI->getOperand(1));
+        DILocalVariable* LV = cast<DILocalVariable>(MV->getMetadata());
+        if(LV->isParameter() && LV->getArg()>1)
+          if(DISubprogram* SP = dyn_cast<DISubprogram>(LV->getScope()))
+            if(SPMap.find(SP) != SPMap.end())
+              PMap.insert(make_pair(SP, LV));
       }
     }
   }
 }
 
 void collectAnnote(GlobalVariable* annote, SubprogramMap &SPMap){
-  if(annote==nullptr)return;
-  if(ConstantArray* annotes = dyn_cast<ConstantArray>(annote->getInitializer())) {
-    for (auto cs:annotes->operand_values()) {
-      DISubprogram* SP = getFuncInfo(cs);
-      StringRef kind = getAnnoteKind(cs);
+  if(annote){
+    if(ConstantArray* annotes = dyn_cast<ConstantArray>(annote->getInitializer())) {
+      for (auto cs:annotes->operand_values()) {
+        DISubprogram* SP = getFuncInfo(cs);
+        StringRef kind = getAnnoteKind(cs);
 
-      if(kind == "Action")
-        SPMap[SP].first = false;
-      else if(kind == "Event")
-        SPMap[SP].first = true;
-      else if(kind == "Const")
-        SPMap[SP].second = true;
+        if(kind == "Action")
+          SPMap[SP].first = false;
+        else if(kind == "Event")
+          SPMap[SP].first = true;
+        else if(kind == "Const")
+          SPMap[SP].second = true;
+      }
     }
   }
 }
