@@ -42,36 +42,8 @@
 
 using namespace llvm;
 
-// General options for llc.  Other pass-specific options are specified
-// within the corresponding llc passes, and target-specific options
-// and back-end code generation options are specified with the target machine.
-//
 SmallString<128> TempFilename;
 char CompileBin[] = "platon-cpp";
-
-
-namespace {
-static ManagedStatic<std::vector<std::string>> RunPassNames;
-
-struct RunPassOption {
-  void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
-    SmallVector<StringRef, 8> PassNames;
-    StringRef(Val).split(PassNames, ',', -1, false);
-    for (auto PassName : PassNames)
-      RunPassNames->push_back(PassName);
-  }
-};
-}
-
-static RunPassOption RunPassOpt;
-
-static cl::opt<RunPassOption, true, cl::parser<std::string>> RunPass(
-    "run-pass",
-    cl::desc("Run compiler only for specified passes (comma separated list)"),
-    cl::value_desc("pass-name"), cl::ZeroOrMore, cl::location(RunPassOpt));
-
 
 static std::unique_ptr<ToolOutputFile> GetOutputStream(const char *TargetName,
                                                        Triple::OSType OS,
@@ -98,34 +70,6 @@ int init(){
   // Register the target printer for --version.
   cl::AddExtraVersionPrinter(TargetRegistry::printRegisteredTargetsForVersion);
   return 0;
-}
-
-static bool addPass(PassManagerBase &PM, const char *_CompileBin,
-                    StringRef PassName, TargetPassConfig &TPC) {
-  if (PassName == "none")
-    return false;
-
-  const PassRegistry *PR = PassRegistry::getPassRegistry();
-  const PassInfo *PI = PR->getPassInfo(PassName);
-  if (!PI) {
-    WithColor::error(errs(), _CompileBin)
-        << "run-pass " << PassName << " is not registered.\n";
-    return true;
-  }
-
-  Pass *P;
-  if (PI->getNormalCtor())
-    P = PI->getNormalCtor()();
-  else {
-    WithColor::error(errs(), _CompileBin)
-        << "cannot create pass: " << PI->getPassName() << "\n";
-    return true;
-  }
-  std::string Banner = std::string("After ") + std::string(P->getPassName());
-  PM.add(P);
-  TPC.printAndVerify(Banner);
-
-  return false;
 }
 
 TargetOptions InitTargetOptions(){
@@ -209,35 +153,7 @@ int compileModule(Module* M) {
     LLVMTargetMachine &LLVMTM = static_cast<LLVMTargetMachine&>(*Target);
     MachineModuleInfo *MMI = new MachineModuleInfo(&LLVMTM);
 
-    // Construct a custom pass pipeline that starts after instruction
-    // selection.
-    if (!RunPassNames->empty()) {
-      if (!MIR) {
-        WithColor::warning(errs(), _CompileBin)
-            << "run-pass is for .mir file only.\n";
-        return 1;
-      }
-      TargetPassConfig &TPC = *LLVMTM.createPassConfig(PM);
-
-      if (TPC.hasLimitedCodeGenPipeline()) {
-        WithColor::warning(errs(), _CompileBin)
-            << "run-pass cannot be used with "
-            << TPC.getLimitedCodeGenPipelineReason(" and ") << ".\n";
-        return 1;
-      }
-
-      TPC.setDisableVerify(true);
-      PM.add(&TPC);
-      PM.add(MMI);
-      TPC.printAndVerify("");
-      for (const std::string &RunPassName : *RunPassNames) {
-        if (addPass(PM, _CompileBin, RunPassName, TPC))
-          return 1;
-      }
-      TPC.setInitialized();
-      PM.add(createPrintMIRPass(*OS));
-      PM.add(createFreeMachineFunctionPass());
-    } else if (Target->addPassesToEmitFile(PM, *OS,
+    if (Target->addPassesToEmitFile(PM, *OS,
                                            DwoOut ? &DwoOut->os() : nullptr,
                                            TargetMachine::CGFT_ObjectFile, false, MMI)) {
       WithColor::warning(errs(), _CompileBin)
