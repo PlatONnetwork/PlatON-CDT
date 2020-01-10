@@ -2,14 +2,16 @@
 // Created by zhou.yang on 2018/11/21.
 //
 #include <vector>
-#include "platon/print.hpp"
+#include "print.hpp"
 
-struct TestResult {
-  size_t testcases = 0;
-  size_t assertions = 0;
-  size_t failures = 0;
-  bool isContinue = false;
-  bool skip = false;
+class TestResult {
+  public:
+    TestResult(): testcases(0), assertions(0), failures(0), isContinue(false), skip(false) {}
+    size_t testcases;
+    size_t assertions ;
+    size_t failures;
+    bool isContinue;
+    bool skip;
 };
 
 #define TEST_CASE(testName, testGroup)                \
@@ -40,9 +42,9 @@ struct TestResult {
         testResult_.skip = true;                                     \
       }                                                              \
       testResult_.failures += 1;                                     \
-      platon::println("assertion failed:", #cond, "line:", __LINE__, \
-                      "file:", __FILE__, "test name:", name_,        \
-                      "group:", group_, ##__VA_ARGS__);              \
+      println("assertion failed:", #cond, ", line:", __LINE__, \
+                      ", file:", __FILE__, ", test name:", name_,        \
+                      ", group:", group_, ##__VA_ARGS__);              \
     }                                                                \
     testResult_.assertions += 1;                                     \
   }
@@ -54,8 +56,8 @@ struct TestResult {
         testResult_.skip = true;                                            \
       }                                                                     \
       testResult_.failures += 1;                                            \
-      platon::println("assertion failed:", #A, "==", #B, "line:", __LINE__, \
-                      "file:", __FILE__, "func:", __func__, ##__VA_ARGS__); \
+      println("assertion failed:", #A, "==", #B, ", line:", __LINE__, \
+                      ", file:", __FILE__, ", func:", __func__, ##__VA_ARGS__); \
     }                                                                       \
     testResult_.assertions += 1;                                            \
   }
@@ -67,8 +69,8 @@ struct TestResult {
         testResult_.skip = true;                                            \
       }                                                                     \
       testResult_.failures += 1;                                            \
-      platon::println("assertion failed:", #A, "!=", #B, "line:", __LINE__, \
-                      "file:", __FILE__, "func:", __func__, ##__VA_ARGS__); \
+      println("assertion failed:", #A, "!=", #B, ", line:", __LINE__, \
+                      ", file:", __FILE__, ", func:", __func__, ##__VA_ARGS__); \
     }                                                                       \
     testResult_.assertions += 1;                                            \
   }
@@ -76,14 +78,16 @@ struct TestResult {
 //#define TEST_SUIT() \
 //    void testSuit(TestResult &testResult)
 
-#define UNITTEST_MAIN()                                                    \
-  void testSuit(TestResult &testResult);                                   \
-  int main(int argc, char *argv[]) {                                       \
-    TestResult testResult;                                                 \
-    testResult.isContinue = true;                                          \
-    testSuit(testResult);                                                  \
-    platon::println(testResult.testcases, "tests,", testResult.assertions, \
-                    "assertions,", testResult.failures, "failures");       \
-    return 0;                                                              \
-  }                                                                        \
-  void testSuit(TestResult &testResult)
+#define UNITTEST_MAIN()                                                     \
+void testSuit(TestResult &testResult);                                    \
+extern "C" {                                                                \
+    int invoke() {                                                          \
+        TestResult testResult;                                              \
+        testResult.isContinue = true;                                       \
+        testSuit(testResult);                                               \
+        println("all test case:", testResult.testcases, ", assertions:",    \
+          testResult.assertions, ", failures:", testResult.failures);    \
+        return 0;                                                           \
+    }                                                                       \
+}                                                                           \
+void testSuit(TestResult &testResult)
