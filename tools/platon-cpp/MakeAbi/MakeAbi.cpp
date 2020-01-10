@@ -17,8 +17,8 @@ using namespace llvm;
 using namespace json;
 using namespace std;
 
-json::Value handleType(DIType* DT);
-json::Value handleElem(StringRef Name, DIType* DT);
+json::Value handleType(DINode* Node, DIType* DT);
+json::Value handleElem(DINode* Node, DIType* DT);
 
 typedef bool isEvent;
 typedef bool isConst;
@@ -32,12 +32,12 @@ json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, A
   json::Value Ret = {};
   if(RetType){
     DIType* RetType1 = cast<DIType>(RetType);
-    Ret = json::Array{handleType(RetType1)};
+    Ret = json::Array{handleType(SP, RetType1)};
   }
 
   json::Value Params = {};
   for(DILocalVariable* LV : LVs){
-    json::Value elem = handleElem(LV->getName(), LV->getType().resolve());
+    json::Value elem = handleElem(LV, LV->getType().resolve());
     Params.getAsArray()->push_back(elem);
   }
 
@@ -82,6 +82,7 @@ void exportParams(DISubprogram* SP, ParamsMap &PMap, vector<DILocalVariable*> &P
 
   unsigned num = SP->getType()->getTypeArray()->getNumOperands();
   Params.resize(num-2);
+
   for(auto iter = PMap.lower_bound(SP); iter != PMap.upper_bound(SP); iter++) {
     DILocalVariable* LV = iter->second;
     Params[LV->getArg()-2] = LV;
