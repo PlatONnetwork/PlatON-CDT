@@ -10,16 +10,44 @@
 #include "llvm/Support/JSON.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/FileSystem.h"
-#include <set>
 #include <map>
 #include <vector>
-#include "../Option.h"
 
 using namespace llvm;
 using namespace json;
 using namespace std;
 
-json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, StringRef SPType);
+json::Value handleType(DIType* DT);
+json::Value handleElem(StringRef Name, DIType* DT);
+
+typedef bool isEvent;
+typedef bool isConst;
+typedef pair<isEvent, isConst> Attr;
+
+json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, Attr SPKind){
+  
+  DISubroutineType* ST = cast<DISubroutineType>(SP->getType());
+  DITypeRefArray TRA = ST->getTypeArray();
+  Metadata* RetType = TRA->getOperand(0).get();
+  json::Value Ret = {};
+  if(RetType){
+    DIType* RetType1 = cast<DIType>(RetType);
+    Ret = json::Array{handleType(RetType1)};
+  }
+
+  json::Value Params = {};
+  for(DILocalVariable* LV : LVs){
+    Params.getAsArray()->push_back(handleElem(LV->getName(), LV->getType().resolve()));
+  }
+
+
+  return Object{{"name", SP->getName()},
+                {"input", Params},
+                {"output", Ret},
+                {"type", SPKind.first?"event":"function"},
+                {"constant", SPKind.second}
+                };
+}
 
 StringRef getAnnoteKind(llvm::Value* cs) {
   if(ConstantStruct* CS=dyn_cast<ConstantStruct>(cs))
@@ -45,8 +73,7 @@ DISubprogram* getFuncInfo(llvm::Value* cs){
   return nullptr;
 }
 
-
-typedef map<llvm::DISubprogram*, StringRef> SubprogramMap;
+typedef map<llvm::DISubprogram*, Attr> SubprogramMap;
 typedef multimap<llvm::DISubprogram*, llvm::DILocalVariable*> ParamsMap;
 
 void exportParams(DISubprogram* SP, ParamsMap &PMap, vector<DILocalVariable*> &Params){
@@ -81,13 +108,15 @@ void collectAnnote(GlobalVariable* annote, SubprogramMap &SPMap){
   if(annote==nullptr)return;
   if(ConstantArray* annotes = dyn_cast<ConstantArray>(annote->getInitializer())) {
     for (auto cs:annotes->operand_values()) {
-      StringRef kind = getAnnoteKind(cs);
       DISubprogram* SP = getFuncInfo(cs);
-      if(kind=="Action"){
-        SPMap[SP] = "function";
-      } else if(kind=="Event"){
-        SPMap[SP] = "event";
-      } 
+      StringRef kind = getAnnoteKind(cs);
+
+      if(kind == "Action")
+        SPMap[SP].first = false;
+      else if(kind == "Event")
+        SPMap[SP].first = true;
+      else if(kind == "Const")
+        SPMap[SP].second = true;
     }
   }
 }
@@ -111,11 +140,11 @@ json::Value makeAbi(Module* M){
 
   for(auto iter : SPMap){
     DISubprogram* SP = iter.first;
-    StringRef SPType = iter.second;
+    auto SPKind = iter.second;
 
     vector<DILocalVariable*> Params;
     exportParams(SP, PMap, Params);
-    json::Value func = handleSubprogram(SP, Params, SPType);
+    json::Value func = handleSubprogram(SP, Params, SPKind);
 
     Funcs.getAsArray()->push_back(func);
   }
@@ -123,13 +152,11 @@ json::Value makeAbi(Module* M){
   return Funcs;
 }
 
-int GenerateABI(PCCOption &Option, llvm::Module* M){
-  SmallString<128> abiPath(Option.Output);
+int GenerateABI(std::string &WasmOutput, llvm::Module* M){
+  SmallString<128> abiPath(WasmOutput);
   llvm::sys::path::replace_extension(abiPath, "abi.json");
 
   json::Value v = makeAbi(M);
-
-//  .str();
 
   std::error_code EC;
   ToolOutputFile Out(abiPath, EC, sys::fs::F_None);
@@ -142,3 +169,4 @@ int GenerateABI(PCCOption &Option, llvm::Module* M){
 
   return 0;
 }
+
