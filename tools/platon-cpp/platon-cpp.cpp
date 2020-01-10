@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
   LLVMContext Context;
   BuilderAction Builder(Context);
 
-  if(Tool.run(&Builder))return 0;
+  if(Tool.run(&Builder))return 1;
 
   std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
 
@@ -112,6 +112,5 @@ int main(int argc, char **argv) {
     return 0;
   }
     
-  GenerateWASM(Option, M.get());
-  return 0;
+  return GenerateWASM(Option, M.get());
 }

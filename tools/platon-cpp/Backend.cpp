@@ -264,13 +264,6 @@ int compileModule(Module* M) {
 
     PM.run(*M);
 
-    /*
-    auto HasError = Context.getDiagHandlerPtr()))->HasError;
-    if (*HasError)
-      return 1;
-      */
-
-
     if (BOS) {
       Out->os() << Buffer;
     }
@@ -287,7 +280,9 @@ int compileModule(Module* M) {
 int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   llvm::sys::fs::createTemporaryFile("platon-cpp", "wasm", TempFilename);
-  compileModule(M);
+
+  if(compileModule(M))
+    return 1;
 
   std::vector<const char*> lldArgs;
   lldArgs.push_back("platon-cpp");

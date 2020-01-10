@@ -161,10 +161,10 @@ int GenerateABI(std::string &WasmOutput, llvm::Module* M){
 
   std::error_code EC;
   ToolOutputFile Out(abiPath, EC, sys::fs::F_None);
-  if (EC) {
-    errs() << EC.message() << '\n';
-    return 1; 
-  }
+    
+  if(EC)
+    report_fatal_error(EC.message());
+
   Out.os() << llvm::formatv("{0:4}", v);
   Out.keep();
 
