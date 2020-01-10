@@ -72,15 +72,16 @@ public:
   }
 };
 
-void OutputIRFile(llvm::Module* M, string OutputIRPath) {
+int OutputIRFile(llvm::Module* M, string OutputIRPath) {
   std::error_code EC;
   ToolOutputFile Out(OutputIRPath, EC, sys::fs::F_None);
   if (EC) {
     errs() << EC.message() << '\n';
-    return;
+    return 1;
   }
   M->print(Out.os(), nullptr, false);
   Out.keep();
+  return 0;
 }
 
 int main(int argc, char **argv) {
@@ -99,7 +100,7 @@ int main(int argc, char **argv) {
   LLVMContext Context;
   BuilderAction Builder(Context);
 
-  if(Tool.run(&Builder))return 0;
+  if(Tool.run(&Builder))return 1;
 
   std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
 
@@ -108,10 +109,8 @@ int main(int argc, char **argv) {
   PCCPass(*M);
 
   if(Option.OutputIR){
-    OutputIRFile(M.get(), Option.Output);
-    return 0;
+    return OutputIRFile(M.get(), Option.Output);
   }
     
-  GenerateWASM(Option, M.get());
-  return 0;
+  return GenerateWASM(Option, M.get());
 }
