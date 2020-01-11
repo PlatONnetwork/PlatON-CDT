@@ -424,6 +424,8 @@ public:
 
     template <class T, class U> RLPStream& operator << (std::map<T, U> const& _s);
 
+    template<typename... Args> RLPStream& operator << (const std::tuple<Args...>& t);
+
     /// Clear the output stream so far.
     void clear() { m_out.clear(); m_listStack.clear(); }
 
