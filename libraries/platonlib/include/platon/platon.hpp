@@ -8,5 +8,6 @@
 #include "platon/RLP.h"
 #include "platon/rlp_extend.hpp"
 #include "platon/rlp_serialize.hpp"
+#include "platon/event.hpp"
 
 #define CONSTANT [[platon::constant]]

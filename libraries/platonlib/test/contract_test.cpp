@@ -10,7 +10,7 @@ class message {
       message(){}
       message(const std::string &p_head):head(p_head){}
       friend std::ostream &operator<<( std::ostream &output, const message &one_message){
-        return output << one_message.head;
+        return output << "head:" << one_message.head;
       }
    private:
       std::string head;
@@ -22,7 +22,8 @@ class my_message : public message {
       my_message(){}
       my_message(const std::string &p_head, const std::string &p_body, const std::string &p_end):message(p_head), body(p_body), end(p_end){}
       friend std::ostream &operator<<( std::ostream &output, const my_message &group){
-        return output << static_cast<const message&>(group) << ' ' << group.body << ' ' << group.end;
+        return output << static_cast<const message&>(group) << ", " 
+        << "body:" << group.body << ", " << "end:" << group.end;
       }
    private:
       std::string body;
@@ -66,7 +67,7 @@ void platon_return(const uint8_t *value, const size_t len){
     std::vector<my_message> info_return;
     fetch(RLP(my_return), info_return);
     for (auto const& i: info_return){
-        std::cout << i << ' ';
+        std::cout << i << std::endl;
     }
     std::cout << std::endl;
 }
@@ -91,7 +92,7 @@ void platon_debug(uint8_t *dst, size_t len){
 }
 
 void platon_panic(){
-    std::cout << "platon panic"<< std::endl;
+    std::cout << "platon panic" << std::endl;
 }
 
 std::vector<byte> getVector(const uint8_t* address, size_t len){
@@ -117,7 +118,7 @@ size_t platon_get_state_length(const uint8_t* key, size_t klen){
     return map_result[vect_key].size();
 }
 
-void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
+size_t platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
     std::vector<byte> vect_key, vect_value;
     vect_key = getVector(key, klen);
     vect_value = map_result[vect_key];
@@ -132,6 +133,28 @@ void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vl
 
 
 int main(int argc, char **argv) {
+    std::vector<byte> test_Data = std::vector<byte>{0xdc, 0xdb, 
+    0xc6, 0x85, 0x47, 0x61, 0x76, 0x69, 0x6e, 0x8a, 0x49, 0x20, 0x61, 0x6d, 0x20, 0x67, 0x61, 0x76, 0x69, 
+    0x6e, 0x88, 0x66, 0x69, 0x6e, 0x69, 0x73, 0x68, 0x65, 0x64};
+    std::vector<my_message> test_message;
+    fetch(RLP(test_Data), test_message);
+    for(auto one : test_message) {
+        std::cout << one << std::endl;
+    }
+    std::cout << std::endl;
+    test_Data = std::vector<byte>{0xe8, 0x8b, 0x61, 0x64, 0x64, 0x5f, 0x6d, 
+    0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0xdb, 0xc6, 0x85, 
+    0x47, 0x61, 0x76, 0x69, 0x6e, 0x8a, 0x49, 0x20, 0x61, 
+    0x6d, 0x20, 0x67, 0x61, 0x76, 0x69, 0x6e, 0x88,
+    0x66, 0x69, 0x6e, 0x69, 0x73, 0x68, 0x65, 0x64};
+     my_message one_test_message;
+     fetch(RLP(test_Data)[1], one_test_message);
+     std::cout << one_test_message << std::endl;
+
+     std::string methord_name;
+     fetch(RLP(test_Data)[0], methord_name);
+     std::cout << methord_name << std::endl;
+
     RLPStream wht_stream;
     my_message one("1_head", "1_body", "1_end");
     wht_stream.appendList(2) << "add_message" << one;

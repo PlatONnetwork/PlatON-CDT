@@ -8,8 +8,6 @@
 
 #include <boost/mp11/tuple.hpp>
 
-#include <boost/mp11/tuple.hpp>
-
 #include <platon/service.hpp>
 #include <type_traits>
 #include <tuple>

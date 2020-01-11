@@ -1,8 +1,9 @@
 #pragma once
 
-#include "print.hpp"
 #include "common.h"
 #include "RLP.h"
+#include "rlp_extend.hpp"
+#include "contract.hpp"
 
 #define ARG_COUNT_P1_(\
   _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) \
@@ -49,180 +50,101 @@
 #define func10(a, ...) a arg10, func9(__VA_ARGS__)
 
 
-/**
- * @brief Defining events
- * 
- */
 #define PLATON_EVENT(NAME, ...) \
-    void M_CAT(EVENT, NAME)(VA_F(__VA_ARGS__)) { \
-        platon::emitEvent(#NAME, PA_F(__VA_ARGS__)); \
+    EVENT void M_CAT(platon_event_, NAME)(VA_F(__VA_ARGS__)) { \
+        platon::emit_event(PA_F(__VA_ARGS__)); \
     }
 
-/**
- * @brief trigger event
- * 
- */
 #define PLATON_EMIT_EVENT(NAME, ...) \
-    M_CAT(EVENT, NAME)(__VA_ARGS__)
+    M_CAT(platon_event_, NAME)(__VA_ARGS__)
 
+
+#define PLATON_EVENT1(NAME, TOPIC, ...) \
+    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic, VA_F(__VA_ARGS__)) { \
+        platon::emit_event1(topic, PA_F(__VA_ARGS__)); \
+    }
+
+#define PLATON_EMIT_EVENT1(NAME, TOPIC, ...) \
+    M_CAT(platon_event_, NAME)(#TOPIC, __VA_ARGS__)
+
+
+#define PLATON_EVENT2(NAME, TOPIC1, TOPIC2, ...) \
+    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic1, const std::string &topic2, VA_F(__VA_ARGS__)) { \
+        platon::emit_event2(topic1, topic2, PA_F(__VA_ARGS__)); \
+    }
+
+#define PLATON_EMIT_EVENT2(NAME, TOPIC1, TOPIC2, ...) \
+    M_CAT(platon_event_, NAME)(#TOPIC1, #TOPIC2, __VA_ARGS__)
+
+#define PLATON_EVENT3(NAME, TOPIC1, TOPIC2, TOPIC3, ...) \
+    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic1, const std::string &topic2, const std::string &topic3, VA_F(__VA_ARGS__)) { \
+        platon::emit_event3(topic1, topic2, topic3, PA_F(__VA_ARGS__)); \
+    }
+
+#define PLATON_EMIT_EVENT3(NAME, TOPIC1, TOPIC2, TOPIC3, ...) \
+    M_CAT(platon_event_, NAME)(#TOPIC1, #TOPIC2, #TOPIC3, __VA_ARGS__)
+
+#define PLATON_EVENT4(NAME, TOPIC1, TOPIC2, TOPIC3, TOPIC4, ...) \
+    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic1, const std::string &topic2, const std::string &topic3, const std::string &topic4, VA_F(__VA_ARGS__)) { \
+        platon::emit_event4(topic1, topic2, topic3, topic4, PA_F(__VA_ARGS__)); \
+    }
+
+#define PLATON_EMIT_EVENT4(NAME, TOPIC1, TOPIC2, TOPIC3, TOPIC4, ...) \
+    M_CAT(platon_event_, NAME)(#TOPIC1, #TOPIC2, #TOPIC3, #TOPIC4, __VA_ARGS__)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void emitEvent(const char *topic, size_t topicLen, const uint8_t *data, size_t dataLen);
+    void platon_event(const uint8_t* args, size_t argsLen);
+    void platon_event1(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen);
+    void platon_event2(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* args, size_t argsLen);
+    void platon_event3(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* topic3, size_t topic3Len, uint8_t* args, size_t argsLen);
+    void platon_event4(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, 
+    const uint8_t* topic3, size_t topic3Len, const uint8_t* topic4, size_t topic4Len, uint8_t* args, size_t argsLen);
 #ifdef __cplusplus
 }
 #endif
 
 namespace platon {
 
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num uint64_t type
-     */
-    inline void event(RLPStream &stream, uint64_t num) {
-        stream << num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num uint32_t type
-     */
-    inline void event(RLPStream &stream, uint32_t num) {
-        stream << num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num uint16_t type
-     */
-    inline void event(RLPStream &stream, uint16_t num) {
-        stream << num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num uint8_t type
-     */
-    inline void event(RLPStream &stream, uint8_t num) {
-        stream << num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num int64_t type
-     */
-    inline void event(RLPStream &stream, int64_t num) {
-        stream << (uint64_t)num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num int32_t type
-     */
-    inline void event(RLPStream &stream, int32_t num) {
-        stream << (uint64_t)num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num int16_t type
-     */
-    inline void event(RLPStream &stream, int16_t num) {
-        stream << (uint64_t)num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num int8_t type
-     */
-    inline void event(RLPStream &stream, int8_t num) {
-        stream << (uint64_t)num;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num std::string type
-     */
-    inline void event(RLPStream &stream, const std::string &s){
-        stream << s;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num const char* type
-     */
-    inline void event(RLPStream &stream, const char* topic) {
-        stream << topic;
-    }
-
-    /**
-     * @brief Specify event type field serialization
-     * 
-     * @param stream RLP stream
-     * @param num char* type
-     */
-    inline void event(RLPStream &stream, char* topic) {
-        stream << topic;
-    }
-
-    /**
-     * @brief Empty parameter
-     * 
-     * @param stream 
-     */
-    inline void event(RLPStream &stream){
-
-    }
-
-    /**
-     * @brief 
-     * 
-     * @tparam Arg Starting parameter type
-     * @tparam Args Variable parameter type
-     * @param stream RLP stream
-     * @param a Starting parameter
-     * @param args Variable parameter
-     */
-    template<typename Arg, typename... Args>
-    inline void event(RLPStream &stream, Arg &&a, Args &&... args) {
-        event(stream, a);
-        event(stream, args...);
-    }
-
-    /**
-     * @brief Serialization parameter
-     * 
-     * @tparam Args Event parameter type
-     * @param topic Topic name
-     * @param args Event parameter
-     */
     template<typename... Args>
-    inline void emitEvent(const std::string &topic, Args &&... args) {
-        bytes data;
-        RLPStream stream(sizeof...(args));
-        event(stream, args...);
-        const bytes& rlpData = stream.out();
-        ::emitEvent(topic.data(), topic.length(),rlpData.data(), rlpData.size());
+    inline bytes event_agrs(const Args &... args) {
+        std::tuple<Args...> tuple_args = std::make_tuple(args...);
+        RLPStream stream;
+        stream << tuple_args;
+        return stream.out();
+    }
+
+    template<typename... Args>
+    inline void emit_event(const Args &... args) {
+        bytes rlpData = event_agrs(args...);
+        ::platon_event(rlpData.data(), rlpData.size());
+    }
+
+    template<typename... Args>
+    inline void emit_event1(const std::string &topic, const Args &... args) {
+        bytes rlpData = event_agrs(args...);
+        ::platon_event1((const uint8_t*)topic.data(), topic.length(), rlpData.data(), rlpData.size());
+    }
+
+    template<typename... Args>
+    inline void emit_event2(const std::string &topic1, const std::string &topic2, const Args &... args) {
+        bytes rlpData = event_agrs(args...);
+        ::platon_event2((const uint8_t*)topic1.data(), topic1.length(), (const uint8_t*)topic2.data(), 
+        topic2.length(), rlpData.data(), rlpData.size());
+    }
+
+    template<typename... Args>
+    inline void emit_event3(const std::string &topic1, const std::string &topic2, const std::string &topic3, const Args &... args) {
+        bytes rlpData = event_agrs(args...);
+        ::platon_event3((const uint8_t*)topic1.data(), topic1.length(), (const uint8_t*)topic2.data(), topic2.length(),
+        (const uint8_t*)topic3.data(), topic3.length(), rlpData.data(), rlpData.size());
+    }
+
+    template<typename... Args>
+    inline void emit_event4(const std::string &topic1, const std::string &topic2, const std::string &topic3, const std::string &topic4, const Args &... args) {
+        bytes rlpData = event_agrs(args...);
+        ::platon_event4((const uint8_t*)topic1.data(), topic1.length(), (const uint8_t*)topic2.data(), topic2.length(), 
+        (const uint8_t*)topic3.data(), topic3.length(), (const uint8_t*)topic4.data(), topic4.length(), rlpData.data(), rlpData.size());
     }
 }

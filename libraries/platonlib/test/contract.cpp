@@ -25,12 +25,15 @@ extern char const contract_info[] = "info";
 
 CONTRACT hello : public platon::Contract{
    public:
+      PLATON_EVENT1(hello, topic, std::string, uint32_t)
       ACTION void init(){}
       ACTION std::vector<my_message> add_message(const my_message &one_message){
+          PLATON_EMIT_EVENT1(hello, topic1, "event1", 1);
           info.self().push_back(one_message);
           return info.self();
       }
       CONST std::vector<my_message> get_message(const std::string &name){
+          PLATON_EMIT_EVENT1(hello, topic2, "event2", 2);
           return info.self();
       }
    private:
