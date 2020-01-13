@@ -51,56 +51,51 @@
 
 
 #define PLATON_EVENT(NAME, ...) \
-    EVENT void M_CAT(platon_event_, NAME)(VA_F(__VA_ARGS__)) { \
+    EVENT void M_CAT(platon_event0_, NAME)(VA_F(__VA_ARGS__)) { \
         platon::emit_event(PA_F(__VA_ARGS__)); \
     }
 
 #define PLATON_EMIT_EVENT(NAME, ...) \
-    M_CAT(platon_event_, NAME)(__VA_ARGS__)
+    M_CAT(platon_event0_, NAME)(__VA_ARGS__)
 
 
-#define PLATON_EVENT1(NAME, TOPIC, ...) \
-    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic, VA_F(__VA_ARGS__)) { \
+#define PLATON_EVENT1(NAME, TOPIC_TYPE, ...) \
+    EVENT1 void M_CAT(platon_event1_, NAME)(const TOPIC_TYPE &topic, VA_F(__VA_ARGS__)) { \
         platon::emit_event1(topic, PA_F(__VA_ARGS__)); \
     }
 
-#define PLATON_EMIT_EVENT1(NAME, TOPIC, ...) \
-    M_CAT(platon_event_, NAME)(#TOPIC, __VA_ARGS__)
+#define PLATON_EMIT_EVENT1(NAME, TOPIC_DATA, ...) \
+    M_CAT(platon_event1_, NAME)(TOPIC_DATA, __VA_ARGS__)
 
 
-#define PLATON_EVENT2(NAME, TOPIC1, TOPIC2, ...) \
-    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic1, const std::string &topic2, VA_F(__VA_ARGS__)) { \
+#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...) \
+    EVENT2 void M_CAT(platon_event2_, NAME)(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2, VA_F(__VA_ARGS__)) { \
         platon::emit_event2(topic1, topic2, PA_F(__VA_ARGS__)); \
     }
 
-#define PLATON_EMIT_EVENT2(NAME, TOPIC1, TOPIC2, ...) \
-    M_CAT(platon_event_, NAME)(#TOPIC1, #TOPIC2, __VA_ARGS__)
+#define PLATON_EMIT_EVENT2(NAME, TOPIC1_DATA, TOPIC2_DATA, ...) \
+    M_CAT(platon_event2_, NAME)(TOPIC1_DATA, TOPIC2_DATA, __VA_ARGS__)
 
-#define PLATON_EVENT3(NAME, TOPIC1, TOPIC2, TOPIC3, ...) \
-    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic1, const std::string &topic2, const std::string &topic3, VA_F(__VA_ARGS__)) { \
+#define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...) \
+    EVENT3 void M_CAT(platon_event3_, NAME)(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2, const TOPIC_TYPE3 &topic3, VA_F(__VA_ARGS__)) { \
         platon::emit_event3(topic1, topic2, topic3, PA_F(__VA_ARGS__)); \
     }
 
-#define PLATON_EMIT_EVENT3(NAME, TOPIC1, TOPIC2, TOPIC3, ...) \
-    M_CAT(platon_event_, NAME)(#TOPIC1, #TOPIC2, #TOPIC3, __VA_ARGS__)
+#define PLATON_EMIT_EVENT3(NAME, TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, ...) \
+    M_CAT(platon_event3_, NAME)(TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, __VA_ARGS__)
 
-#define PLATON_EVENT4(NAME, TOPIC1, TOPIC2, TOPIC3, TOPIC4, ...) \
-    EVENT void M_CAT(platon_event_, NAME)(const std::string &topic1, const std::string &topic2, const std::string &topic3, const std::string &topic4, VA_F(__VA_ARGS__)) { \
+#define PLATON_EVENT4(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, TOPIC_TYPE4, ...) \
+    EVENT4 void M_CAT(platon_event4_, NAME)(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2, const TOPIC_TYPE3 &topic3, const TOPIC_TYPE4 &topic4, VA_F(__VA_ARGS__)) { \
         platon::emit_event4(topic1, topic2, topic3, topic4, PA_F(__VA_ARGS__)); \
     }
 
-#define PLATON_EMIT_EVENT4(NAME, TOPIC1, TOPIC2, TOPIC3, TOPIC4, ...) \
-    M_CAT(platon_event_, NAME)(#TOPIC1, #TOPIC2, #TOPIC3, #TOPIC4, __VA_ARGS__)
+#define PLATON_EMIT_EVENT4(NAME, TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, TOPIC4_DATA, ...) \
+    M_CAT(platon_event4_, NAME)(TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, TOPIC4_DATA, __VA_ARGS__)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void platon_event(const uint8_t* args, size_t argsLen);
-    void platon_event1(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen);
-    void platon_event2(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* args, size_t argsLen);
-    void platon_event3(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* topic3, size_t topic3Len, uint8_t* args, size_t argsLen);
-    void platon_event4(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, 
-    const uint8_t* topic3, size_t topic3Len, const uint8_t* topic4, size_t topic4Len, uint8_t* args, size_t argsLen);
+    void platon_event(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen);
 #ifdef __cplusplus
 }
 #endif
@@ -117,34 +112,43 @@ namespace platon {
 
     template<typename... Args>
     inline void emit_event(const Args &... args) {
-        bytes rlpData = event_agrs(args...);
-        ::platon_event(rlpData.data(), rlpData.size());
+        bytes topic_data = event_agrs(args...);
+        ::platon_event(NULL, 0, topic_data.data(), topic_data.size());
     }
 
-    template<typename... Args>
-    inline void emit_event1(const std::string &topic, const Args &... args) {
-        bytes rlpData = event_agrs(args...);
-        ::platon_event1((const uint8_t*)topic.data(), topic.length(), rlpData.data(), rlpData.size());
+    template<class Topic, typename... Args>
+    inline void emit_event1(const Topic &topic, const Args &... args) {
+        RLPStream stream(1);
+        stream << topic;
+        bytes topic_data =  stream.out();  
+        bytes rlp_data = event_agrs(args...);
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 
-    template<typename... Args>
-    inline void emit_event2(const std::string &topic1, const std::string &topic2, const Args &... args) {
-        bytes rlpData = event_agrs(args...);
-        ::platon_event2((const uint8_t*)topic1.data(), topic1.length(), (const uint8_t*)topic2.data(), 
-        topic2.length(), rlpData.data(), rlpData.size());
+    template<class Topic1, class Topic2, typename... Args>
+    inline void emit_event2(const Topic1 &topic1, const Topic2 &topic2, const Args &... args) {
+        RLPStream stream(2);
+        stream << topic1 << topic2;
+        bytes topic_data =  stream.out();  
+        bytes rlp_data = event_agrs(args...);
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 
-    template<typename... Args>
-    inline void emit_event3(const std::string &topic1, const std::string &topic2, const std::string &topic3, const Args &... args) {
-        bytes rlpData = event_agrs(args...);
-        ::platon_event3((const uint8_t*)topic1.data(), topic1.length(), (const uint8_t*)topic2.data(), topic2.length(),
-        (const uint8_t*)topic3.data(), topic3.length(), rlpData.data(), rlpData.size());
+    template<class Topic1, class Topic2, class Topic3, typename... Args>
+    inline void emit_event3(const Topic1 &topic1, const Topic2 &topic2, const Topic3 &topic3, const Args &... args) {
+        RLPStream stream(3);
+        stream << topic1 << topic2 << topic3;
+        bytes topic_data =  stream.out();  
+        bytes rlp_data = event_agrs(args...);
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 
-    template<typename... Args>
-    inline void emit_event4(const std::string &topic1, const std::string &topic2, const std::string &topic3, const std::string &topic4, const Args &... args) {
-        bytes rlpData = event_agrs(args...);
-        ::platon_event4((const uint8_t*)topic1.data(), topic1.length(), (const uint8_t*)topic2.data(), topic2.length(), 
-        (const uint8_t*)topic3.data(), topic3.length(), (const uint8_t*)topic4.data(), topic4.length(), rlpData.data(), rlpData.size());
+    template<class Topic1, class Topic2, class Topic3, class Topic4, typename... Args>
+    inline void emit_event4(const Topic1 &topic1, const Topic2 &topic2, const Topic3 &topic3, const Topic4 &topic4, const Args &... args) {
+        RLPStream stream(4);
+        stream << topic1 << topic2 << topic3 << topic4;
+        bytes topic_data =  stream.out();  
+        bytes rlp_data = event_agrs(args...);
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 }
