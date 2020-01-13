@@ -24,7 +24,3 @@ platon_get_call_output_length
 platon_get_call_output
 platon_revert
 platon_event
-platon_event1
-platon_event2
-platon_event3
-platon_event4
