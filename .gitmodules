@@ -1,3 +1,0 @@
-[submodule "libraries/rapidjson"]
-	path = libraries/rapidjson
-	url = https://github.com/PlatONnetwork/rapidjson.git
