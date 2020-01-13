@@ -95,12 +95,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void platon_event(const uint8_t* args, size_t argsLen);
-    void platon_event1(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen);
-    void platon_event2(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* args, size_t argsLen);
-    void platon_event3(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* topic3, size_t topic3Len, uint8_t* args, size_t argsLen);
-    void platon_event4(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, 
-    const uint8_t* topic3, size_t topic3Len, const uint8_t* topic4, size_t topic4Len, uint8_t* args, size_t argsLen);
+    void platon_event(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen);
 #ifdef __cplusplus
 }
 #endif
@@ -125,43 +120,41 @@ namespace platon {
     template<typename... Args>
     inline void emit_event(const Args &... args) {
         bytes rlpData = event_agrs(args...);
-        ::platon_event(rlpData.data(), rlpData.size());
+        ::platon_event(NULL, 0, rlpData.data(), rlpData.size());
     }
 
     template<class Topic, typename... Args>
     inline void emit_event1(const Topic &topic, const Args &... args) {
+        RLPStream stream;
+        stream << topic;
+        bytes topic_data =  stream.out();  
         bytes rlp_data = event_agrs(args...);
-        bytes topic_data = one_topic_data(topic);
-        ::platon_event1(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 
     template<class Topic1, class Topic2, typename... Args>
     inline void emit_event2(const Topic1 &topic1, const Topic2 &topic2, const Args &... args) {
+        RLPStream stream(2);
+        stream << topic1 << topic2;
+        bytes topic_data =  stream.out();  
         bytes rlp_data = event_agrs(args...);
-        bytes topic1_data = one_topic_data(topic1);
-        bytes topic2_data = one_topic_data(topic2);
-        ::platon_event2(topic1_data.data(), topic1_data.size(), topic2_data.data(), 
-        topic2_data.size(), rlp_data.data(), rlp_data.size());
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 
     template<class Topic1, class Topic2, class Topic3, typename... Args>
     inline void emit_event3(const Topic1 &topic1, const Topic2 &topic2, const Topic3 &topic3, const Args &... args) {
+        RLPStream stream(3);
+        stream << topic1 << topic2 << topic3;
+        bytes topic_data =  stream.out();  
         bytes rlp_data = event_agrs(args...);
-        bytes topic1_data = one_topic_data(topic1);
-        bytes topic2_data = one_topic_data(topic2);
-        bytes topic3_data = one_topic_data(topic3);
-        ::platon_event3(topic1_data.data(), topic1_data.size(), topic2_data.data(), topic2_data.size(),
-        topic3_data.data(), topic3_data.size(), rlp_data.data(), rlp_data.size());
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
     }
 
     template<class Topic1, class Topic2, class Topic3, class Topic4, typename... Args>
     inline void emit_event4(const Topic1 &topic1, const Topic2 &topic2, const Topic3 &topic3, const Topic4 &topic4, const Args &... args) {
+        RLPStream stream(4);
+        stream << topic1 << topic2 << topic3 << topic4;
+        bytes topic_data =  stream.out();  
         bytes rlp_data = event_agrs(args...);
-        bytes topic1_data = one_topic_data(topic1);
-        bytes topic2_data = one_topic_data(topic2);
-        bytes topic3_data = one_topic_data(topic3);
-        bytes topic4_data = one_topic_data(topic4);
-        ::platon_event4(topic1_data.data(), topic1_data.size(), topic2_data.data(), topic2_data.size(), 
-        topic3_data.data(), topic3_data.size(), topic4_data.data(), topic4_data.size(), rlp_data.data(), rlp_data.size());
-    }
+        ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(), rlp_data.size());
 }

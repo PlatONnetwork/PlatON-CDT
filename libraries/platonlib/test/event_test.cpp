@@ -8,54 +8,50 @@ using namespace platon;
 extern "C" {
 #endif
 
-void platon_event(const uint8_t* args, size_t argsLen){
-    byte *ptr = (byte *)args;
-    std::vector<byte> my_args;
-    for(size_t i = 0; i < argsLen; i++) {
-        my_args.push_back(*ptr);
-        ptr++;
+void platon_event(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen){
+    byte *topic_ptr = (byte *)topic;
+    std::vector<byte> my_topic;
+    for(size_t i = 0; i < topicLen; i++) {
+        my_topic.push_back(*topic_ptr);
+        topic_ptr++;
     }
     
+    if (0 != my_topic.size()){
+        RLP rlp(my_topic);
+        switch (rlp.itemCountStrict()):
+            case 1:
+                std::array<std::string, 1> topic_info;
+                fetch(rlp, topic_info);
+                std::cout << topic_info[0] << std::endl;
+                break;
+            case 2:
+                std::array<std::string, 2> topic_info;
+                fetch(rlp, topic_info);
+                std::cout << topic_info[0] << topic_info[1] << std::endl;
+                break;
+            case 3:
+                std::array<std::string, 3> topic_info;
+                fetch(rlp, topic_info);
+                std::cout << topic_info[0]  << topic_info[1] << topic_info[2] << std::endl;
+                break;
+            case 4:
+                std::array<std::string, 4> topic_info;
+                fetch(rlp, topic_info);
+                std::cout << topic_info[0] << topic_info[1] << topic_info[2] << topic_info[3] << std::endl;
+                break;
+            default:
+                platon_panic();      
+    }
+
+    byte *args_ptr = (byte *)args;
+    std::vector<byte> my_args;
+    for(size_t i = 0; i < argsLen; i++) {
+        my_args.push_back(*args_ptr);
+        args_ptr++;
+    }
     std::tuple<std::string, uint32_t> result;
     fetch(RLP(my_args), result);
     std::cout << std::get<0>(result) << ' ' << std::get<1>(result) << std::endl;
-}
-
-void platon_event1(const uint8_t* topic, size_t topicLen, const uint8_t* args, size_t argsLen){
-    for (size_t i = 0; i < topicLen; i++){   
-        std::cout << *(char*)(topic + i);
-    }
-    std::cout << std::endl;
-    platon_event(args, argsLen);
-}
-
-void platon_event2(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, const uint8_t* args, size_t argsLen){
-    for (size_t i = 0; i < topic1Len; i++){   
-        std::cout << *(char*)(topic1 + i);
-    }
-    std::cout << std::endl;
-
-    platon_event1(topic2, topic2Len, args, argsLen);
-}
-
-void platon_event3(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, 
-const uint8_t* topic3, size_t topic3Len, uint8_t* args, size_t argsLen){
-    for (size_t i = 0; i < topic1Len; i++){   
-        std::cout << *(char*)(topic1 + i);
-    }
-    std::cout << std::endl;
-
-    platon_event2(topic2, topic2Len, topic3, topic3Len, args, argsLen);
-}
-
-void platon_event4(const uint8_t* topic1, size_t topic1Len, const uint8_t* topic2, size_t topic2Len, 
-const uint8_t* topic3, size_t topic3Len, const uint8_t* topic4, size_t topic4Len, uint8_t* args, size_t argsLen){
-    for (size_t i = 0; i < topic1Len; i++){   
-        std::cout << *(char*)(topic1 + i);
-    }
-    std::cout << std::endl;
-
-    platon_event3(topic2, topic2Len, topic3, topic3Len, topic4, topic4Len, args, argsLen);
 }
 
 
