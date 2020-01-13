@@ -45,13 +45,14 @@ size_t platon_get_state_length(const uint8_t* key, size_t klen){
     return result[vect_key].size();
 }
 
-void platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
+size_t platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t vlen){
     std::vector<byte> vect_key, vect_value;
     vect_key = getVector(key, klen);
     vect_value = result[vect_key];
     for(size_t i = 0; i < vlen && i < vect_value.size(); i++){
         *(value + i) = vect_value[i];
     }
+    return vlen;
 }
 
 #ifdef __cplusplus
