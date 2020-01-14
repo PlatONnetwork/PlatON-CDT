@@ -26,11 +26,10 @@ size_t platon_get_input_length(void){
     return result.size();
 }
 
-void platon_get_input(const uint8_t *value){
-    byte *ptr = (byte *)value;
+void platon_get_input(uint8_t *value){
     for (auto one :result) {
-        *ptr = one;
-        ptr++;
+        *value = one;
+        value++;
     }
 }
 

@@ -8,7 +8,7 @@ extern "C" {
 
 void platon_return(const uint8_t *value, const size_t len);
 size_t platon_get_input_length(void);
-void platon_get_input(const uint8_t *value);
+void platon_get_input(uint8_t *value);
 void platon_debug(uint8_t *dst, size_t len);
 void platon_panic(void);
 

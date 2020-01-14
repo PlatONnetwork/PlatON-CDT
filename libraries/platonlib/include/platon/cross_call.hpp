@@ -22,6 +22,10 @@ extern "C" {
     int32_t platon_static_call(const uint8_t to[20], const uint8_t* args, size_t argsLen, 
         const uint8_t* callCost, size_t callCostLen);
 
+    // call result
+    size_t platon_get_call_output_length();
+    void platon_get_call_output(uint8_t *value);
+
 #ifdef __cplusplus
 }
 #endif
@@ -76,6 +80,15 @@ int32_t platon_static_call(const std::string &str_address, const bytes paras, co
     bytes gass_bytes = value_to_bytes(gass);
     return ::platon_static_call(contrace_address.data(), paras.data(), paras.size(), 
     gass_bytes.data(), gass_bytes.size());
+}
+
+template<typename T>
+inline void get_call_output(T &t) {
+    bytes result;
+    size_t len = ::platon_get_call_output_length();
+    result.resize(len);
+    ::platon_get_call_output(result.data());
+    fetch(RLP(result), t);
 }
 
 }

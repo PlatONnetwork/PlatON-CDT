@@ -27,3 +27,5 @@ platon_event
 platon_call
 platon_delegate_call
 platon_static_call
+platon_get_call_output_length
+platon_get_call_output

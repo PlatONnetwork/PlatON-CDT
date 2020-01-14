@@ -11,4 +11,3 @@
 #include "platon/event.hpp"
 #include "platon/cross_call.hpp"
 
-#define CONSTANT [[platon::constant]]
