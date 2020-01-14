@@ -27,7 +27,10 @@ class MakeAbi {
     llvm::json::Value handleEvent(llvm::DISubprogram* SP, llvm::json::Value Params, unsigned num);
     void handleSubprogram(llvm::DISubprogram* SP, std::vector<llvm::DILocalVariable*> &LVs, Attr attr);
 
+    llvm::StringRef handleVector(llvm::DINode* Node, llvm::DICompositeType* CT);
+    llvm::StringRef handleStructType(llvm::DINode* Node, llvm::DICompositeType* CT);
     llvm::StringRef handleCompositeType(llvm::DINode* Node, llvm::DICompositeType* CT);
+
     llvm::StringRef handleDerivedType(llvm::DINode* Node, llvm::DIDerivedType* DevT);
     llvm::StringRef handleBasicType(llvm::DINode* Node, llvm::DIBasicType* BT);
     llvm::json::Value handleElem(llvm::DINode* Node, llvm::DIType* DT);
