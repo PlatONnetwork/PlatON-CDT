@@ -126,6 +126,10 @@ size_t platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t 
     }
 }
 
+void platon_origin(uint8_t addr[20]){}
+void platon_caller(uint8_t addr[20]){}
+void platon_address(uint8_t addr[20]){}
+
 #ifdef __cplusplus
 }
 #endif
@@ -146,13 +150,27 @@ int main(int argc, char **argv) {
     0x47, 0x61, 0x76, 0x69, 0x6e, 0x8a, 0x49, 0x20, 0x61, 
     0x6d, 0x20, 0x67, 0x61, 0x76, 0x69, 0x6e, 0x88,
     0x66, 0x69, 0x6e, 0x69, 0x73, 0x68, 0x65, 0x64};
-     my_message one_test_message;
-     fetch(RLP(test_Data)[1], one_test_message);
-     std::cout << one_test_message << std::endl;
+    my_message one_test_message;
+    fetch(RLP(test_Data)[1], one_test_message);
+    std::cout << one_test_message << std::endl;
 
-     std::string methord_name;
-     fetch(RLP(test_Data)[0], methord_name);
-     std::cout << methord_name << std::endl;
+    std::string methord_name;
+    fetch(RLP(test_Data)[0], methord_name);
+    std::cout << methord_name << std::endl;
+
+    std::cout << "------------------------------------------" << std::endl;
+    test_Data = std::vector<byte>{0xf5, 0x8b, 0x61, 0x64, 0x64, 0x5f,
+    0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0xe8, 0xc6, 0x85, 0x47, 0x61, 0x76, 0x69, 0x6e, 0x97, 
+    0x49, 0x20, 0x61, 0x6d, 0x20, 0x67, 0x61, 0x76, 0x69, 0x6e, 0x20, 
+    0x44, 0x65, 0x6c, 0x65, 0x67, 0x61, 0x74, 0x65, 0x43, 0x61, 0x6c, 
+    0x6c, 0x88, 0x66, 0x69, 0x6e, 0x69, 0x73, 0x68, 0x65, 0x64};
+
+    fetch(RLP(test_Data)[0], methord_name);
+    std::cout << methord_name << std::endl;
+
+    fetch(RLP(test_Data)[1], one_test_message);
+    std::cout << one_test_message << std::endl;
+    std::cout << "------------------------------------------" << std::endl;
 
     RLPStream wht_stream;
     my_message one("1_head", "1_body", "1_end");
