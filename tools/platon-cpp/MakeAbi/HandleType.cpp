@@ -10,6 +10,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include "MakeAbi.h"
 
 using namespace llvm;
 using namespace json;
@@ -49,7 +50,12 @@ StringRef getName(DINode* Node){
   if(DILocalVariable* LV = dyn_cast<DILocalVariable>(Node)){ 
     return LV->getName();
   } else if(DIDerivedType* DerT = dyn_cast<DIDerivedType>(Node)){
-    return DerT->getName();
+    if(DerT->getTag() == dwarf::DW_TAG_member)
+      return DerT->getName();
+    else if(DerT->getTag() == dwarf::DW_TAG_inheritance)
+      return "BaseClass";
+    else 
+      llvm_unreachable("unknown variable");
   } else {
     llvm_unreachable("unknown variable");
   }
@@ -73,19 +79,22 @@ void report_error(DINode* Node){
     File = SP->getFile();
     Line = SP->getLine();
     llvm::errs() << "function return type can not support\n";
+  } else {
+    llvm_unreachable("unknown error");
   }
-  llvm::outs() << File->getFilename() << ":" << Line << "\n";
-  llvm::outs() << "Variable: " << Name << "\n";
+  llvm::errs() << File->getFilename() << ":" << Line << "\n";
+  llvm::errs() << "Variable: " << Name << "\n";
 }
 
-json::Value handleElem(DINode* Node, DIType* DT){
-  json::Value v = handleType(Node, DT);
-  llvm::json::Object vv = *v.getAsObject();
-  vv["name"] = getName(Node);
-  return vv;
+json::Value MakeAbi::handleElem(DINode* Node, DIType* DT){
+  StringRef s = handleType(Node, DT);
+  json::Value type = s; 
+  return Object {
+    {"name", getName(Node)},
+    {"type", type}};
 }
 
-json::Value handleBasicType_(DINode* Node, DIBasicType* BT){
+StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
   unsigned size = BT->getSizeInBits();
   switch(BT->getEncoding()){
 
@@ -94,11 +103,25 @@ json::Value handleBasicType_(DINode* Node, DIBasicType* BT){
 
     case llvm::dwarf::DW_ATE_unsigned_char:
     case llvm::dwarf::DW_ATE_unsigned:
-      return "uint<" + to_string(size) + ">";
+      if(size==8)return "uint8";
+      else if(size==16)return "uint16";
+      else if(size==32)return "uint32";
+      else if(size==64)return "uint64";
+      else {
+        report_error(Node);
+        report_fatal_error("unknown base type");
+      }
 
     case llvm::dwarf::DW_ATE_signed_char:
     case llvm::dwarf::DW_ATE_signed:
-      return "int<" + to_string(size) + ">";
+      if(size==8)return "int8";
+      else if(size==16)return "int16";
+      else if(size==32)return "int32";
+      else if(size==64)return "int64";
+      else {
+        report_error(Node);
+        report_fatal_error("unknown base type");
+      }
 
     case llvm::dwarf::DW_ATE_float:
       report_error(Node);
@@ -110,14 +133,10 @@ json::Value handleBasicType_(DINode* Node, DIBasicType* BT){
   }
 }
 
-json::Value handleBasicType(DINode* Node, DIBasicType* BT){
-  return Object{{"type", handleBasicType_(Node, BT)}};
-}
-
-json::Value handleDerivedType(DINode* Node, DIDerivedType* DevT){
+StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT){
 
   if(isString(DevT))
-    return Object{{"type", "bytes"}};
+    return "string";
 
   DIType* BT = DevT->getBaseType().resolve();
 
@@ -128,11 +147,6 @@ json::Value handleDerivedType(DINode* Node, DIDerivedType* DevT){
     case dwarf::DW_TAG_const_type:
       return handleType(Node, BT);
 
-    case dwarf::DW_TAG_member:
-      return handleElem(DevT, BT);
-    case dwarf::DW_TAG_inheritance:
-      return handleElem(DevT, BT);
-
     case dwarf::DW_TAG_pointer_type:
       report_error(Node);
       report_fatal_error("can not handle Pointer Type");
@@ -142,27 +156,43 @@ json::Value handleDerivedType(DINode* Node, DIDerivedType* DevT){
   }
 }
 
-json::Value handleCompositeType(DINode* Node, DICompositeType* CT){
+
+StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
   if(isVector(CT)){
     DIType* T = getVectorParam(CT);
-    json::Value v = handleType(Node, T);
-    llvm::json::Object vv = *v.getAsObject();
-    llvm::Optional<StringRef> OStr = vv["type"].getAsString();
-    vv["type"] = OStr->str() + "[]";
-    return vv;
+    StringRef s = handleType(Node, T);
+
+    unsigned len = StringBuf.size();
+    StringBuf.append(s);
+    StringBuf.append("[]");
+   
+    StringRef ss(StringBuf.data()+len, s.size()+2);
+    return ss;
 
   } else if(CT->getTag() == dwarf::DW_TAG_structure_type || CT->getTag() == dwarf::DW_TAG_class_type){
     json::Value Elems = {};
+    json::Value BaseClass = {};
     for(DINode* DN : CT->getElements()){
       if(DIDerivedType* Elem = dyn_cast<DIDerivedType>(DN)){
-        json::Value v = handleDerivedType(Elem, Elem);
-        Elems.getAsArray()->push_back(v);
+        DIType* BT = Elem->getBaseType().resolve();
+        if(Elem->getTag() == dwarf::DW_TAG_member){
+          json::Value e = handleElem(Elem, BT);
+          Elems.getAsArray()->push_back(e);
+        } else if(Elem->getTag() == dwarf::DW_TAG_inheritance){
+          StringRef c = handleType(Elem, BT);
+          BaseClass.getAsArray()->push_back(c);
+        }
       }
     }
-    return Object{
-      {"type",       "tuple"},
-      {"components", Elems}};
+    json::Value v = json::Object {
+      {"name", CT->getName()},
+      {"type", "struct"},
+      {"baseclass", BaseClass},
+      {"fields", Elems}};
+
+    contents.getAsArray()->push_back(v);
+    return CT->getName();
 
   } else {
     report_error(Node);
@@ -170,7 +200,7 @@ json::Value handleCompositeType(DINode* Node, DICompositeType* CT){
   }
 }
 
-json::Value handleType(DINode* Node, DIType* DT){
+StringRef MakeAbi::handleType_(DINode* Node, DIType* DT){
   if(DIBasicType* BT = dyn_cast<DIBasicType>(DT)){
     return handleBasicType(Node, BT);
   } else if(DICompositeType* CT = dyn_cast<DICompositeType>(DT)){
@@ -185,3 +215,70 @@ json::Value handleType(DINode* Node, DIType* DT){
   }
 }
 
+StringRef MakeAbi::handleType(DINode* Node, DIType* DT){
+  auto iter = TypeMap.find(DT);
+  if(iter != TypeMap.end()){
+    return iter->second;
+  } else {
+    StringRef s = handleType_(Node, DT);
+    TypeMap[DT] = s;
+    return s;
+  }
+}
+
+json::Value MakeAbi::handleAction(DISubprogram* SP, json::Value Params, bool isConst){
+  
+  DISubroutineType* ST = cast<DISubroutineType>(SP->getType());
+  DITypeRefArray TRA = ST->getTypeArray();
+  Metadata* RetType = TRA->getOperand(0).get();
+
+  json::Value Ret = 
+    RetType? 
+    handleType(SP, cast<DIType>(RetType)):
+    "void";
+
+  return Object{
+                {"name", SP->getName()},
+                {"input", Params},
+                {"output", Ret},
+                {"type", "Action"},
+                {"constant", isConst}
+                };
+}
+
+json::Value MakeAbi::handleEvent(DISubprogram* SP, json::Value Params, unsigned num){
+  
+  DISubroutineType* ST = cast<DISubroutineType>(SP->getType());
+  DITypeRefArray TRA = ST->getTypeArray();
+  Metadata* RetType = TRA->getOperand(0).get();
+
+  if(RetType != nullptr)
+    report_fatal_error("event can not hava return value");
+
+  return Object{
+                {"name", SP->getName()},
+                {"input", Params},
+                {"type", "Event"},
+                {"topic", num}
+                };
+}
+
+void MakeAbi::handleSubprogram(DISubprogram* SP, vector<DILocalVariable*> &LVs, Attr attr){
+
+  json::Value Params = {};
+  for(DILocalVariable* LV : LVs){
+    DIType* T = LV->getType().resolve();
+    json::Value elem = handleElem(LV, T);
+    Params.getAsArray()->push_back(elem);
+  }
+
+  AttrKind kind = attr.first;
+  unsigned attrnum = attr.second;
+
+  json::Value v = 
+    kind==ActionKind?
+    handleAction(SP, Params, attrnum):
+    handleEvent(SP, Params, attrnum);
+
+  contents.getAsArray()->push_back(v);
+}
