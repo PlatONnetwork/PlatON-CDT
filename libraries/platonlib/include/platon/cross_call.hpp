@@ -1,3 +1,4 @@
+#pragma once
 #include "boost/preprocessor/seq/for_each.hpp"
 #include "boost/fusion/algorithm/iteration/for_each.hpp"
 #include <boost/fusion/include/for_each.hpp>
@@ -19,8 +20,8 @@ extern "C" {
         const uint8_t *value, size_t valueLen, const uint8_t* callCost, size_t callCostLen);
     int32_t platon_delegate_call(const uint8_t to[20], const uint8_t* args, size_t argsLen, 
         const uint8_t* callCost, size_t callCostLen);
-    int32_t platon_static_call(const uint8_t to[20], const uint8_t* args, size_t argsLen, 
-        const uint8_t* callCost, size_t callCostLen);
+    // int32_t platon_static_call(const uint8_t to[20], const uint8_t* args, size_t argsLen, 
+    //     const uint8_t* callCost, size_t callCostLen);
 
     // call result
     size_t platon_get_call_output_length();
@@ -56,31 +57,31 @@ inline bytes value_to_bytes(T value) {
     return result;
 }
 
-template<typename value_type, typename gass_type>
-int32_t platon_call(const std::string &str_address, const bytes paras, 
-    const value_type &value, const gass_type &gass) {
+template<typename value_type, typename gas_type>
+inline int32_t platon_call(const std::string &str_address, const bytes paras, 
+    const value_type &value, const gas_type &gas) {
     Address contrace_address(str_address);
     bytes value_bytes = value_to_bytes(value);
-    bytes gass_bytes = value_to_bytes(gass);
+    bytes gas_bytes = value_to_bytes(gas);
     return ::platon_call(contrace_address.data(), paras.data(), paras.size(), 
-    value_bytes.data(), value_bytes.size(), gass_bytes.data(), gass_bytes.size());
+    value_bytes.data(), value_bytes.size(), gas_bytes.data(), gas_bytes.size());
 }
 
-template<typename gass_type>
-int32_t platon_delegate_call(const std::string &str_address, const bytes paras, const gass_type &gass) {
+template<typename gas_type>
+inline int32_t platon_delegate_call(const std::string &str_address, const bytes paras, const gas_type &gas) {
     Address contrace_address(str_address);
-    bytes gass_bytes = value_to_bytes(gass);
+    bytes gas_bytes = value_to_bytes(gas);
     return ::platon_delegate_call(contrace_address.data(), paras.data(), paras.size(), 
-    gass_bytes.data(), gass_bytes.size());
+    gas_bytes.data(), gas_bytes.size());
 }
 
-template<typename gass_type> 
-int32_t platon_static_call(const std::string &str_address, const bytes paras, const gass_type &gass) {
-    Address contrace_address(str_address);
-    bytes gass_bytes = value_to_bytes(gass);
-    return ::platon_static_call(contrace_address.data(), paras.data(), paras.size(), 
-    gass_bytes.data(), gass_bytes.size());
-}
+// template<typename gas_type> 
+// int32_t platon_static_call(const std::string &str_address, const bytes paras, const gas_type &gas) {
+//     Address contrace_address(str_address);
+//     bytes gas_bytes = value_to_bytes(gas);
+//     return ::platon_static_call(contrace_address.data(), paras.data(), paras.size(), 
+//     gas_bytes.data(), gas_bytes.size());
+// }
 
 template<typename T>
 inline void get_call_output(T &t) {

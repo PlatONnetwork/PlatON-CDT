@@ -10,4 +10,6 @@
 #include "platon/rlp_serialize.hpp"
 #include "platon/event.hpp"
 #include "platon/cross_call.hpp"
+#include "platon/authority.hpp"
+#include "platon/destory.hpp"
 

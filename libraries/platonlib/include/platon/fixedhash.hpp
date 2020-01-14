@@ -11,6 +11,9 @@ namespace platon {
     template <unsigned N>
     class FixedHash{
     public:
+        /// The size of the container.
+        enum { size = N };
+
         /// Construct an empty hash.
         FixedHash() { m_data.fill(0); }
 
@@ -78,7 +81,6 @@ namespace platon {
         /// @returns true if all one-bits in @a _c are set in this object.
         bool contains(FixedHash const& _c) const { return (*this & _c) == _c; }
 
-        const size_t size() const { return N; }
     private:
         std::array<byte, N> m_data;
     };
