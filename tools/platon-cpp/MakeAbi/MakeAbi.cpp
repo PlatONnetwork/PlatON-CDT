@@ -12,42 +12,11 @@
 #include "llvm/Support/FileSystem.h"
 #include <map>
 #include <vector>
+#include "MakeAbi.h"
 
 using namespace llvm;
 using namespace json;
 using namespace std;
-
-json::Value handleType(DINode* Node, DIType* DT);
-json::Value handleElem(DINode* Node, DIType* DT);
-
-typedef bool isEvent;
-typedef bool isConst;
-typedef pair<isEvent, isConst> Attr;
-
-json::Value handleSubprogram(DISubprogram*  SP, vector<DILocalVariable*> &LVs, Attr SPKind){
-  
-  DISubroutineType* ST = cast<DISubroutineType>(SP->getType());
-  DITypeRefArray TRA = ST->getTypeArray();
-  Metadata* RetType = TRA->getOperand(0).get();
-  json::Value Ret = {};
-  if(RetType){
-    DIType* RetType1 = cast<DIType>(RetType);
-    Ret = json::Array{handleType(SP, RetType1)};
-  }
-
-  json::Value Params = {};
-  for(DILocalVariable* LV : LVs){
-    json::Value elem = handleElem(LV, LV->getType().resolve());
-    Params.getAsArray()->push_back(elem);
-  }
-
-  return Object{{"name", SP->getName()},
-                {"input", Params},
-                {"output", Ret},
-                {"type", SPKind.first?"event":"function"},
-                {"constant", SPKind.second}
-                };
-}
 
 StringRef getAnnoteKind(llvm::Value* cs) {
   if(ConstantStruct* CS=dyn_cast<ConstantStruct>(cs))
@@ -104,26 +73,55 @@ void collectParams(Function* DbgDecl, SubprogramMap &SPMap, ParamsMap &PMap){
   }
 }
 
+Attr DedupKind(Attr attr0, Attr attr1){
+  AttrKind Kind0 = attr0.first;
+  AttrKind Kind1 = attr1.first;
+  unsigned num0 = attr0.second;
+  unsigned num1 = attr1.second;
+
+  if(Kind0==ActionKind && Kind1==ActionKind)
+    return make_pair(ActionKind, num0 || num1);
+  else if(Kind0==EventKind && Kind1==EventKind){
+    if(num0==num1)return attr0;
+    else report_fatal_error("Event dismatch");
+  } else
+    report_fatal_error("attr dismatch");
+}
+
+Attr parseAttr(StringRef Kind){
+  if(Kind == "Action")
+    return make_pair(ActionKind, 0);
+  else if(Kind == "Const")
+    return make_pair(ActionKind, 1);
+  else if(Kind.startswith("Event")){
+    APInt r;
+    if(!Kind.drop_front(5).getAsInteger(10, r)){
+      return make_pair(EventKind, r.getZExtValue());
+    }
+  }
+  return make_pair(OtherKind, 0);
+}
+
 void collectAnnote(GlobalVariable* annote, SubprogramMap &SPMap){
   if(annote){
     if(ConstantArray* annotes = dyn_cast<ConstantArray>(annote->getInitializer())) {
       for (auto cs:annotes->operand_values()) {
         DISubprogram* SP = getFuncInfo(cs);
-        StringRef kind = getAnnoteKind(cs);
 
-        if(kind == "Action")
-          SPMap[SP].first = false;
-        else if(kind == "Event")
-          SPMap[SP].first = true;
-        else if(kind == "Const")
-          SPMap[SP].second = true;
+        Attr attr = parseAttr(getAnnoteKind(cs));
+
+        if(attr.first != OtherKind){
+          if(SPMap.find(SP)==SPMap.end())
+            SPMap[SP] = attr;
+          else 
+            SPMap[SP] = DedupKind(SPMap[SP], attr);
+        }
       }
     }
   }
 }
 
-
-json::Value makeAbi(Module* M){
+void makeAbi(Module* M, MakeAbi &MABI){
 
   SubprogramMap SPMap;
   ParamsMap PMap;
@@ -137,7 +135,7 @@ json::Value makeAbi(Module* M){
   collectParams(M->getFunction("llvm.dbg.declare"), SPMap, PMap);
   collectParams(M->getFunction("llvm.dbg.value"), SPMap, PMap);
 
-  json::Value Funcs = {};
+  assert(SPMap.size());
 
   for(auto iter : SPMap){
     DISubprogram* SP = iter.first;
@@ -145,19 +143,16 @@ json::Value makeAbi(Module* M){
 
     vector<DILocalVariable*> Params;
     exportParams(SP, PMap, Params);
-    json::Value func = handleSubprogram(SP, Params, SPKind);
-
-    Funcs.getAsArray()->push_back(func);
+    MABI.handleSubprogram(SP, Params, SPKind);
   }
-
-  return Funcs;
 }
 
 int GenerateABI(std::string &WasmOutput, llvm::Module* M){
   SmallString<128> abiPath(WasmOutput);
   llvm::sys::path::replace_extension(abiPath, "abi.json");
 
-  json::Value v = makeAbi(M);
+  MakeAbi MABI;
+  makeAbi(M, MABI);
 
   std::error_code EC;
   ToolOutputFile Out(abiPath, EC, sys::fs::F_None);
@@ -165,7 +160,7 @@ int GenerateABI(std::string &WasmOutput, llvm::Module* M){
   if(EC)
     report_fatal_error(EC.message());
 
-  Out.os() << llvm::formatv("{0:4}", v);
+  Out.os() << llvm::formatv("{0:4}", MABI.contents);
   Out.keep();
 
   return 0;
