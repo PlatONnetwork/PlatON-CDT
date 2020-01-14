@@ -79,6 +79,10 @@ void report_error(DINode* Node){
     File = SP->getFile();
     Line = SP->getLine();
     llvm::errs() << "function return type can not support\n";
+  } else if(DICompositeType* CT = dyn_cast<DICompositeType>(Node)){
+    Name = CT->getName();
+    File = CT->getFile();
+    Line = CT->getLine();
   } else {
     llvm_unreachable("unknown error");
   }
@@ -156,43 +160,57 @@ StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT){
   }
 }
 
+StringRef MakeAbi::handleVector(DINode* Node, DICompositeType* CT){
+
+  DIType* T = getVectorParam(CT);
+  StringRef s = handleType(Node, T);
+
+  unsigned len = StringBuf.size();
+  StringBuf.append(s);
+  StringBuf.append("[]");
+  
+  StringRef ss(StringBuf.data()+len, s.size()+2);
+  return ss;
+}
+
+StringRef MakeAbi::handleStructType(DINode* Node, DICompositeType* CT){
+  json::Value Elems = {};
+  json::Value BaseClass = {};
+
+  for(DINode* DN : CT->getElements()){
+    if(DIDerivedType* Elem = dyn_cast<DIDerivedType>(DN)){
+      DIType* BT = Elem->getBaseType().resolve();
+      if(Elem->getTag() == dwarf::DW_TAG_member){
+        json::Value e = handleElem(Elem, BT);
+        Elems.getAsArray()->push_back(e);
+      } else if(Elem->getTag() == dwarf::DW_TAG_inheritance){
+        StringRef c = handleType(Elem, BT);
+        BaseClass.getAsArray()->push_back(c);
+      }
+    }
+  }
+  json::Value v = json::Object {
+    {"name", CT->getName()},
+    {"type", "struct"},
+    {"baseclass", BaseClass},
+    {"fields", Elems}};
+
+  contents.getAsArray()->push_back(v);
+  return CT->getName();
+}
 
 StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
-  if(isVector(CT)){
-    DIType* T = getVectorParam(CT);
-    StringRef s = handleType(Node, T);
+  if(CT->getElements().get() == nullptr){
+    report_error(Node);
+    report_fatal_error("StructType have define but never used");
+  }
 
-    unsigned len = StringBuf.size();
-    StringBuf.append(s);
-    StringBuf.append("[]");
-   
-    StringRef ss(StringBuf.data()+len, s.size()+2);
-    return ss;
+  if(isVector(CT)){
+    return handleVector(Node, CT);
 
   } else if(CT->getTag() == dwarf::DW_TAG_structure_type || CT->getTag() == dwarf::DW_TAG_class_type){
-    json::Value Elems = {};
-    json::Value BaseClass = {};
-    for(DINode* DN : CT->getElements()){
-      if(DIDerivedType* Elem = dyn_cast<DIDerivedType>(DN)){
-        DIType* BT = Elem->getBaseType().resolve();
-        if(Elem->getTag() == dwarf::DW_TAG_member){
-          json::Value e = handleElem(Elem, BT);
-          Elems.getAsArray()->push_back(e);
-        } else if(Elem->getTag() == dwarf::DW_TAG_inheritance){
-          StringRef c = handleType(Elem, BT);
-          BaseClass.getAsArray()->push_back(c);
-        }
-      }
-    }
-    json::Value v = json::Object {
-      {"name", CT->getName()},
-      {"type", "struct"},
-      {"baseclass", BaseClass},
-      {"fields", Elems}};
-
-    contents.getAsArray()->push_back(v);
-    return CT->getName();
+    return handleStructType(Node, CT);
 
   } else {
     report_error(Node);
