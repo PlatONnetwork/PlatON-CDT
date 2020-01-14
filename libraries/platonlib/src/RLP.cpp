@@ -279,7 +279,7 @@ RLPStream& RLPStream::append(bytesConstRef _s, bool _compact)
     return *this;
 }
 
-RLPStream& RLPStream::append(uint64_t _i)
+RLPStream& RLPStream::append(u512 _i)
 {
     if (!_i)
         m_out.push_back(c_rlpDataImmLenStart);

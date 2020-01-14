@@ -1,6 +1,7 @@
 #pragma once
 #include<vector>
 #include<string>
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
