@@ -8,7 +8,7 @@ if(NOT DEFINED LLVM_CONFIG)
   endif()
 
   if(NOT LLVM_CONFIG)
-    execute_process(COMMAND wget http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz)
+    execute_process(COMMAND wget --progress=bar:force http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz)
     execute_process(COMMAND tar xavf clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz)
     execute_process(COMMAND mv clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04 clang_llvm_8.0)
     set(LLVM_CONFIG clang_llvm_8.0/bin/llvm-config)
