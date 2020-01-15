@@ -1,4 +1,6 @@
-#include <platon/platon.hpp>
+#include "platon/contract.hpp"
+#include "platon/rlp_serialize.hpp"
+#include "platon/dispatcher.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
