@@ -1,10 +1,12 @@
+#pragma once
+
 #include <stdio.h>
 #include <string>
 
+namespace platon {
+
 std::string all_info;
 char temp_info[500];
-
-inline void print() { printf("\n"); }
 
 inline void print( const char* ptr ) { sprintf(temp_info, "%s", ptr); all_info += std::string(temp_info);}
 
@@ -42,6 +44,7 @@ inline void print( bool is_true ) {
 template<typename Arg, typename... Args>
 void print( Arg&& a, Args&&... args ) {
     print(std::forward<Arg>(a));
+    print(' ');
     print(std::forward<Args>(args)...);
 }
 
@@ -49,6 +52,10 @@ template<typename Arg, typename... Args>
 void println( Arg&& a, Args&&... args ) {
     all_info = "";
     print(std::forward<Arg>(a), std::forward<Args>(args)...);
-    printf("%s", all_info.c_str());
-    printf("\n");
+    printf("%s\n", all_info.c_str());
+}
+
+#define DEBUG(...)\
+platon::println("line", __LINE__, "file", __FILE__, "func", __func__, ##__VA_ARGS__); 
+
 }

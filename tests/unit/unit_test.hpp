@@ -1,9 +1,12 @@
 //
 // Created by zhou.yang on 2018/11/21.
 //
+#pragma once
 #include <vector>
-#include "print.hpp"
+#include "platon/print.hpp"
 #include "platon/contract.hpp"
+
+using namespace platon;
 
 class TestResult {
   public:
@@ -43,9 +46,9 @@ class TestResult {
         testResult_.skip = true;                                     \
       }                                                              \
       testResult_.failures += 1;                                     \
-      println("assertion failed:", #cond, ", line:", __LINE__, \
-                      ", file:", __FILE__, ", test name:", name_,        \
-                      ", group:", group_, ##__VA_ARGS__);              \
+      println("assertion failed", #cond, "line", __LINE__, \
+                      "file", __FILE__, "test name", name_,        \
+                      "group", group_, ##__VA_ARGS__);              \
     }                                                                \
     testResult_.assertions += 1;                                     \
   }
@@ -57,8 +60,8 @@ class TestResult {
         testResult_.skip = true;                                            \
       }                                                                     \
       testResult_.failures += 1;                                            \
-      println("assertion failed:", #A, "==", #B, ", line:", __LINE__, \
-                      ", file:", __FILE__, ", func:", __func__, ##__VA_ARGS__); \
+      println("assertion failed", #A, "==", #B, "line:", __LINE__, \
+                      "file", __FILE__, "func", __func__, ##__VA_ARGS__); \
     }                                                                       \
     testResult_.assertions += 1;                                            \
   }
@@ -70,8 +73,8 @@ class TestResult {
         testResult_.skip = true;                                            \
       }                                                                     \
       testResult_.failures += 1;                                            \
-      println("assertion failed:", #A, "!=", #B, ", line:", __LINE__, \
-                      ", file:", __FILE__, ", func:", __func__, ##__VA_ARGS__); \
+      println("assertion failed", #A, "!=", #B, "line", __LINE__, \
+                      "file", __FILE__, "func", __func__, ##__VA_ARGS__); \
     }                                                                       \
     testResult_.assertions += 1;                                            \
   }
@@ -86,8 +89,8 @@ extern "C" {                                                                \
         TestResult testResult;                                              \
         testResult.isContinue = true;                                       \
         testSuit(testResult);                                               \
-        println("all test case:", testResult.testcases, ", assertions:",    \
-          testResult.assertions, ", failures:", testResult.failures);    \
+        println("all test case", testResult.testcases, "assertions",    \
+          testResult.assertions, "failures", testResult.failures);    \
         return 0;                                                           \
     }                                                                       \
 }                                                                           \
