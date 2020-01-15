@@ -6,15 +6,15 @@ char temp_info[500];
 
 inline void print() { printf("\n"); }
 
-inline void print( const char* ptr ) { sprintf(temp_info, ptr); all_info += std::string(temp_info);}
+inline void print( const char* ptr ) { sprintf(temp_info, "%s", ptr); all_info += std::string(temp_info);}
 
-inline void print(std::string info) { sprintf(temp_info, info.c_str()); all_info += std::string(temp_info);}
+inline void print(std::string info) { sprintf(temp_info, "%s", info.c_str()); all_info += std::string(temp_info);}
 
 inline void print( float num ) { sprintf(temp_info, "%f", num); all_info += std::string(temp_info);}
 
 inline void print( double num ) { sprintf(temp_info, "%lf", num); all_info += std::string(temp_info);}
 
-inline void print( long double num ) { sprintf(temp_info, "ll%f", num); all_info += std::string(temp_info);}
+inline void print( long double num ) { sprintf(temp_info, "%Lf", num); all_info += std::string(temp_info);}
 
 inline void print(char num) { sprintf(temp_info, "%c", num); all_info += std::string(temp_info);}
 
@@ -49,6 +49,6 @@ template<typename Arg, typename... Args>
 void println( Arg&& a, Args&&... args ) {
     all_info = "";
     print(std::forward<Arg>(a), std::forward<Args>(args)...);
-    printf(all_info.c_str());
+    printf("%s", all_info.c_str());
     printf("\n");
 }
