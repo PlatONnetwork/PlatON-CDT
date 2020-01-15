@@ -1,6 +1,7 @@
 #include "platon/fixedhash.hpp"
 #include "platon/RLP.h"
 #include "platon/rlp_extend.hpp"
+#include "platon/print.hpp"
 #include <iostream>
 
 using namespace platon;
@@ -35,4 +36,5 @@ int main(int argc, char **argv) {
     fetch(RLP(result), result_address);
     std::cout << result_address.toString() << std::endl;
     std::cout << (test_address == result_address) << std::endl;
+    DEBUG("result_address", result_address.toString())
 }

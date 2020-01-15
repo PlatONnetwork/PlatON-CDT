@@ -12,4 +12,5 @@
 #include "platon/cross_call.hpp"
 #include "platon/authority.hpp"
 #include "platon/destory.hpp"
+#include "platon/print.hpp"
 
