@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
+#include <array>
 #include <limits>
 #include <ostream>
 #include <sstream>
@@ -95,7 +96,9 @@ public:
     constexpr operator float() const noexcept;
 
     struct _impl;
-
+    std::array<base_type, _impl::arr_size>& value() {
+        return m_arr;
+    }
 private:
     friend struct ::_test;
 
@@ -105,7 +108,7 @@ private:
     friend struct numeric_limits<wide_integer<Bits, signed>>;
     friend struct numeric_limits<wide_integer<Bits, unsigned>>;
 
-    base_type m_arr[_impl::arr_size];
+    std::array<base_type, _impl::arr_size> m_arr;
 };
 
 template <typename T>
