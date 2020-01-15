@@ -17,11 +17,9 @@ int32_t platon_migrate(uint8_t newAddr[20], const uint8_t* args, size_t argsLen,
 
 namespace platon {
 
-    template<typename value_type, typename gas_type, typename... Args>
-    int32_t platon_migrate(Address &platon_address, const bytes &code,
-    const value_type &value, const gas_type &gas, const Args &... args) {
-        bytes init_args = cross_call_args("init", args...);
-        
+    template<typename value_type, typename gas_type>
+    int32_t platon_migrate(Address &platon_address, const bytes &code, const bytes &init_args,
+    const value_type &value, const gas_type &gas) {   
         // encode
         RLPStream stream;
         stream.appendList(2) << code << init_args;

@@ -42,6 +42,10 @@ namespace platon {
             std::copy(b.begin(), b.end(), m_data.begin());
         }
 
+        explicit FixedHash(const bytes &b) {
+            std::copy(b.begin(), b.end(), m_data.begin());
+        }
+
         explicit FixedHash(const std::string &s, bool isHex = true): FixedHash(isHex ? fromHex(s) : asBytes(s)){}
 
         std::string toString() const {
