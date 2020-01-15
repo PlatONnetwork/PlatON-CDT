@@ -1,4 +1,7 @@
-#include <platon/platon.hpp>
+#include "platon/contract.hpp"
+#include "platon/rlp_serialize.hpp"
+#include "platon/dispatcher.hpp"
+#include "platon/storagetype.hpp"
 #include <iostream>
 #include <string>
 #include <map>
@@ -125,10 +128,6 @@ size_t platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t 
         *(value + i) = vect_value[i];
     }
 }
-
-void platon_origin(uint8_t addr[20]){}
-void platon_caller(uint8_t addr[20]){}
-void platon_address(uint8_t addr[20]){}
 
 #ifdef __cplusplus
 }

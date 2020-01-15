@@ -34,7 +34,7 @@ extern "C" {
 namespace platon {
 
 template<typename... Args>
-inline bytes cross_call_args(const std::string method, const Args &... args){
+inline bytes cross_call_args(const std::string &method, const Args &... args){
     RLPStream stream;
     std::tuple<Args...> tuple_args = std::make_tuple(args...);
     size_t num = sizeof...(Args);
@@ -46,7 +46,7 @@ inline bytes cross_call_args(const std::string method, const Args &... args){
     return stream.out();
 }
 
-template <class T> 
+template <typename T> 
 inline bytes value_to_bytes(T value) {
     unsigned byte_count = bytesRequired(value);
     bytes result;
@@ -58,20 +58,20 @@ inline bytes value_to_bytes(T value) {
 }
 
 template<typename value_type, typename gas_type>
-inline int32_t platon_call(const std::string &str_address, const bytes paras, 
+inline int32_t platon_call(const std::string &str_address, const bytes &paras, 
     const value_type &value, const gas_type &gas) {
-    Address contrace_address(str_address);
+    Address contract_address(str_address);
     bytes value_bytes = value_to_bytes(value);
     bytes gas_bytes = value_to_bytes(gas);
-    return ::platon_call(contrace_address.data(), paras.data(), paras.size(), 
+    return ::platon_call(contract_address.data(), paras.data(), paras.size(), 
     value_bytes.data(), value_bytes.size(), gas_bytes.data(), gas_bytes.size());
 }
 
 template<typename gas_type>
-inline int32_t platon_delegate_call(const std::string &str_address, const bytes paras, const gas_type &gas) {
-    Address contrace_address(str_address);
+inline int32_t platon_delegate_call(const std::string &str_address, const bytes &paras, const gas_type &gas) {
+    Address contract_address(str_address);
     bytes gas_bytes = value_to_bytes(gas);
-    return ::platon_delegate_call(contrace_address.data(), paras.data(), paras.size(), 
+    return ::platon_delegate_call(contract_address.data(), paras.data(), paras.size(), 
     gas_bytes.data(), gas_bytes.size());
 }
 

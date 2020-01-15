@@ -35,6 +35,10 @@ void platon_get_call_output(uint8_t *value){
 
 int main(int argc, char **argv) {
     platon::bytes paras = platon::cross_call_args("init", std::string("jatel"), 56);
+    for (auto i : paras) {
+        std::cout << i << ' ';
+    }
+    std::cout << std::endl;
     std::tuple<std::string, std::string, uint32_t> call_paras;
     platon::fetch(platon::RLP(paras), call_paras);
     std::cout << std::get<0>(call_paras) << ' ' << std::get<1>(call_paras) << ' ' << std::get<2>(call_paras) << std::endl;

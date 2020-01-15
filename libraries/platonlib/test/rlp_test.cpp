@@ -171,5 +171,20 @@ int main(int argc, char **argv) {
     for( auto i : map_test_one) {
         std::cout << i.first << ' ' << i.second << ' ';
     }
-    std::cout <<  std::endl;
+    std::cout << std::endl;
+
+    // 测试追加数据
+    wht_stream.clear();
+    wht_stream.appendList(3);
+    uint32_t data_32= 1*256*256*256 + 2*256*256 + 3*256 + 4;
+    wht_stream << data_32;
+    data_32= 5*256*256*256 + 6*256*256 + 7*256 + 8;
+    wht_stream << data_32;
+    data_32= 9*256*256*256 + 10*256*256 + 11*256 + 12;
+    wht_stream << data_32;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
 }

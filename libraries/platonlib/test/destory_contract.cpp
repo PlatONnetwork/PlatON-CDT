@@ -20,7 +20,7 @@ extern const char contract_ower[] = "ower";
 
 CONTRACT hello : public platon::Contract{
    public:
-      ACTION void init(const std::string address = ""){
+      ACTION std::string init(const std::string address = ""){
           if (address.empty()) {
               Address platon_address;
               platon_caller(platon_address);
@@ -28,6 +28,8 @@ CONTRACT hello : public platon::Contract{
           } else {
               contract_ower.self() = Address(address);
           }
+
+          return contract_ower.self().toString();
       }
 
       ACTION std::vector<my_message> add_message(const my_message &one_message){
@@ -39,13 +41,19 @@ CONTRACT hello : public platon::Contract{
           return info.self();
       }
 
-      ACTION void destory() {
+      ACTION std::string get_ower() {
+          Address platon_address = contract_ower.self();
+          return platon_address.toString();
+      }
+
+      ACTION std::string destroy() {
           Address platon_address;
           platon_origin_caller(platon_address);
           if (contract_ower.self() != platon_address){
-              return;
+              return "invalid address";
           }
           platon_destroy();
+          return platon_address.toString();
       }
 
       ACTION std::string migrate(const bytes &code, uint64_t transfer_value, uint64_t gas_value, 
@@ -53,7 +61,7 @@ CONTRACT hello : public platon::Contract{
             Address platon_address;
             platon_origin_caller(platon_address);
             if (contract_ower.self() != platon_address){
-                return "";
+                return "invalid address";
             }
 
             Address return_address;
@@ -66,4 +74,4 @@ CONTRACT hello : public platon::Contract{
       StorageType<contract_ower, Address> contract_ower;
 };
 
-PLATON_DISPATCH(hello, (init)(add_message)(get_message)(destory)(migrate))
+PLATON_DISPATCH(hello, (init)(add_message)(get_message)(get_ower)(destroy)(migrate))
