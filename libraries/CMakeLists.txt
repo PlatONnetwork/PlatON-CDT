@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything --target=wasm32 -nostdli
 
 add_subdirectory(libc)
 add_subdirectory(libc++)
+add_subdirectory(builtins)
 add_subdirectory(platonlib/src)
 
 
