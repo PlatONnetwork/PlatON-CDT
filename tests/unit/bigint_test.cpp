@@ -1870,7 +1870,7 @@ UNITTEST_MAIN() {
     RUN_TEST(bigint, testToString)
     RUN_TEST(bigint, testNativeOperators)
     RUN_TEST(bigint, testNativeOperatorsAssign)
-//    RUN_TEST(bigint, testNativeOperatorsAssignFloat)
+    RUN_TEST(bigint, testNativeOperatorsAssignFloat)
     RUN_TEST(bigint, testConstexpr)
     RUN_TEST(bigint, testToChars)
     RUN_TEST(bigint, testNegative)
