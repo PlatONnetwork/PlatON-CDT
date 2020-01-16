@@ -14,6 +14,11 @@
 
 namespace platon{
 
+inline RLPStream& RLPStream::operator << (bytes const& _s){
+    append(_s);
+    return *this;
+}
+
 template <class _T>
 inline RLPStream& RLPStream::operator << (std::vector<_T> const& _s){
     appendList(_s.size());
@@ -82,6 +87,10 @@ inline RLPStream& RLPStream::operator << ( const std::tuple<Args...> &t) {
 template <class T> 
 inline void fetch(const RLP &rlp, T &value){
     value = T(rlp);
+}
+
+inline void fetch(const RLP &rlp, bytes &value){
+    value = rlp.toBytes();
 }
 
 template <class T>

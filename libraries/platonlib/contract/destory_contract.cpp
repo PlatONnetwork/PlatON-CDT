@@ -58,8 +58,7 @@ CONTRACT hello : public platon::Contract{
           return platon_address.toString();
       }
 
-      ACTION std::string migrate(const bytes &code, const bytes &init_arg, uint64_t transfer_value, 
-      uint64_t gas_value){
+      ACTION std::string migrate(const bytes &init_arg, uint64_t transfer_value, uint64_t gas_value){
             Address platon_address;
             platon_origin_caller(platon_address);
             if (contract_ower.self() != platon_address){
@@ -67,7 +66,8 @@ CONTRACT hello : public platon::Contract{
             }
 
             Address return_address;
-            platon_migrate(return_address, code, init_arg, transfer_value, gas_value);
+            platon_migrate_contract(return_address, init_arg, transfer_value, gas_value);
+            DEBUG("return_address", return_address.toString())
             return return_address.toString();
       }
 

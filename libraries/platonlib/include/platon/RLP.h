@@ -413,6 +413,8 @@ public:
     /// Shift operators for appending data items.
     template <class T> RLPStream& operator<<(T _data) { return append(_data); }
 
+    RLPStream& operator << (bytes const& _s);
+
     template <class _T>RLPStream& operator << (std::vector<_T> const& _s);
 
     template <class _T, size_t S> RLPStream& operator << (std::array<_T, S> const& _s);

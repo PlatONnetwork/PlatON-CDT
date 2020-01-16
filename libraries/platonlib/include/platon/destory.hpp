@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "fixedhash.hpp"
 #include "cross_call.hpp"
+#include "authority.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,31 +19,20 @@ int32_t platon_migrate(uint8_t newAddr[20], const uint8_t* args, size_t argsLen,
 namespace platon {
 
     template<typename value_type, typename gas_type>
-    int32_t platon_migrate(Address &platon_address, const bytes &code, const bytes &init_args,
-    const value_type &value, const gas_type &gas) {   
-        // encode
-        RLPStream stream;
-        stream.appendList(2) << code << init_args;
-        bytes deploy_args = stream.out();
-
-        // add magic number
-        bytes real_args;
-        for (int i = 0; i < 4; i++) {
-            real_args.push_back(code[i]);
-        }
-        std::copy(deploy_args.begin(), deploy_args.end(), std::back_inserter(real_args));
-
+    int32_t platon_migrate_contract(Address &platon_address, const bytes &init_args, 
+        value_type value, gas_type gas) {   
         // value and gas
         bytes value_bytes = value_to_bytes(value);
         bytes gas_bytes = value_to_bytes(gas);
 
         // call platon_migrate
-        uint8_t addr[20] = {};
-        ::platon_migrate(addr, real_args.data(), real_args.size(), value_bytes.data(), 
+        bytes address_bytes;
+        address_bytes.resize(address_len);
+        ::platon_migrate(address_bytes.data(), init_args.data(), init_args.size(), value_bytes.data(), 
         value_bytes.size(), gas_bytes.data(), gas_bytes.size());
 
         //set address
-        const char * addres_ptr = (const char *)addr;
-        platon_address = Address(addres_ptr);
+        platon_address =  Address(address_bytes);
+        return 0;
     }
 }
