@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string>
+#include "bigint.hpp"
 
 namespace platon {
 
@@ -31,6 +32,9 @@ inline void print(long long num) { sprintf(temp_info, "%lld", num); all_info += 
 inline void print(uint32_t num) { sprintf(temp_info, "%lu", num); all_info += std::string(temp_info);}
 
 inline void print(uint64_t num) { sprintf(temp_info, "%llu", num); all_info += std::string(temp_info);}
+
+template <size_t Bits, typename Signed>
+inline void print(const std::wide_integer<Bits, Signed> num) { all_info += std::to_string(num);}
 
 inline void print( bool is_true ) { 
     if (is_true) {
