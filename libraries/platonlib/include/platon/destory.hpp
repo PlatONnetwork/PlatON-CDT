@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-int32_t platon_destroy();
+int32_t platon_destroy(const uint8_t to[20]);
 int32_t platon_migrate(uint8_t newAddr[20], const uint8_t* args, size_t argsLen, 
     const uint8_t* value, size_t valueLen, const uint8_t* callCost, size_t callCostLen);
 
@@ -34,5 +34,9 @@ namespace platon {
         //set address
         platon_address =  Address(address_bytes);
         return 0;
+    }
+
+    int32_t platon_destroy_contract(const Address &platon_address){
+        return platon_destroy(platon_address.data());
     }
 }

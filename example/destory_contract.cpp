@@ -54,7 +54,7 @@ CONTRACT hello : public platon::Contract{
           if (contract_ower.self() != platon_address){
               return "invalid address";
           }
-          platon_destroy();
+          platon_destroy_contract(platon_address);
           return platon_address.toString();
       }
 
