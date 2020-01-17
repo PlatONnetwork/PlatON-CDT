@@ -7,11 +7,13 @@
 extern "C" {
 #endif
 
+void  platon_assert( uint32_t test, const char* msg );
 void platon_return(const uint8_t *value, const size_t len);
 size_t platon_get_input_length(void);
 void platon_get_input(uint8_t *value);
 void platon_debug(uint8_t *dst, size_t len);
 void platon_panic(void);
+void platon_revert(void);
 
 #ifdef __cplusplus
 }
