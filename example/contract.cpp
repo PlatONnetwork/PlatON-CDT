@@ -40,7 +40,7 @@ CONTRACT hello : public platon::Contract{
           return info.self();
       }
 
-      ACTION void hello_abort(){platon_assert(0, "hello abort");}
+      ACTION void hello_abort(){platon_assert_abort(0, "hello abort");}
 
       ACTION void hello_panic(){platon_panic();}
 

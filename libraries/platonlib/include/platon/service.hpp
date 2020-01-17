@@ -7,7 +7,6 @@
 extern "C" {
 #endif
 
-void  platon_assert( uint32_t test, const char* msg );
 void platon_return(const uint8_t *value, const size_t len);
 size_t platon_get_input_length(void);
 void platon_get_input(uint8_t *value);
@@ -34,5 +33,13 @@ namespace platon {
       ::platon_debug((uint8_t *)msg.c_str(), len);
       ::platon_panic();
    }
+
+    inline void platon_assert_abort ( uint32_t test, const char* msg ) {
+        if (!test) {
+            uint8_t * dest = (uint8_t *)msg;
+            ::platon_debug(dest, strlen(msg));
+            platon_revert();
+        }
+    }
 
 }
