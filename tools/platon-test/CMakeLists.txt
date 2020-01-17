@@ -3,3 +3,5 @@ execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build_test.sh)
 file(COPY platon-test DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 file(REMOVE_RECURSE platon-test)
+
+install(PROGRAMS ${EXECUTABLE_OUTPUT_PATH}/platon-test DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

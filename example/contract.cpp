@@ -39,8 +39,13 @@ CONTRACT hello : public platon::Contract{
           PLATON_EMIT_EVENT1(hello, "get_message", "event2", 2);
           return info.self();
       }
+
+      ACTION void hello_abort(){platon_assert(0, "hello abort");}
+
+      ACTION void hello_panic(){platon_panic();}
+
    private:
       platon::StorageType<contract_info, std::vector<my_message>> info;
 };
 
-PLATON_DISPATCH(hello, (init)(add_message)(get_message))
+PLATON_DISPATCH(hello, (init)(add_message)(get_message)(hello_abort)(hello_panic))

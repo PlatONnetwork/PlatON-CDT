@@ -44,9 +44,9 @@
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #endif
 
-extern "C" void platon_assert( unsigned int test, const char* msg  );
-size_t strftime(char*, size_t, const char*, const struct tm*) { platon_assert(false, "error: strftime called"); }
-size_t strftime_l(char*, size_t, const char*, const struct tm*, locale_t) { platon_assert(false, "error: strftime_l called"); }
+extern "C" void platon_abort( unsigned int test, const char* msg  );
+size_t strftime(char*, size_t, const char*, const struct tm*) { platon_abort(false, "error: strftime called"); }
+size_t strftime_l(char*, size_t, const char*, const struct tm*, locale_t) { platon_abort(false, "error: strftime_l called"); }
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 

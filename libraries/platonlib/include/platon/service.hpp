@@ -12,6 +12,7 @@ size_t platon_get_input_length(void);
 void platon_get_input(uint8_t *value);
 void platon_debug(uint8_t *dst, size_t len);
 void platon_panic(void);
+void platon_revert(void);
 
 #ifdef __cplusplus
 }
