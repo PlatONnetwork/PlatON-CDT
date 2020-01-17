@@ -34,12 +34,4 @@ namespace platon {
       ::platon_panic();
    }
 
-    inline void platon_assert_abort ( uint32_t test, const char* msg ) {
-        if (!test) {
-            uint8_t * dest = (uint8_t *)msg;
-            ::platon_debug(dest, strlen(msg));
-            platon_revert();
-        }
-    }
-
 }

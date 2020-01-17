@@ -13,4 +13,4 @@
 #include "platon/authority.hpp"
 #include "platon/destory.hpp"
 #include "platon/print.hpp"
-
+#include "platon/assert.hpp"
