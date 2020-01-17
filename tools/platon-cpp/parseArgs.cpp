@@ -118,6 +118,7 @@ void PCCOption::AdjustLLDArgs(bool NoStdlib){
     ldArgs.push_back(libdir);
     ldArgs.push_back("-lc");
     ldArgs.push_back("-lc++");
+    ldArgs.push_back("-lbuiltins");
     ldArgs.push_back("-lplatonlib");
   }
 
