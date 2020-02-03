@@ -94,6 +94,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
   clangArgs.push_back("--target=wasm32-wasm");
   clangArgs.push_back("-fno-rtti");
   clangArgs.push_back("-fno-exceptions");
+  clangArgs.push_back("-Werror=return-type");
   clangArgs.push_back("-std=c++17");
   clangArgs.push_back("-g");
   clangArgs.push_back("-O0");
