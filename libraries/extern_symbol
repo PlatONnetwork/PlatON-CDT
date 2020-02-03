@@ -2,6 +2,7 @@ platon_gas_price
 platon_block_hash
 platon_block_number
 platon_gas_limit
+platon_gas
 platon_timestamp
 platon_coinbase
 platon_balance
