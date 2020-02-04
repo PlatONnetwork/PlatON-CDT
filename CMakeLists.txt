@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.4.3)
 
+
 if(NOT DEFINED LLVM_CONFIG)
   find_program(LLVM_CONFIG NAMES llvm-config-8.0)
 
@@ -19,7 +20,7 @@ if(NOT DEFINED LLVM_CONFIG)
       execute_process(COMMAND mv clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-18.04 clang_llvm_8.0)
       set(LLVM_CONFIG clang_llvm_8.0/bin/llvm-config)
     else()
-      message(ERROR "unsupported system ${CMAKE_SYSTEM_NAME}")
+      message(FATAL_ERROR "Your are using the system does not support build currently, please use Ubuntu 18.04 or macOS.")
     endif()
   endif()
 
@@ -35,7 +36,6 @@ SET(CMAKE_C_COMPILER ${LLVM_BINDIR}/clang)
 SET(CMAKE_CXX_COMPILER ${LLVM_BINDIR}/clang++)
 SET(CMAKE_AR ${LLVM_BINDIR}/llvm-ar  CACHE FILEPATH "" FORCE)
 SET(CMAKE_RANLIB ${LLVM_BINDIR}/llvm-ranlib)
-
 
 project(PlatON-CDT)
 
