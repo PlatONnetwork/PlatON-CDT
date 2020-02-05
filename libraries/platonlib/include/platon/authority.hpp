@@ -14,15 +14,11 @@ void platon_address(uint8_t addr[20]);
 }
 #endif
 
-#define STATIC_OWNER(addr)                                                     \
-  static const std::set<platon::Address> kStaticOwner{platon::Address(addr)};
-
-#define IS_STATIC_OWNER(addr)                                   \
-  kStaticOwner.find(platon::Address(addr)) != kStaticOwner.end()
-
 namespace platon {
 
 static const size_t address_len = 20;
+static const char sys_whitelist_name[] = "$platon$whitelist";
+static const char sys_owner_name[] = "$platon$owner";
 
 Address platon_caller() {
   bytes address_bytes;
@@ -31,7 +27,7 @@ Address platon_caller() {
   return Address(address_bytes);
 }
 
-        Address platon_origin_caller() {
+Address platon_origin_caller() {
   bytes address_bytes;
   address_bytes.resize(address_len);
   ::platon_origin(address_bytes.data());
@@ -51,14 +47,12 @@ void set_owner(const std::string &address = std::string()) {
     platon_addr = platon_caller();
   }
 
-  static const char contract_owner[] = "owner";
-  StorageType<contract_owner, Address> owner_addr;
+  StorageType<sys_owner_name, Address> owner_addr;
   owner_addr.self() = platon_addr;
 }
 
 Address owner() {
-  static const char contract_owner[] = "owner";
-  StorageType<contract_owner, Address> owner_addr;
+  StorageType<sys_owner_name, Address> owner_addr;
   return owner_addr.self();
 }
 
@@ -68,30 +62,30 @@ bool is_owner(const std::string &addr = std::string()) {
     platon_addr = platon_origin_caller();
   }
 
-  static const char contract_owner[] = "owner";
-  StorageType<contract_owner, Address> owner_addr;
+  StorageType<sys_owner_name, Address> owner_addr;
   return owner_addr.self() == platon_addr;
 }
 
-void add_to_whitelist(const std::string &addr) {
-  static const char whitelist_name[] = "whitelist";
-  Set<whitelist_name, Address> whitelist;
-  whitelist.self().emplace(addr);
-}
+template <const char *Name>
+class WhiteList {
+ public:
+  WhiteList() : whitelist_() {}
 
-bool in_whitelist(const std::string &addr = std::string()) {
-  Address platon_addr(addr);
-  if (addr.empty()) {
-    platon_addr = platon_origin_caller();
+  void Add(const std::string &addr) { Add(Address(addr)); }
+  void Add(const Address &addr) { whitelist_.self().insert(addr); }
+
+  void Delete(const std::string &addr) { Delete(Address(addr)); }
+  void Delete(const Address &addr) { whitelist_.self().erase(addr); }
+
+  bool Exists(const std::string &addr) { return Exists(Address(addr)); }
+  bool Exists(const Address &addr) {
+    return whitelist_.self().find(addr) != whitelist_.self().end();
   }
 
-  static const char whitelist_name[] = "whitelist";
-  Set<whitelist_name, Address> whitelist;
+ private:
+  Set<Name, Address> whitelist_;
+};
 
-  if (whitelist.self().find(platon_addr) != whitelist.self().end()) {
-    return true;
-  }
-  return false;
-}
+using SysWhitelist = WhiteList<sys_whitelist_name>;
 
-} // namespace platon
+}  // namespace platon
