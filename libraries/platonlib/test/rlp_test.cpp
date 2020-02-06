@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 # include <map>
+#include <iomanip>
+#include <stdio.h>
 
 using namespace platon;
 
@@ -175,16 +177,178 @@ int main(int argc, char **argv) {
 
     // 测试追加数据
     wht_stream.clear();
-    wht_stream.appendList(3);
+    wht_stream.appendList(4);
     uint32_t data_32= 1*256*256*256 + 2*256*256 + 3*256 + 4;
     wht_stream << data_32;
     data_32= 5*256*256*256 + 6*256*256 + 7*256 + 8;
     wht_stream << data_32;
     data_32= 9*256*256*256 + 10*256*256 + 11*256 + 12;
     wht_stream << data_32;
+    data_32= 13*256*256 + 14*256 + 15;
+    wht_stream << data_32;
     result = wht_stream.out();
     for(auto i : result){
         std::cout << int(i) << ' ';
     }
     std::cout << std::endl;
+
+    // 负数 rlp 编码
+    wht_stream.clear();
+    int negative_data = -1;
+    long long_data = long(negative_data);
+    uint64_t u64_data = uint64_t((long_data << 1) ^ (long_data >> 63));
+    wht_stream << u64_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+    int negative_result = 0;
+    u64_data = 0;
+    fetch(RLP(result), u64_data);
+    long_data = long((u64_data >> 1) ^ -(u64_data & 1));
+    negative_result = int(long_data);
+    std::cout << negative_result << std::endl;
+
+    // 字符串 rlp 编码
+    wht_stream.clear();
+    std::string strdata = "abc";
+    wht_stream << strdata;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    // float 类型编码
+    float float_data = -1.2;
+    uint32_t u32_data = *(uint32_t *)(&float_data);
+    wht_stream.clear();
+    wht_stream << u32_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    u32_data = 0;
+    fetch(RLP(result), u32_data);
+    float float_result = *(float *)(&u32_data);
+    std::cout << float_result << std::endl;
+
+    // double 类型编码
+    double double_data = -1.23;
+    std::cout << sizeof(double_data) << std::endl;
+    u64_data = *(uint64_t *)(&double_data);
+    wht_stream.clear();
+    wht_stream << u64_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    u64_data = 0;
+    fetch(RLP(result), u64_data);
+    double double_result = *(double *)(&u64_data);
+    printf("%lf\n", double_result);
+
+    // bool 类型 
+    bool bool_data  = true;
+    wht_stream.clear();
+    wht_stream << bool_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    bool_data = false;
+    fetch(RLP(result), bool_data);
+    std::cout.setf(std::ios_base::boolalpha);
+    std::cout << bool_data << std::endl;
+
+    // char
+    char char_data  = -1;
+    wht_stream.clear();
+    wht_stream << char_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    char_data = 0;
+    fetch(RLP(result), char_data);
+    std::cout << int(char_data) << std::endl;
+
+    // short
+    short short_data  = -2;
+    wht_stream.clear();
+    wht_stream << short_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    short_data = 0;
+    fetch(RLP(result), short_data);
+    std::cout << short_data << std::endl;
+
+    // int 
+    short int_data  = -3;
+    wht_stream.clear();
+    wht_stream << int_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    int_data = 0;
+    fetch(RLP(result), int_data);
+    std::cout << int_data << std::endl;
+
+    // long
+    long_data  = -4;
+    wht_stream.clear();
+    wht_stream << long_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    long_data = 0;
+    fetch(RLP(result), long_data);
+    std::cout << long_data << std::endl;
+
+    // float
+    float_data  = 2.3;
+    wht_stream.clear();
+    wht_stream << float_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    float_data = 0;
+    fetch(RLP(result), float_data);
+    std::cout << float_data << std::endl;
+
+    // double
+    double_data  = 3.4;
+    wht_stream.clear();
+    wht_stream << double_data;
+    result = wht_stream.out();
+    for(auto i : result){
+        std::cout << int(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    double_data = 0;
+    fetch(RLP(result), double_data);
+    std::cout << double_data << std::endl;
 }
