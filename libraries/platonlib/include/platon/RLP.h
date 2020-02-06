@@ -170,10 +170,10 @@ namespace platon
         explicit operator u160() const { return toInt<u160>(); }
         explicit operator u256() const { return toInt<u256>(); }
         explicit operator bigint() const { return toInt<bigint>(); }
-        explicit operator char() const { return toSignedInt<char>(); }
-        explicit operator short() const { return toSignedInt<short>(); }
-        explicit operator int() const { return toSignedInt<int>(); }
-        explicit operator long() const { return toSignedInt<long>(); }
+        explicit operator int8_t() const { return toSignedInt<int8_t>(); }
+        explicit operator int16_t() const { return toSignedInt<int16_t>(); }
+        explicit operator int32_t() const { return toSignedInt<int32_t>(); }
+        explicit operator int64_t() const { return toSignedInt<int64_t>(); }
         explicit operator float() const { return toFloat();}
         explicit operator double() const { return toDouble();}
         template <unsigned N> explicit operator FixedHash<N>() const { return toHash<FixedHash<N>>(); }
@@ -295,8 +295,8 @@ namespace platon
         template <typename _T> _T toSignedInt(int _flags = Strict) const
         {
             uint64_t u64_data = toInt<uint64_t>(_flags); 
-            long long_data = static_cast<long>((u64_data >> 1) ^ -(u64_data & 1));
-            return static_cast<_T>(long_data);
+            int64_t int64_data = static_cast<int64_t>((u64_data >> 1) ^ -(u64_data & 1));
+            return static_cast<_T>(int64_data);
         }
 
         float toFloat(int _flags = Strict) const
@@ -387,10 +387,10 @@ namespace platon
     template <> struct Converter<u160> { static u160 convert(RLP const& _r, int _flags) { return _r.toInt<u160>(_flags); } };
     template <> struct Converter<u256> { static u256 convert(RLP const& _r, int _flags) { return _r.toInt<u256>(_flags); } };
     template <> struct Converter<bigint> { static bigint convert(RLP const& _r, int _flags) { return _r.toInt<bigint>(_flags); } };
-    template <> struct Converter<char> { static short convert(RLP const& _r, int _flags) { return _r.toSignedInt<char>(_flags); } };
-    template <> struct Converter<short> { static short convert(RLP const& _r, int _flags) { return _r.toSignedInt<short>(_flags); } };
-    template <> struct Converter<int> { static int convert(RLP const& _r, int _flags) { return _r.toSignedInt<int>(_flags); } };
-    template <> struct Converter<long> { static long convert(RLP const& _r, int _flags) { return _r.toSignedInt<long>(_flags); } };
+    template <> struct Converter<int8_t> { static int8_t convert(RLP const& _r, int _flags) { return _r.toSignedInt<int8_t>(_flags); } };
+    template <> struct Converter<int16_t> { static int16_t convert(RLP const& _r, int _flags) { return _r.toSignedInt<int16_t>(_flags); } };
+    template <> struct Converter<int32_t> { static int32_t convert(RLP const& _r, int _flags) { return _r.toSignedInt<int32_t>(_flags); } };
+    template <> struct Converter<int64_t> { static int64_t convert(RLP const& _r, int _flags) { return _r.toSignedInt<int64_t>(_flags); } };
     template <> struct Converter<float> { static float convert(RLP const& _r, int _flags) { return _r.toFloat(_flags); } };
     template <> struct Converter<double> { static double convert(RLP const& _r, int _flags) { return _r.toDouble(_flags); } };
     template <unsigned N> struct Converter<FixedHash<N>> { static FixedHash<N> convert(RLP const& _r, int _flags) { return _r.toHash<FixedHash<N>>(_flags); } };
@@ -429,10 +429,10 @@ public:
     RLPStream& append(u160 _s) { return append(bigint(_s)); }
     RLPStream& append(u256 _s) { return append(bigint(_s)); }
     RLPStream& append(bigint _i);
-    RLPStream& append(char _c) { return append(long(_c)); }
-    RLPStream& append(short _s) { return append(long(_s)); }
-    RLPStream& append(int _s) { return append(long(_s)); }
-    RLPStream& append(long _l){
+    RLPStream& append(int8_t _c) { return append(int64_t(_c)); }
+    RLPStream& append(int16_t _s) { return append(int64_t(_s)); }
+    RLPStream& append(int32_t _s) { return append(int64_t(_s)); }
+    RLPStream& append(int64_t _l){
         uint64_t _i = uint64_t((_l << 1) ^ (_l >> 63));
         return append(_i);
     }
