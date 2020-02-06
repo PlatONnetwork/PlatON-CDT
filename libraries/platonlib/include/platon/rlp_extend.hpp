@@ -89,6 +89,10 @@ inline void fetch(const RLP &rlp, T &value){
     value = T(rlp);
 }
 
+inline void fetch(const RLP &rlp, bool &value){
+    value = rlp.toBool();
+}
+
 inline void fetch(const RLP &rlp, bytes &value){
     value = rlp.toBytes();
 }
