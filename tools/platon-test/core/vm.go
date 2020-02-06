@@ -4,17 +4,21 @@ import (
 	"fmt"
 	"github.com/PlatONnetwork/wagon/exec"
 	"github.com/PlatONnetwork/wagon/wasm"
+	"math"
 	"reflect"
-
 )
+var (
 
-var importer = func(name string) (*wasm.Module, error) {
-	switch name {
-	case "env":
-		return NewHostModule(), nil
+	db = NewDB()
+
+	 importer = func(name string) (*wasm.Module, error) {
+		switch name {
+		case "env":
+			return NewHostModule(), nil
+		}
+		return nil, fmt.Errorf("module %q unknown", name)
 	}
-	return nil, fmt.Errorf("module %q unknown", name)
-}
+)
 
 func addFuncExport(m *wasm.Module, sig wasm.FunctionSig, function wasm.Function, export wasm.ExportEntry) {
 	typesLen := len(m.Types.Entries)
@@ -34,6 +38,39 @@ func Debug(proc *exec.Process, dst uint32, len uint32) {
 
 func Panic(proc *exec.Process) {
 	panic("test case panic")
+}
+
+func Revert(proc *exec.Process) {
+	proc.Terminate()
+}
+
+func SetState(proc *exec.Process, key uint32, keyLen uint32, val uint32, valLen uint32) {
+	keyBuf := make([]byte, keyLen)
+	proc.ReadAt(keyBuf, int64(key))
+	if valLen == 0 {
+		db.Delete(string(keyBuf))
+		return
+	}
+	valBuf := make([]byte, valLen)
+	proc.ReadAt(valBuf, int64(val))
+	db.Set(string(keyBuf), valBuf)
+}
+
+func GetStateLength(proc *exec.Process, key uint32, keyLen uint32) uint32 {
+	keyBuf := make([]byte, keyLen)
+	proc.ReadAt(keyBuf, int64(key))
+	return uint32(len(db.Get(string(keyBuf))))
+}
+
+func GetState(proc *exec.Process, key uint32, keyLen uint32, val uint32, valLen uint32) uint32 {
+	keyBuf := make([]byte, keyLen)
+	proc.ReadAt(keyBuf, int64(key))
+	valBuf := db.Get(string(keyBuf))
+	if uint32(len(valBuf)) > valLen {
+		return math.MaxUint32
+	}
+	proc.WriteAt(valBuf, int64(val))
+	return 0
 }
 
 func NewHostModule() *wasm.Module {
@@ -62,6 +99,63 @@ func NewHostModule() *wasm.Module {
 		},
 		wasm.ExportEntry{
 			FieldStr: "platon_panic",
+			Kind:     wasm.ExternalFunction,
+		},
+	)
+
+	addFuncExport(m,
+		wasm.FunctionSig{},
+		wasm.Function{
+			Host: reflect.ValueOf(Revert),
+			Body: &wasm.FunctionBody{},
+		},
+		wasm.ExportEntry{
+			FieldStr: "platon_revert",
+			Kind:     wasm.ExternalFunction,
+		},
+	)
+
+	addFuncExport(m,
+		wasm.FunctionSig{
+			ParamTypes:  []wasm.ValueType{wasm.ValueTypeI32, wasm.ValueTypeI32, wasm.ValueTypeI32, wasm.ValueTypeI32},
+			ReturnTypes: []wasm.ValueType{wasm.ValueTypeI32},
+		},
+		wasm.Function{
+			Host: reflect.ValueOf(GetState),
+			Body: &wasm.FunctionBody{},
+		},
+		wasm.ExportEntry{
+			FieldStr: "platon_get_state",
+			Kind:     wasm.ExternalFunction,
+		},
+	)
+
+	addFuncExport(m,
+		wasm.FunctionSig{
+			ParamTypes:  []wasm.ValueType{wasm.ValueTypeI32, wasm.ValueTypeI32},
+			ReturnTypes: []wasm.ValueType{wasm.ValueTypeI32},
+		},
+		wasm.Function{
+
+			Host: reflect.ValueOf(GetStateLength),
+			Body: &wasm.FunctionBody{},
+		},
+		wasm.ExportEntry{
+			FieldStr: "platon_get_state_length",
+			Kind:     wasm.ExternalFunction,
+		},
+	)
+
+	addFuncExport(m,
+		wasm.FunctionSig{
+			ParamTypes: []wasm.ValueType{wasm.ValueTypeI32, wasm.ValueTypeI32, wasm.ValueTypeI32, wasm.ValueTypeI32},
+		},
+		wasm.Function{
+			Host: reflect.ValueOf(SetState),
+			Body: &wasm.FunctionBody{},
+		},
+		wasm.ExportEntry{
+			FieldStr: "platon_set_state",
 			Kind:     wasm.ExternalFunction,
 		},
 	)
