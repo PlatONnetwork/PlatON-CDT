@@ -9,8 +9,8 @@ namespace db {
  *
  * @tparam *Name The name of the Map, the name of the Map should be unique
  * within each contract.
- * @tparam Key key的类型
- * @tparam Value value的类型
+ * @tparam Key key type
+ * @tparam Value value type
  * @tparam MapType::Traverse The default is Traverse, when Traverse needs extra
  * data structure to operate, set to NoTraverse when no traversal operation is
  * needed.
