@@ -269,7 +269,7 @@ int main(int argc, char **argv) {
     std::cout << bool_data << std::endl;
 
     // char
-    char char_data  = -1;
+    signed char char_data  = -1;
     wht_stream.clear();
     wht_stream << char_data;
     result = wht_stream.out();
