@@ -30,21 +30,21 @@ target_link_libraries(platon-cpp MakeAbi)
 
 
 target_link_libraries(platon-cpp
-  clangCodeGen 
-  clangTooling 
-  clangFrontend 
-  clangASTMatchers 
-  clangParse 
-  clangSerialization 
-  clangSema 
-  clangEdit  
-  clangAnalysis 
-  clangDriver 
-  clangFormat 
-  clangToolingCore 
-  clangAST 
-  clangRewrite 
-  clangLex 
+  clangCodeGen
+  clangTooling
+  clangFrontend
+  clangASTMatchers
+  clangParse
+  clangSerialization
+  clangSema
+  clangEdit
+  clangAnalysis
+  clangDriver
+  clangFormat
+  clangToolingCore
+  clangAST
+  clangRewrite
+  clangLex
   clangBasic
   )
 
@@ -52,17 +52,17 @@ target_link_libraries(platon-cpp
   lldDriver
   lldWasm
   lldCommon
-  LLVMLTO 
-  LLVMPasses 
-  LLVMObjCARCOpts 
-  LLVMMIRParser 
-  LLVMSymbolize 
-  LLVMDebugInfoPDB 
-  LLVMDebugInfoDWARF 
-  LLVMCoverage 
-  LLVMTableGen 
-  LLVMDlltoolDriver 
-  LLVMOrcJIT 
+  LLVMLTO
+  LLVMPasses
+  LLVMObjCARCOpts
+  LLVMMIRParser
+  LLVMSymbolize
+  LLVMDebugInfoPDB
+  LLVMDebugInfoDWARF
+  LLVMCoverage
+  LLVMTableGen
+  LLVMDlltoolDriver
+  LLVMOrcJIT
   LLVMOption
 
   LLVMWebAssemblyDisassembler
@@ -170,47 +170,55 @@ target_link_libraries(platon-cpp
 
 
   LLVMAggressiveInstCombine
-  LLVMGlobalISel 
-  LLVMSelectionDAG 
-  LLVMAsmPrinter 
-  LLVMDebugInfoCodeView 
-  LLVMDebugInfoMSF 
-  LLVMMCDisassembler 
-  LLVMMCJIT 
-  LLVMLineEditor 
-  LLVMInterpreter 
-  LLVMExecutionEngine 
-  LLVMRuntimeDyld 
-  LLVMCodeGen 
-  LLVMTarget 
-  LLVMCoroutines 
-  LLVMipo 
-  LLVMInstrumentation 
-  LLVMVectorize 
-  LLVMScalarOpts 
-  LLVMLinker 
-  LLVMIRReader 
-  LLVMAsmParser 
-  LLVMInstCombine 
-  LLVMTransformUtils 
-  LLVMBitWriter 
-  LLVMAnalysis 
-  LLVMProfileData 
-  LLVMObject 
-  LLVMMCParser 
-  LLVMMC 
-  LLVMBitReader 
-  LLVMCore 
-  LLVMBinaryFormat 
-  LLVMSupport 
+  LLVMGlobalISel
+  LLVMSelectionDAG
+  LLVMAsmPrinter
+  LLVMDebugInfoCodeView
+  LLVMDebugInfoMSF
+  LLVMMCDisassembler
+  LLVMMCJIT
+  LLVMLineEditor
+  LLVMInterpreter
+  LLVMExecutionEngine
+  LLVMRuntimeDyld
+  LLVMCodeGen
+  LLVMTarget
+  LLVMCoroutines
+  LLVMipo
+  LLVMInstrumentation
+  LLVMVectorize
+  LLVMScalarOpts
+  LLVMLinker
+  LLVMIRReader
+  LLVMAsmParser
+  LLVMInstCombine
+  LLVMTransformUtils
+  LLVMBitWriter
+  LLVMAnalysis
+  LLVMProfileData
+  LLVMObject
+  LLVMMCParser
+  LLVMMC
+  LLVMBitReader
+  LLVMCore
+  LLVMBinaryFormat
+  LLVMSupport
   LLVMDemangle
 )
 
-target_link_libraries(platon-cpp
-  z 
-  rt 
-  dl 
-  tinfo 
-  pthread 
-  m
-)
+if (APPLE)
+  target_link_libraries(platon-cpp
+    z
+    dl
+    pthread
+    curses
+    m)
+else()
+  target_link_libraries(platon-cpp
+    z
+    rt
+    dl
+    tinfo
+    pthread
+    m)
+endif()
