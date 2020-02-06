@@ -32,22 +32,37 @@ sudo apt install build-essential cmake libz-dev libtinfo-dev tar wget
 ```shell
 git clone https://github.com/PlatONnetwork/PlatON-CDT.git
 cd PlatON-CDT
+git checkout feature/wasm
 ```
+
 - **Build Code**
 
+Unit test modules are not included by default. The build operation is as follows.
+
 ``` sh
-cd PlatON-CDT
 mkdir build && cd build
 
 cmake ..
 make -j4
 sudo make install
-
 ```
+
+If you want to add a unit test module, first install go1.13 and then do the following:
+
+``` sh
+mkdir build && cd build
+
+cmake .. -DTEST=ON
+make -j4
+sudo make install
+```
+
 ## Usage
+
 ``` bash
 platon-cpp test.cpp
 ```
+
 run command could generate test.wasm and test.abi.json in current dirctoy.
 
 ## License
