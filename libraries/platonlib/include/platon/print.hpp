@@ -21,9 +21,7 @@ inline void print(std::string info) { all_info += info; }
 // inline void print( long double num ) { sprintf(temp_info, "%Lf", num);
 // all_info += std::string(temp_info);}
 //
-// inline void print(char num) { sprintf(temp_info, "%c", num); all_info +=
-// std::string(temp_info);}
-//
+
 // inline void print(short num) { sprintf(temp_info, "%d", num); all_info +=
 // std::string(temp_info);}
 //
@@ -42,25 +40,32 @@ inline void print(std::string info) { all_info += info; }
 // inline void print(uint64_t num) { sprintf(temp_info, "%llu", num); all_info
 // += std::string(temp_info);}
 
-template <typename T, class = typename std::enable_if<
-                          std::numeric_limits<T>::is_integer ||
-                          std::numeric_limits<T>::is_iec559>::type>
+template <typename T,
+          class = typename std::enable_if<
+              std::numeric_limits<std::decay_t<T>>::is_integer ||
+              std::numeric_limits<std::decay_t<T>>::is_iec559>::type>
 inline void print(const T num) {
-  all_info += std::to_string(num);
-}
-
-template <size_t Bits, typename Signed>
-inline void print(const std::wide_integer<Bits, Signed> num) {
-  all_info += std::to_string(num);
-}
-
-inline void print(bool is_true) {
-  if (is_true) {
-    all_info += "true";
+  if constexpr (std::is_same<T, char>::value) {
+    all_info += num;
+  } else if constexpr (std::is_same<T, bool>::value) {
+    all_info += num ? "true" : "false";
   } else {
-    all_info += "false";
+    all_info += std::to_string(num);
   }
 }
+
+// template <size_t Bits, typename Signed>
+// inline void print(const std::wide_integer<Bits, Signed> num) {
+//  all_info += std::to_string(num);
+//}
+//
+// inline void print(bool is_true) {
+//  if (is_true) {
+//    all_info += "true";
+//  } else {
+//    all_info += "false";
+//  }
+//}
 
 template <typename Arg, typename... Args>
 void print(Arg&& a, Args&&... args) {
