@@ -5,6 +5,7 @@
 #include "chain.hpp"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
+#include "exchange.hpp"
 
 namespace platon {
 
