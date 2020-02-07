@@ -1,18 +1,7 @@
 #pragma once
 #include "fixedhash.hpp"
 #include "storagetype.hpp"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void platon_origin(uint8_t addr[20]);
-void platon_caller(uint8_t addr[20]);
-void platon_address(uint8_t addr[20]);
-
-#ifdef __cplusplus
-}
-#endif
+#include "chain.hpp"
 
 namespace platon {
 
@@ -32,24 +21,28 @@ Address platon_caller() {
   return Address(address_bytes);
 }
 
+
 /**
  * @brief Get the address of the original transaction initiator
  *
  * @return The address of the original transaction initiator
  */
-Address platon_origin_caller() {
+
+Address platon_origin() {
   bytes address_bytes;
   address_bytes.resize(address_len);
   ::platon_origin(address_bytes.data());
   return Address(address_bytes);
 }
 
+
 /**
  * @brief Get the address of contract
  *
  * @return The address of contract
  */
-Address platon_contract_address() {
+
+Address platon_address() {
   bytes address_bytes;
   address_bytes.resize(address_len);
   ::platon_address(address_bytes.data());
@@ -92,7 +85,7 @@ Address owner() {
 bool is_owner(const std::string &addr = std::string()) {
   Address platon_addr(addr);
   if (addr.empty()) {
-    platon_addr = platon_origin_caller();
+    platon_addr = platon_origin();
   }
 
   StorageType<sys_owner_name, Address> owner_addr;
