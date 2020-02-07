@@ -6,20 +6,9 @@
 #include <string>
 #include <vector>
 #include "RLP.h"
+#include "chain.hpp"
 #include "common.h"
 #include "rlp_extend.hpp"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-void platon_set_state(const uint8_t *key, size_t klen, const uint8_t *value,
-                      size_t vlen);
-size_t platon_get_state_length(const uint8_t *key, size_t klen);
-size_t platon_get_state(const uint8_t *key, size_t klen, uint8_t *value,
-                        size_t vlen);
-#ifdef __cplusplus
-}
-#endif
 
 const uint8_t value_prefix = 0xfe;
 
