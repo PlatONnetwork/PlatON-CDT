@@ -76,13 +76,13 @@ TEST_CASE(multi_index, normal) {
 
   ASSERT(!r.second);
 
-  auto iter = member_table.find<"index2"_n>(10);
+  auto iter = member_table.find<"index2"_n>(uint8_t (10));
   ASSERT(iter->sex == 15, "sex:", iter->sex);
   ASSERT(iter != member_table.cend());
 
   member_table.erase(iter);
 
-  iter = member_table.find<"index2"_n>(10);
+  iter = member_table.find<"index2"_n>(uint8_t (10));
   ASSERT(iter == member_table.cend());
 }
 TEST_CASE(multi_index, find) {
@@ -106,7 +106,7 @@ TEST_CASE(multi_index, find) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  auto iter = member_table.find<"index2"_n>(10);
+  auto iter = member_table.find<"index2"_n>(uint8_t (10));
   int size = 0;
   for (; iter != member_table.cend(); iter++) {
     size++;
