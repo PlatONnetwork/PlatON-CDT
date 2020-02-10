@@ -62,6 +62,8 @@ ENDFOREACH(FN)
 
 set(INTERNAL_SOURCES musl/src/internal/floatscan.c musl/src/internal/intscan.c musl/src/internal/shgetc.c musl/src/internal/libc.c)
 
+add_definitions("-DWASM_FLOAT_SUPPORT=3")
+
 add_library(c 
             ${CRYPT_SOURCES} 
             ${CTYPE_SOURCES}
