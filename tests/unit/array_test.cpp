@@ -15,7 +15,7 @@ TEST_CASE(array, batch) {
       arrayInt[i] = i;
     }
     for (size_t i = 0; i < 10; i++) {
-      arrayInt[i] = 0
+      arrayInt[i] = 0;
     }
   }
 

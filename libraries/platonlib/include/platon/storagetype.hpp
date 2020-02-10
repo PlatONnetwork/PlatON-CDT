@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include "platon/name.hpp"
+#include "platon/storage.hpp"
 
 #include <string>
 
@@ -12,7 +14,6 @@
 #include <set>
 #include <tuple>
 #include <vector>
-#include "platon/storage.hpp"
 
 namespace platon {
 
@@ -23,7 +24,7 @@ namespace platon {
  * unique
  * @tparam T Element type
  */
-template <const char *Name, typename T>
+template <Name::Raw StorageName, typename T>
 class StorageType {
  public:
   /**
@@ -39,8 +40,8 @@ class StorageType {
    */
   StorageType(const T &d) : default_(d) { Init(); }
 
-  StorageType(const StorageType<Name, T> &) = delete;
-  StorageType(const StorageType<Name, T> &&) = delete;
+  StorageType(const StorageType<StorageName, T> &) = delete;
+  StorageType(const StorageType<StorageName, T> &&) = delete;
   /**
    * @brief Destroy the Storage Type object. Refresh to blockchain
    *
@@ -151,75 +152,76 @@ class StorageType {
    */
   void Flush() { set_state(name_, t_); }
   T default_;
-  const std::string name_ = Name;
+  const std::string name_ =
+      std::string("_s_") + std::to_string(uint64_t(StorageName));
   T t_;
 };
 
-template <const char *name>
+template <Name::Raw name>
 using Uint8 = class StorageType<name, uint8_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Int8 = class StorageType<name, int8_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Uint16 = class StorageType<name, uint16_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Int16 = class StorageType<name, int16_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Uint = class StorageType<name, uint32_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Int = class StorageType<name, int32_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Uint64 = class StorageType<name, uint64_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Int64 = class StorageType<name, int64_t>;
 
-template <const char *name>
+template <Name::Raw name>
 using Float = class StorageType<name, float>;
 
-template <const char *name>
+template <Name::Raw name>
 using Double = class StorageType<name, double>;
 
-template <const char *name>
+template <Name::Raw name>
 using String = class StorageType<name, std::string>;
 
-template <const char *name, typename T>
+template <Name::Raw name, typename T>
 using Vector = class StorageType<name, std::vector<T>>;
 
-template <const char *name, typename T>
+template <Name::Raw name, typename T>
 using Set = class StorageType<name, std::set<T>>;
 
-template <const char *name, typename K, typename V>
+template <Name::Raw name, typename K, typename V>
 using Map = class StorageType<name, std::map<K, V>>;
 
-template <const char *name, typename T, size_t N>
+template <Name::Raw name, typename T, size_t N>
 using Array = class StorageType<name, std::array<T, N>>;
 
-template <const char *name, typename... Types>
+template <Name::Raw name, typename... Types>
 using Tuple = class StorageType<name, std::tuple<Types...>>;
 
-template <const char *name, typename T>
+template <Name::Raw name, typename T>
 using Deque = class StorageType<name, std::deque<T>>;
 
-//    template <const char *name,  typename T>
+//    template <Name::Raw name,  typename T>
 //    using Queue = class StorageType<name, std::queue<T>>;
 //
 //
-//    template <const char *name,  typename T>
+//    template <Name::Raw name,  typename T>
 //    using Stack = class StorageType<name, std::stack<T>>;
 
-//    template <const char *name,  typename T>
+//    template <Name::Raw name,  typename T>
 //    using List = class StorageType<name, std::list<T>>;
 //
-//    template <const char *name,  typename K, typename V>
+//    template <Name::Raw name,  typename K, typename V>
 //    using UnorderedMap = class StorageType<name, std::unordered_map<K, V>>;
 //
-//    template <const char *name, typename T>
+//    template <Name::Raw name, typename T>
 //    using UnorderedSet = class StorageType<name, std::unordered_set<T>>;
 
 }  // namespace platon
