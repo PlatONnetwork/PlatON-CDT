@@ -6,7 +6,7 @@
 namespace platon {
 
 static const size_t address_len = 20;
-static const char sys_whitelist_name[] = "$platon$whitelist";
+//static const char sys_whitelist_name[] = "$platon$whitelist";
 static const char sys_owner_name[] = "$platon$owner";
 
 /**
@@ -61,7 +61,7 @@ void set_owner(const std::string &address = std::string()) {
     platon_addr = platon_caller();
   }
 
-  StorageType<sys_owner_name, Address> owner_addr;
+  StorageType<"$platon$owner"_n, Address> owner_addr;
   owner_addr.self() = platon_addr;
 }
 
@@ -71,7 +71,7 @@ void set_owner(const std::string &address = std::string()) {
  * @return The address of contract
  */
 Address owner() {
-  StorageType<sys_owner_name, Address> owner_addr;
+  StorageType<"$platon$owner"_n, Address> owner_addr;
   return owner_addr.self();
 }
 
@@ -88,7 +88,7 @@ bool is_owner(const std::string &addr = std::string()) {
     platon_addr = platon_origin();
   }
 
-  StorageType<sys_owner_name, Address> owner_addr;
+  StorageType<"$platon$owner"_n, Address> owner_addr;
   return owner_addr.self() == platon_addr;
 }
 
@@ -97,7 +97,7 @@ bool is_owner(const std::string &addr = std::string()) {
  *
  * @tparam Name Whitelist name, in the same contract, the name should be unique
  */
-template <const char *Name>
+template <Name::Raw TableName>
 class WhiteList {
  public:
   /**
@@ -152,12 +152,12 @@ class WhiteList {
   }
 
  private:
-  Set<Name, Address> whitelist_;
+  Set<TableName, Address> whitelist_;
 };
 
 /**
  * @brief System default whitelist
  */
-using SysWhitelist = WhiteList<sys_whitelist_name>;
+using SysWhitelist = WhiteList<"$platon$whitelist"_n>;
 
 }  // namespace platon

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "chain.hpp"
-
+#include "platon.hpp"
 namespace platon {
 /**
  * @brief Platon assertion.
