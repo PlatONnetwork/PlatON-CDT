@@ -96,52 +96,104 @@
 
 namespace platon {
 
+/**
+ * @brief Gets rlp-encoded data for any number and type parameters
+ *
+ * @param args any number and type parameters
+ *             
+ * @return An array of bytes after RLP encodes data
+ */
 template <typename... Args>
-inline bytes event_agrs(const Args &... args) {
+inline bytes event_args(const Args &... args) {
   std::tuple<Args...> tuple_args = std::make_tuple(args...);
   RLPStream stream;
   stream << tuple_args;
   return stream.out();
-}
+} 
 
+/**
+ * @brief Send event items that are not indexed
+ *
+ * @param args Any number of event parameters of any type
+ *             
+ * @return void
+ */
 template <typename... Args>
 inline void emit_event(const Args &... args) {
-  bytes topic_data = event_agrs(args...);
+  bytes topic_data = event_args(args...);
   ::platon_event(NULL, 0, topic_data.data(), topic_data.size());
 }
 
+/**
+ * @brief Sends an event that has only one index entry
+ *
+ * @param topic Event index value
+ * @param args Any number of event parameters of any type
+ *             
+ * @return void
+ */
 template <class Topic, typename... Args>
 inline void emit_event1(const Topic &topic, const Args &... args) {
   RLPStream stream(1);
   stream << topic;
   bytes topic_data = stream.out();
-  bytes rlp_data = event_agrs(args...);
+  bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
 }
 
+/**
+ * @brief Sends an event with two index values
+ *
+ * @param topic1 The first index value of the event
+ * @param topic2 The second index value of the event
+ * @param args Any number of event parameters of any type
+ *             
+ * @return void
+ */
 template <class Topic1, class Topic2, typename... Args>
 inline void emit_event2(const Topic1 &topic1, const Topic2 &topic2,
                         const Args &... args) {
   RLPStream stream(2);
   stream << topic1 << topic2;
   bytes topic_data = stream.out();
-  bytes rlp_data = event_agrs(args...);
+  bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
 }
 
+/**
+ * @brief Sends an event with three event index values
+ *
+ * @param topic1 The first index value of the event
+ * @param topic2 The second index value of the event
+ * @param topic3 The third index value of the event
+ * @param args Any number of event parameters of any type
+ *             
+ * @return void
+ */
 template <class Topic1, class Topic2, class Topic3, typename... Args>
 inline void emit_event3(const Topic1 &topic1, const Topic2 &topic2,
                         const Topic3 &topic3, const Args &... args) {
   RLPStream stream(3);
   stream << topic1 << topic2 << topic3;
   bytes topic_data = stream.out();
-  bytes rlp_data = event_agrs(args...);
+  bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
 }
 
+/**
+ * @brief Sends an event with four event index values
+ *
+ * @param topic1 The first index value of the event
+ * @param topic2 The second index value of the event
+ * @param topic3 The third index value of the event
+ * @param topic4 The four index value of the event
+ * @param args Any number of event parameters of any type
+ *             
+ * @return void
+ */
 template <class Topic1, class Topic2, class Topic3, class Topic4,
           typename... Args>
 inline void emit_event4(const Topic1 &topic1, const Topic2 &topic2,
@@ -150,7 +202,7 @@ inline void emit_event4(const Topic1 &topic1, const Topic2 &topic2,
   RLPStream stream(4);
   stream << topic1 << topic2 << topic3 << topic4;
   bytes topic_data = stream.out();
-  bytes rlp_data = event_agrs(args...);
+  bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
 }
