@@ -167,6 +167,35 @@ bool check_unique(uint64_t table_name, uint64_t index_name, const T& value) {
   return has_state(key);
 }
 
+/**
+ * @brief MultiIndex Multi Index Table
+ * @details MultiIndex supports unique indexes and ordinary indexes. The unique
+ * index should be placed first in the parameter. The structure needs to provide
+ * the get function corresponding to the index field.
+ *
+ * Example:
+ *
+ * @code
+  struct Member {
+   std::string name;
+   uint8_t age;
+   uint8_t sex;
+   uint64_t $seq_;
+   std::string Name() const { return name; }
+   uint8_t Age() const { return age; }
+   PLATON_SERIALIZE(Member, (name)(age)(sex))
+  };
+  MultiIndex<
+   "table"_n, Member,
+    IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                       IndexType::UniqueIndex>>,
+   IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                        IndexType::NormalIndex>>>
+   member_table;
+
+ * @endcode
+ */
+
 template <Name::Raw TableName, typename T, typename... Indices>
 class MultiIndex {
  public:
@@ -344,9 +373,109 @@ class MultiIndex {
   };
 
  public:
+  /**
+   * @brief Iterator start position, but its return value cannot be incremented
+   * or decremented because MultiIndex does not support full-order traversal
+   * container.
+   *
+   *
+   * @return const_iterator
+   *
+   * Example:
+   *
+   * @code
+    struct Member {
+     std::string name;
+     uint8_t age;
+     uint8_t sex;
+     uint64_t $seq_;
+     std::string Name() const { return name; }
+     uint8_t Age() const { return age; }
+     PLATON_SERIALIZE(Member, (name)(age)(sex))
+    };
+    MultiIndex<
+     "table"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                         IndexType::UniqueIndex>>,
+     IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                          IndexType::NormalIndex>>>
+     member_table;
+   auto iter = member_table.find<"index2"_n>(uint8_t(10));
+   assert(iter == member_table.cbegin())
+   * @endcode
+   */
   const_iterator cbegin() const { return const_iterator(this, true, false); }
+
+  /**
+   * @brief Insert new value
+   *
+   *
+   * @return const_iterator
+   *
+   * Example:
+   *
+   * @code
+    struct Member {
+     std::string name;
+     uint8_t age;
+     uint8_t sex;
+     uint64_t $seq_;
+     std::string Name() const { return name; }
+     uint8_t Age() const { return age; }
+     PLATON_SERIALIZE(Member, (name)(age)(sex))
+    };
+    MultiIndex<
+     "table"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                         IndexType::UniqueIndex>>,
+     IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                          IndexType::NormalIndex>>>
+     member_table;
+    auto iter = member_table.find<"index2"_n>(uint8_t(10));
+    for (; iter != member_table.cend(); iter++) {
+    }
+   * @endcode
+   */
   const_iterator cend() const { return const_iterator(this, false, true); }
 
+  /**
+   * @brief Iterator start position, but its return value cannot be incremented
+   * or decremented because MultiIndex does not support full-order traversal
+   * container.
+   *
+   * @param constructor of value
+   *
+   * @return Returns an iterator that indicates whether the insertion was
+   * successful with the bool type. If unique index conflicts, the insertion
+   * fails
+   *
+   * Example:
+   *
+   * @code
+    struct Member {
+     std::string name;
+     uint8_t age;
+     uint8_t sex;
+     uint64_t $seq_;
+     std::string Name() const { return name; }
+     uint8_t Age() const { return age; }
+     PLATON_SERIALIZE(Member, (name)(age)(sex))
+    };
+    MultiIndex<
+     "table"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                         IndexType::UniqueIndex>>,
+     IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                          IndexType::NormalIndex>>>
+     member_table;
+
+   member_table.emplace([&](auto &m) {
+     m.age = 10;
+     m.name = "hello";
+     m.sex = 1;
+    });
+   * @endcode
+   */
   template <typename Lambda>
   std::pair<const_iterator, bool> emplace(Lambda&& constructor) {
     // create new item
@@ -390,6 +519,37 @@ class MultiIndex {
     return std::make_pair(const_iterator(this, item), true);
   }
 
+  /**
+   * @brief Find the data, the unique index will only return one piece of data,
+   * the secondary index will return the data set, iterable through the
+   * iterator.
+   *
+   * @param key key of index
+   * @return iterator of data set
+   *
+   * Example:
+   *
+   * @code
+    struct Member {
+     std::string name;
+     uint8_t age;
+     uint8_t sex;
+     uint64_t $seq_;
+     std::string Name() const { return name; }
+     uint8_t Age() const { return age; }
+     PLATON_SERIALIZE(Member, (name)(age)(sex))
+    };
+    MultiIndex<
+     "table"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                         IndexType::UniqueIndex>>,
+     IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                          IndexType::NormalIndex>>>
+     member_table;
+
+    auto iter = member_table.find<"index2"_n>(uint8_t(10));
+   * @endcode
+   */
   template <Name::Raw IndexName, typename KEY>
   const_iterator find(const KEY& key) {
     const_iterator result(this, nullptr);
@@ -433,6 +593,37 @@ class MultiIndex {
 
     return result;
   }
+
+  /**
+   * @brief Modify data based on iterator, but cannot modify all index-related
+   * fields .
+   *
+   * @param position position of iterator
+   * @param constructor lambda function that updates the target object
+   *
+   * Example:
+   *
+   * @code
+    struct Member {
+     std::string name;
+     uint8_t age;
+     uint8_t sex;
+     uint64_t $seq_;
+     std::string Name() const { return name; }
+     uint8_t Age() const { return age; }
+     PLATON_SERIALIZE(Member, (name)(age)(sex))
+    };
+    MultiIndex<
+     "table"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                         IndexType::UniqueIndex>>,
+     IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                          IndexType::NormalIndex>>>
+     member_table;
+
+     member_table.modify(r.first, [&](auto &m) { m.sex = 15; });
+   * @endcode
+   */
   template <typename Lambda>
   void modify(const_iterator position, Lambda&& constructor) {
     // reduce query statedb operation, don't chekc exists position in statedb
@@ -465,6 +656,36 @@ class MultiIndex {
     }
   }
 
+  /**
+   * @brief Modify data based on iterator, but cannot modify all index-related
+   * fields .
+   *
+   * @param position position of iterator
+   *
+   * Example:
+   *
+   * @code
+    struct Member {
+     std::string name;
+     uint8_t age;
+     uint8_t sex;
+     uint64_t $seq_;
+     std::string Name() const { return name; }
+     uint8_t Age() const { return age; }
+     PLATON_SERIALIZE(Member, (name)(age)(sex))
+    };
+    MultiIndex<
+    "table"_n, Member,
+    IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                       IndexType::UniqueIndex>>,
+    IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                        IndexType::NormalIndex>>>
+    member_table;
+
+    auto iter = member_table.find<"index2"_n>(uint8_t(10));
+    member_table.erase(iter);
+   * @endcode
+   */
   void erase(const_iterator position) {
     hana::for_each(indices_, [&](auto& idx) {
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
