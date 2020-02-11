@@ -36,7 +36,7 @@ CONTRACT user : public platon::Contract {
         ACTION std::vector<my_message> delegate_call_add_message(const std::string &target_address, const my_message &one_message,
             uint64_t gas_value) {
             platon::bytes paras = platon::cross_call_args("add_message", one_message);
-            platon::platon_delegate_call(Address(target_addres)s, paras, gas_value);
+            platon::platon_delegate_call(Address(target_address), paras, gas_value);
             std::vector<my_message> return_value;
             return_value = get_call_output<std::vector<my_message>>();
             return return_value;
