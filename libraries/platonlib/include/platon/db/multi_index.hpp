@@ -158,41 +158,6 @@ void delete_secondary_index_db(uint64_t table_name, uint64_t index_name,
         set_state(key, pre_value);
       }
     }
-    //    else {
-    //      SecondaryIndexKey<T> second_key = {
-    //          .table_name = table_name, .index_name = index_name, .value =
-    //          value};
-    //      NormalIndexValue current_value;
-    //      for (;;) {
-    //        second_key.position = pre_value.next_seq;
-    //        NormalIndexValue tmp;
-    //        get_state(second_key, tmp);
-    //        if (tmp.keys.find(seq) != tmp.keys.end()) {
-    //          current_value = std::move(tmp);
-    //          break;
-    //        }
-    //        pre_value = std::move(tmp);
-    //      }
-    //      current_value.keys.erase(seq);
-    //      if (current_value.keys.empty() && current_value.next_seq != 0) {
-    //        del_state(second_key);
-    //        second_key.position = current_value.next_seq;
-    //        NormalIndexValue post_value;
-    //        get_state(second_key, post_value);
-    //        post_value.pre_seq = current_value.pre_seq;
-    //        set_state(second_key, post_value);
-    //        pre_value.next_seq = current_value.next_seq;
-    //        second_key.position = current_value.pre_seq;
-    //        set_state(second_key, pre_value);
-    //      } else if (current_value.keys.empty()) {
-    //        del_state(second_key);
-    //        pre_value.next_seq = 0;
-    //        second_key.position = current_value.pre_seq;
-    //        set_state(second_key, pre_value);
-    //      } else {
-    //        set_state(second_key, current_value);
-    //      }
-    //    }
   }
 }
 template <typename T>
@@ -244,14 +209,71 @@ class MultiIndex {
       : public std::iterator<std::bidirectional_iterator_tag, const T> {
    public:
     friend bool operator==(const const_iterator& a, const const_iterator& b) {
-      if (a.item_ == nullptr && b.item_ == nullptr) {
-        return true;
+      if (a.multi_index_ != b.multi_index_) {
+        return false;
       }
+      // secondary index
+      if (a.item_->normal_index_value != nullptr ||
+          b.item_->normal_index_value != nullptr) {
+        if (a.begin_ || b.begin_) {
+          bool equal_a = a.item_->normal_index_value != nullptr
+                             ? a.item_->normal_index_value->iter ==
+                                   a.item_->normal_index_value->keys.begin()
+                             : a.begin_;
+          bool equal_b = b.item_->normal_index_value != nullptr
+                             ? b.item_->normal_index_value->iter ==
+                                   b.item_->normal_index_value->keys.begin()
+                             : b.begin_;
+
+          return equal_a && equal_b;
+        }
+        if (a.end_ || b.end_) {
+          bool equal_a = a.item_->normal_index_value != nullptr
+                             ? a.item_->normal_index_value->iter ==
+                                   a.item_->normal_index_value->keys.end()
+                             : a.end_;
+          bool equal_b = b.item_->normal_index_value != nullptr
+                             ? b.item_->normal_index_value->iter ==
+                                   b.item_->normal_index_value->keys.end()
+                             : b.end_;
+
+          return equal_a && equal_b;
+        }
+      }
+
       return a.item_ == b.item_;
     }
     friend bool operator!=(const const_iterator& a, const const_iterator& b) {
-      if (a.item_ == nullptr && b.item_ == nullptr) {
-        return false;
+      if (a.multi_index_ != b.multi_index_) {
+        return true;
+      }
+      // secondary index
+      if (a.item_->normal_index_value != nullptr ||
+          b.item_->normal_index_value != nullptr) {
+        if (a.begin_ || b.begin_) {
+          bool equal_a = a.item_->normal_index_value != nullptr
+                             ? a.item_->normal_index_value->iter ==
+                                   a.item_->normal_index_value->keys.begin()
+                             : a.begin_;
+          bool equal_b = b.item_->normal_index_value != nullptr
+                             ? b.item_->normal_index_value->iter ==
+                                   b.item_->normal_index_value->keys.begin()
+                             : b.begin_;
+
+          return !(equal_a && equal_b);
+        }
+        if (a.end_ || b.end_) {
+          bool equal_a = a.item_->normal_index_value != nullptr
+                             ? a.item_->normal_index_value->iter ==
+                                   a.item_->normal_index_value->keys.end()
+                             : a.end_;
+          bool equal_b = b.item_->normal_index_value != nullptr
+                             ? b.item_->normal_index_value->iter ==
+                                   b.item_->normal_index_value->keys.end()
+                             : b.end_;
+
+          return !(equal_a && equal_b);
+        }
       }
       return a.item_ != b.item_;
     }
@@ -283,10 +305,6 @@ class MultiIndex {
     const_iterator& operator++() {
       if (item_->normal_index_value != nullptr) {
         item_->normal_index_value->iter++;
-        if (item_->normal_index_value->iter ==
-            item_->normal_index_value->keys.end()) {
-          item_ = nullptr;
-        }
       } else {
         item_ = nullptr;
       }
@@ -295,11 +313,8 @@ class MultiIndex {
     const_iterator& operator--() {
       if (item_->normal_index_value != nullptr) {
         if (item_->normal_index_value->iter !=
-            item_->normal_index_value->begin()) {
+            item_->normal_index_value->keys.begin()) {
           item_->normal_index_value->iter--;
-          T& obj = static_cast<T&>(*item_);
-          get_state_db(item_->normal_index_value->table_name,
-                       *item_->normal_index_value->iter, obj);
         }
       } else {
         item_ = nullptr;
@@ -311,10 +326,14 @@ class MultiIndex {
    private:
     const_iterator(const MultiIndex* mi, std::shared_ptr<Item> i = nullptr)
         : multi_index_(mi), item_(i) {}
+    const_iterator(const MultiIndex* mi, bool begin, bool end)
+        : multi_index_(mi), item_(nullptr), begin_(begin), end_(end) {}
     void reset(std::shared_ptr<Item> i) { item_ = i; }
 
     const MultiIndex* multi_index_;
     std::shared_ptr<Item> item_;
+    bool begin_ = false;
+    bool end_ = false;
     friend class MultiIndex;
   };  /// class MultiIndex::const_iterator
 
@@ -325,7 +344,8 @@ class MultiIndex {
   };
 
  public:
-  const_iterator cend() const { return const_iterator(this, nullptr); }
+  const_iterator cbegin() const { return const_iterator(this, true, false); }
+  const_iterator cend() const { return const_iterator(this, false, true); }
 
   template <typename Lambda>
   std::pair<const_iterator, bool> emplace(Lambda&& constructor) {
@@ -499,8 +519,6 @@ class MultiIndex {
   IndicesType indices_;
   Uint64<TableName> seq_;
   int unique_number_ = -1;
-
- public:
-};
+};  // namespace db
 }  // namespace db
 }  // namespace platon

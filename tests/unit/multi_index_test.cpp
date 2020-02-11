@@ -1,9 +1,11 @@
 
 #include "platon/db/multi_index.hpp"
+#include <map>
 #include <platon/chain.hpp>
 #include <string>
 #include "platon/name.hpp"
 #include "platon/rlp_serialize.hpp"
+#include "platon/storagetype.hpp"
 #include "unit_test.hpp"
 using namespace platon::db;
 struct Member {
@@ -76,13 +78,13 @@ TEST_CASE(multi_index, normal) {
 
   ASSERT(!r.second);
 
-  auto iter = member_table.find<"index2"_n>(uint8_t (10));
+  auto iter = member_table.find<"index2"_n>(uint8_t(10));
   ASSERT(iter->sex == 15, "sex:", iter->sex);
   ASSERT(iter != member_table.cend());
 
   member_table.erase(iter);
 
-  iter = member_table.find<"index2"_n>(uint8_t (10));
+  iter = member_table.find<"index2"_n>(uint8_t(10));
   ASSERT(iter == member_table.cend());
 }
 TEST_CASE(multi_index, find) {
@@ -106,13 +108,23 @@ TEST_CASE(multi_index, find) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  auto iter = member_table.find<"index2"_n>(uint8_t (10));
+  auto iter = member_table.find<"index2"_n>(uint8_t(10));
   int size = 0;
   for (; iter != member_table.cend(); iter++) {
+    ASSERT(iter->age == 10);
     size++;
   }
   ASSERT(size == 2);
+  size = 0;
+  ASSERT(iter == member_table.cend());
+  for (; iter != member_table.cbegin(); --iter) {
+    ASSERT(iter->age == 10);
+    size++;
+  }
+  ASSERT(size == 2, "size:", size);
+  ASSERT(iter == member_table.cbegin());
 }
+
 UNITTEST_MAIN() {
   RUN_TEST(multi_index, unique);
   RUN_TEST(multi_index, normal);
