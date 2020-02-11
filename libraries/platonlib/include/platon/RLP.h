@@ -230,6 +230,7 @@ class RLP {
   explicit operator bigint() const { return toInt<bigint>(); }
   explicit operator int8_t() const { return toSignedInt<int8_t>(); }
   explicit operator int16_t() const { return toSignedInt<int16_t>(); }
+  explicit operator int() const { return toSignedInt<int>(); }
   explicit operator int32_t() const { return toSignedInt<int32_t>(); }
   explicit operator int64_t() const { return toSignedInt<int64_t>(); }
   explicit operator float() const { return toFloat(); }
@@ -547,6 +548,12 @@ struct Converter<int16_t> {
   }
 };
 template <>
+struct Converter<int> {
+  static int convert(RLP const& _r, int _flags) {
+    return _r.toSignedInt<int>(_flags);
+  }
+};
+template <>
 struct Converter<int32_t> {
   static int32_t convert(RLP const& _r, int _flags) {
     return _r.toSignedInt<int32_t>(_flags);
@@ -638,6 +645,7 @@ class RLPStream {
   RLPStream& append(bigint _i);
   RLPStream& append(int8_t _c) { return append(int64_t(_c)); }
   RLPStream& append(int16_t _s) { return append(int64_t(_s)); }
+  RLPStream& append(int _c) { return append(int64_t(_c)); }
   RLPStream& append(int32_t _s) { return append(int64_t(_s)); }
   RLPStream& append(int64_t _l) {
     uint64_t _i = uint64_t((_l << 1) ^ (_l >> 63));

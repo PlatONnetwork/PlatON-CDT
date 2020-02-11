@@ -11,6 +11,7 @@ set(INC_OUTPUT ${PLATON_CDT}/include)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything --target=wasm32 -nostdlib -fno-builtin -ffreestanding  -fno-threadsafe-statics  -Oz")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything --target=wasm32 -nostdlib -nostdinc -fno-builtin -ffreestanding  -fno-threadsafe-statics  -Oz  -fno-rtti -fno-exceptions -std=c++17")
 
+add_definitions("-DNDEBUG")
 add_subdirectory(libc)
 add_subdirectory(libc++)
 add_subdirectory(builtins)
