@@ -7,7 +7,7 @@ platon::bytes global_bytes;
 extern "C" {
 #endif
 
-void platon_debug(uint8_t *dst, size_t len){
+void platon_debug(const uint8_t *dst, size_t len){
     for (size_t i = 0; i < len; i++){   
         std::cout << *(char*)(dst + i);
     }
@@ -51,6 +51,6 @@ int main(int argc, char **argv) {
 
     global_bytes = paras;
     std::tuple<std::string, std::string, uint32_t> call_result;
-    platon::get_call_output(call_result);
+    call_result = platon::get_call_output<std::tuple<std::string, std::string, uint32_t>>();
     std::cout << std::get<0>(call_result) << ' ' << std::get<1>(call_result) << ' ' << std::get<2>(call_result) << std::endl;
 }
