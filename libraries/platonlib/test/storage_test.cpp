@@ -59,8 +59,6 @@ size_t platon_get_state(const uint8_t* key, size_t klen, uint8_t *value, size_t 
 }
 #endif
 
-extern char const contract_info[] = "info";
-
 class testContract 
 {
     public:
@@ -75,7 +73,7 @@ class testContract
         }
 
     private:
-        StorageType<contract_info, std::vector<std::string>> info;
+        StorageType<"info"_n, std::vector<std::string>> info;
 };
 
 int main(int argc, char **argv) {
