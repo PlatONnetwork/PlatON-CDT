@@ -15,9 +15,6 @@ class my_message : public message {
         PLATON_SERIALIZE_DERIVED(my_message, message, (body)(end))
 };
 
-extern char const contract_info[] = "info";
-extern const char contract_ower[] = "ower";
-
 CONTRACT hello : public platon::Contract{
    public:
       ACTION std::string init(const std::string address = ""){
@@ -72,8 +69,8 @@ CONTRACT hello : public platon::Contract{
       }
 
    private:
-      StorageType<contract_info, std::vector<my_message>> info;
-      StorageType<contract_ower, Address> contract_ower;
+      StorageType<"info"_n, std::vector<my_message>> info;
+      StorageType<"owner"_n, Address> contract_ower;
 };
 
 PLATON_DISPATCH(hello, (init)(add_message)(get_message)(get_ower)(destroy)(migrate))
