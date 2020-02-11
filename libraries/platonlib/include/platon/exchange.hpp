@@ -138,7 +138,7 @@ Energon operator""_VON(uint64_t von) { return Energon(von); }
 Energon operator""_kVON(uint64_t kvon) { return Energon(kvon * u256(kVON)); }
 
 /**
- * @brief 1_mVON representing 1e3 VON
+ * @brief 1_mVON representing 1e6 VON
  *
  * @param mvon Amount of mVON
  * @return Energon
@@ -274,11 +274,11 @@ Energon operator-(const Energon& lhs, const Energon& rhs) {
  *
  * @param addr Accounts address
  * @param amount The amount of Energon
- * @return The call succeeds or fails
+ * @return true if transfer success, false otherwise
  */
-int32_t platon_transfer(const Address& addr, const Energon& amount) {
+bool platon_transfer(const Address& addr, const Energon& amount) {
   auto bs = amount.Bytes();
-  return ::platon_transfer(addr.data(), bs.data(), bs.size());
+  return ::platon_transfer(addr.data(), bs.data(), bs.size()) == 0;
 }
 
 }  // namespace platon

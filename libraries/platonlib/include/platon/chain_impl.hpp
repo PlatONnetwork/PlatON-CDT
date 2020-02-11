@@ -3,9 +3,9 @@
 #include "RLP.h"
 #include "bigint.hpp"
 #include "chain.hpp"
+#include "exchange.hpp"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
-#include "exchange.hpp"
 
 namespace platon {
 
@@ -97,9 +97,9 @@ Energon platon_balance(const Address& addr) {
  *
  * @param addr Accounts address
  * @param amount The amount of Energon
- * @return The call succeeds or fails
+ * @return true if transfer success, false otherwise
  */
-int32_t platon_transfer(const Address& addr, const Energon& amount);
+bool platon_transfer(const Address& addr, const Energon& amount);
 
 /**
  * @brief Get the value of the current transaction value field
@@ -218,7 +218,7 @@ bool platon_delegate_call(const Address& addr, const bytes& paras,
  * @return The value of call output
  */
 template <typename T>
-T get_call_output();
+void get_call_output(T& t);
 
 /**
  * @brief Get the address of original caller
