@@ -97,9 +97,9 @@ Energon platon_balance(const Address& addr) {
  *
  * @param addr Accounts address
  * @param amount The amount of Energon
- * @return The call succeeds or fails
+ * @return true if transfer success, false otherwise
  */
-int32_t platon_transfer(const Address& addr, const Energon& amount);
+bool platon_transfer(const Address& addr, const Energon& amount);
 
 /**
  * @brief Get the value of the current transaction value field
