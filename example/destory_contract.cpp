@@ -15,15 +15,11 @@ class my_message : public message {
         PLATON_SERIALIZE_DERIVED(my_message, message, (body)(end))
 };
 
-extern char const contract_info[] = "info";
-extern const char contract_ower[] = "ower";
-
 CONTRACT hello : public platon::Contract{
    public:
       ACTION std::string init(const std::string address = ""){
           if (address.empty()) {
-              Address platon_address;
-              platon_caller(platon_address);
+              Address platon_address = platon_caller();
               contract_ower.self() = platon_address;
           } else {
               contract_ower.self() = Address(address);
@@ -48,19 +44,17 @@ CONTRACT hello : public platon::Contract{
       }
 
       ACTION std::string destroy() {
-          Address platon_address;
-          platon_origin_caller(platon_address);
+          Address platon_address = platon_origin();
           DEBUG("destroy ower address:", contract_ower.self().toString(), ", caller address:", platon_address.toString())
           if (contract_ower.self() != platon_address){
               return "invalid address";
           }
-          platon_destroy_contract(platon_address);
+          platon_destroy(platon_address);
           return platon_address.toString();
       }
 
       ACTION std::string migrate(const bytes &init_arg, uint64_t transfer_value, uint64_t gas_value){
-            Address platon_address;
-            platon_origin_caller(platon_address);
+            Address platon_address = platon_origin();
             if (contract_ower.self() != platon_address){
                 return "invalid address";
             }
@@ -72,8 +66,8 @@ CONTRACT hello : public platon::Contract{
       }
 
    private:
-      StorageType<contract_info, std::vector<my_message>> info;
-      StorageType<contract_ower, Address> contract_ower;
+      StorageType<"info"_n, std::vector<my_message>> info;
+      StorageType<"owner"_n, Address> contract_ower;
 };
 
 PLATON_DISPATCH(hello, (init)(add_message)(get_message)(get_ower)(destroy)(migrate))

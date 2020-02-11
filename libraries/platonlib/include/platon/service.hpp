@@ -17,7 +17,7 @@ inline std::vector<byte> get_input(void) {
 
 inline void platon_throw(const std::string msg) {
   size_t len = msg.length();
-  ::platon_debug((uint8_t *)msg.c_str(), len);
+  ::platon_debug((const uint8_t *)msg.c_str(), len);
   ::platon_panic();
 }
 

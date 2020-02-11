@@ -9,7 +9,7 @@ using namespace platon;
 extern "C" {
 #endif
 
-void platon_debug(uint8_t *dst, size_t len){
+void platon_debug(const uint8_t *dst, size_t len){
     for (size_t i = 0; i < len; i++){   
         std::cout << *(char*)(dst + i);
     }

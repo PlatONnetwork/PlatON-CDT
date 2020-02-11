@@ -34,8 +34,6 @@ class my_message : public message {
       PLATON_SERIALIZE_DERIVED(my_message, message, (body)(end))
 };
 
-extern char const contract_info[] = "info";
-
 CONTRACT hello : public platon::Contract{
    public:
       ACTION void init(){}
@@ -48,7 +46,7 @@ CONTRACT hello : public platon::Contract{
           return info.self();
       }
    private:
-      platon::StorageType<contract_info, std::vector<my_message>> info;
+      platon::StorageType<"info"_n, std::vector<my_message>> info;
 };
 
 PLATON_DISPATCH(hello, (init)(add_message)(get_message))
@@ -86,7 +84,7 @@ void platon_get_input(uint8_t *value){
     }
 }
 
-void platon_debug(uint8_t *dst, size_t len){
+void platon_debug(const uint8_t *dst, size_t len){
     for (size_t i = 0; i < len; i++){   
         std::cout << *(char*)(dst + i);
     }

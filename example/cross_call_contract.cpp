@@ -29,16 +29,16 @@ CONTRACT user : public platon::Contract {
         ACTION uint64_t call_add_message(const std::string &target_address, const my_message &one_message, 
             uint64_t transfer_value, uint64_t gas_value) {
             platon::bytes paras = platon::cross_call_args("add_message", one_message);
-            int32_t return_vale = platon::platon_call(target_address, paras, transfer_value, gas_value);
+            bool return_vale = platon::platon_call(Address(target_address), paras, transfer_value, gas_value);
             return 0;
         }
 
         ACTION std::vector<my_message> delegate_call_add_message(const std::string &target_address, const my_message &one_message,
             uint64_t gas_value) {
             platon::bytes paras = platon::cross_call_args("add_message", one_message);
-            platon::platon_delegate_call(target_address, paras, gas_value);
+            platon::platon_delegate_call(Address(target_address), paras, gas_value);
             std::vector<my_message> return_value;
-            get_call_output(return_value);
+            return_value = get_call_output<std::vector<my_message>>();
             return return_value;
         }
 

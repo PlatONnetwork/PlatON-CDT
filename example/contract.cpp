@@ -21,8 +21,6 @@ class my_message : public message {
       PLATON_SERIALIZE_DERIVED(my_message, message, (body)(end))
 };
 
-extern char const contract_info[] = "info";
-
 CONTRACT hello : public platon::Contract{
    public:
       PLATON_EVENT1(hello, std::string, std::string, uint32_t)
@@ -42,10 +40,10 @@ CONTRACT hello : public platon::Contract{
 
       ACTION void hello_abort(){platon_assert(0, "hello abort");}
 
-      ACTION void hello_panic(){platon_panic();}
+      ACTION void hello_panic(){platon::platon_panic();}
 
    private:
-      platon::StorageType<contract_info, std::vector<my_message>> info;
+      platon::StorageType<"info"_n, std::vector<my_message>> info;
 };
 
 PLATON_DISPATCH(hello, (init)(add_message)(get_message)(hello_abort)(hello_panic))
