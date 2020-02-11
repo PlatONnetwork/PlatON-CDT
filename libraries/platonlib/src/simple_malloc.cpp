@@ -47,7 +47,7 @@ namespace platon {
       size_t next_page;
    }; 
    dsmalloc _dsmalloc;
-} // ns eosio
+}
 
 extern "C" {
 
