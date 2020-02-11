@@ -44,17 +44,17 @@ CONTRACT hello : public platon::Contract{
       }
 
       ACTION std::string destroy() {
-          Address platon_address = platon_origin_caller();
+          Address platon_address = platon_origin();
           DEBUG("destroy ower address:", contract_ower.self().toString(), ", caller address:", platon_address.toString())
           if (contract_ower.self() != platon_address){
               return "invalid address";
           }
-          platon_destroy_contract(platon_address);
+          platon_destroy(platon_address);
           return platon_address.toString();
       }
 
       ACTION std::string migrate(const bytes &init_arg, uint64_t transfer_value, uint64_t gas_value){
-            Address platon_address = platon_origin_caller();
+            Address platon_address = platon_origin();
             if (contract_ower.self() != platon_address){
                 return "invalid address";
             }
