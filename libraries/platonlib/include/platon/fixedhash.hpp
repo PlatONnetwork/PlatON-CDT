@@ -48,7 +48,7 @@ class FixedHash {
   explicit FixedHash(const std::string& s, bool isHex = true)
       : FixedHash(isHex ? fromHex(s) : asBytes(s)) {}
 
-  std::string toString() const { return toHex(m_data); }
+  std::string toString() const { return "0x" + toHex(m_data); }
   byte const* data() const { return m_data.data(); }
   byte* data() { return m_data.data(); }
   bytesRef ref() { return bytesRef(m_data.data(), N); }
