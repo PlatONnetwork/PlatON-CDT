@@ -2,6 +2,7 @@
 
 #include <map>
 #include "platon/assert.hpp"
+#include "platon/name.hpp"
 #include "platon/storage.hpp"
 
 namespace platon {
@@ -13,7 +14,7 @@ namespace db {
  * @tparam Key Array element type
  * @tparam Size Array length
  */
-template <const char* Name, typename Key, unsigned N>
+template <Name::Raw TableName, typename Key, unsigned N>
 class Array {
  public:
   /**
@@ -36,7 +37,7 @@ class Array {
      * @param array Array
      * @param pos position
      */
-    iterator(Array<Name, Key, N>* array, size_t pos)
+    iterator(Array<TableName, Key, N>* array, size_t pos)
         : array_(array), pos_(pos) {}
 
     /**
@@ -77,7 +78,7 @@ class Array {
     }
 
    private:
-    Array<Name, Key, N>* array_;
+    Array<TableName, Key, N>* array_;
     size_t pos_;
   };
 
@@ -102,7 +103,7 @@ class Array {
      * @param array Array
      * @param pos position
      */
-    const_iterator(Array<Name, Key, N>* array, size_t pos)
+    const_iterator(Array<TableName, Key, N>* array, size_t pos)
         : array_(array), pos_(pos) {}
 
     /**
@@ -149,7 +150,7 @@ class Array {
     }
 
    private:
-    Array<Name, Key, N>* array_;
+    Array<TableName, Key, N>* array_;
     size_t pos_;
     Key key_;
   };
@@ -177,7 +178,7 @@ class Array {
      * @param array Array
      * @param pos position
      */
-    const_reverse_iterator(Array<Name, Key, N>* array, size_t pos)
+    const_reverse_iterator(Array<TableName, Key, N>* array, size_t pos)
         : array_(array), pos_(pos) {}
 
     /**
@@ -224,7 +225,7 @@ class Array {
     }
 
    private:
-    Array<Name, Key, N>* array_;
+    Array<TableName, Key, N>* array_;
     size_t pos_;
     Key key_;
   };
@@ -235,9 +236,9 @@ class Array {
   static_assert(N != 0, "array no support size = 0");
   Array() {}
 
-  Array(const Array<Name, Key, N>&) = delete;
-  Array(const Array<Name, Key, N>&&) = delete;
-  Array<Name, Key, N>& operator=(const Array<Name, Key, N>&) = delete;
+  Array(const Array<TableName, Key, N>&) = delete;
+  Array(const Array<TableName, Key, N>&&) = delete;
+  Array<TableName, Key, N>& operator=(const Array<TableName, Key, N>&) = delete;
 
   ~Array() { Flush(); }
 
@@ -395,10 +396,10 @@ class Array {
  private:
   std::map<size_t, Key> cache_;
 
-  const std::string name_ = kType + Name;
+  const std::string name_ = kType + std::to_string(uint64_t(TableName));
 };
 
-template <const char* Name, typename Key, unsigned N>
-const std::string Array<Name, Key, N>::kType = "__array__";
+template <Name::Raw TableName, typename Key, unsigned N>
+const std::string Array<TableName, Key, N>::kType = "__array__";
 }  // namespace db
 }  // namespace platon

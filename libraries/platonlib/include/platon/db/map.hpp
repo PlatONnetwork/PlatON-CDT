@@ -1,5 +1,6 @@
 #pragma once
 
+#include "platon/name.hpp"
 #include "platon/rlp_serialize.hpp"
 #include "platon/storage.hpp"
 namespace platon {
@@ -9,13 +10,13 @@ namespace db {
  *
  * @tparam *Name The name of the Map, the name of the Map should be unique
  * within each contract.
- * @tparam Key key的类型
- * @tparam Value value的类型
+ * @tparam Key key type
+ * @tparam Value value type
  * @tparam MapType::Traverse The default is Traverse, when Traverse needs extra
  * data structure to operate, set to NoTraverse when no traversal operation is
  * needed.
  */
-template <const char *Name, typename Key, typename Value>
+template <Name::Raw TableName, typename Key, typename Value>
 class Map {
  public:
   /**
@@ -45,9 +46,10 @@ class Map {
 
  public:
   Map() {}
-  Map(const Map<Name, Key, Value> &) = delete;
-  Map(const Map<Name, Key, Value> &&) = delete;
-  Map<Name, Key, Value> &operator=(const Map<Name, Key, Value> &) = delete;
+  Map(const Map<TableName, Key, Value> &) = delete;
+  Map(const Map<TableName, Key, Value> &&) = delete;
+  Map<TableName, Key, Value> &operator=(const Map<TableName, Key, Value> &) =
+      delete;
   /**
    * @brief Destroy the Map object Refresh data to the blockchain
    *
@@ -208,14 +210,14 @@ class Map {
 
   std::map<Key, Value> map_;
   std::set<Key> modify_;
-  const std::string keyPrefix_ = kType + Name;
+  const std::string keyPrefix_ = kType + std::to_string(uint64_t(TableName));
   //    const std::string sizePrefix = kType + string("s_") + Name;
   //    size_t size_ = 0;
 
   bool init_ = false;
 };
 
-template <const char *Name, typename Key, typename Value>
-const std::string Map<Name, Key, Value>::kType = "__map__";
+template <Name::Raw TableName, typename Key, typename Value>
+const std::string Map<TableName, Key, Value>::kType = "__map__";
 }  // namespace db
 }  // namespace platon
