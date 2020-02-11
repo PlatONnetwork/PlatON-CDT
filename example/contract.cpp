@@ -40,7 +40,7 @@ CONTRACT hello : public platon::Contract{
 
       ACTION void hello_abort(){platon_assert(0, "hello abort");}
 
-      ACTION void hello_panic(){platon_panic();}
+      ACTION void hello_panic(){platon::platon_panic();}
 
    private:
       platon::StorageType<"info"_n, std::vector<my_message>> info;

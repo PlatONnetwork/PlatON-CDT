@@ -19,8 +19,7 @@ CONTRACT hello : public platon::Contract{
    public:
       ACTION std::string init(const std::string address = ""){
           if (address.empty()) {
-              Address platon_address;
-              platon_caller(platon_address);
+              Address platon_address = platon_caller();
               contract_ower.self() = platon_address;
           } else {
               contract_ower.self() = Address(address);
@@ -45,8 +44,7 @@ CONTRACT hello : public platon::Contract{
       }
 
       ACTION std::string destroy() {
-          Address platon_address;
-          platon_origin_caller(platon_address);
+          Address platon_address = platon_origin_caller();
           DEBUG("destroy ower address:", contract_ower.self().toString(), ", caller address:", platon_address.toString())
           if (contract_ower.self() != platon_address){
               return "invalid address";
@@ -56,8 +54,7 @@ CONTRACT hello : public platon::Contract{
       }
 
       ACTION std::string migrate(const bytes &init_arg, uint64_t transfer_value, uint64_t gas_value){
-            Address platon_address;
-            platon_origin_caller(platon_address);
+            Address platon_address = platon_origin_caller();
             if (contract_ower.self() != platon_address){
                 return "invalid address";
             }
