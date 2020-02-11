@@ -64,8 +64,7 @@ inline bool platon_delegate_call(const Address &addr, const bytes &paras,
 // }
 
 template <typename T>
-inline T get_call_output() {
-  T t;
+inline void get_call_output(T& t) {
   bytes result;
   size_t len = ::platon_get_call_output_length();
   result.resize(len);

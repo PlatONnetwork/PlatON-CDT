@@ -3,9 +3,9 @@
 #include "RLP.h"
 #include "bigint.hpp"
 #include "chain.hpp"
+#include "exchange.hpp"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
-#include "exchange.hpp"
 
 namespace platon {
 
@@ -218,7 +218,7 @@ bool platon_delegate_call(const Address& addr, const bytes& paras,
  * @return The value of call output
  */
 template <typename T>
-T get_call_output();
+void get_call_output(T& t);
 
 /**
  * @brief Get the address of original caller
