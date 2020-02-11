@@ -246,6 +246,16 @@ class Array {
    * @brief iterator start position
    *
    * @return iterator
+   *
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * name[0] = "hello";
+   * auto iter = name.begin();
+   * assert(*iter == "hello");
+   * @endcode
    */
   iterator begin() { return iterator(this, 1); }
 
@@ -253,6 +263,17 @@ class Array {
    * @brief iterator end position
    *
    * @return iterator
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * name[0] = "hello";
+   * name[1] = "world";
+   * auto iter = name.begin();
+   * for (auto iter = name.begin(); iter != name.end(); iter++) {
+   * }
+   * @endcode
    */
   iterator end() { return iterator(this, N + 1); }
 
@@ -303,6 +324,14 @@ class Array {
    *
    * @param pos Element position
    * @return Key& Element value
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * name[0] = "hello";
+   * assert(name.at[0] = "hello");
+   * @endcode
    */
   Key& at(size_t pos) {
     platon_assert(pos < N, "out of range pos:", pos, "size:", N);
@@ -322,6 +351,13 @@ class Array {
    *
    * @param pos position
    * @return Key& element
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * name[0] = "hello";
+   * @endcode
    */
   Key& operator[](size_t pos) { return at(pos); }
 
@@ -329,6 +365,13 @@ class Array {
    * @brief array size
    *
    * @return size_t
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * assert(name.size() == 3);
+   * @endcode
    */
   size_t size() { return N; }
 
@@ -337,6 +380,14 @@ class Array {
    *
    * @param pos position
    * @return Key Element value
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * name[0] = "hello";
+   * assert(name.get_const(0) == "hello");
+   * @endcode
    */
   Key get_const(size_t pos) {
     auto iter = cache_.find(pos);
@@ -353,6 +404,15 @@ class Array {
    *
    * @param pos
    * @param key
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+   * ArrayName name;
+   * name[0] = "hello";
+   * name.set_const(0, "world");
+   * assert(name.get_const(0) == "world");
+   * @endcode
    */
   void set_const(size_t pos, const Key& key) {
     auto iter = cache_.find(pos);
