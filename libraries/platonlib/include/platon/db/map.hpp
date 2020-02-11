@@ -63,6 +63,15 @@ class Map {
    * @param v Value
    * @return true Inserted successfully
    * @return false Insert failed
+   *
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.insert("hello", "world");
+   * assert(map["hello"] == "world");
+   * @endcode
    */
   bool insert(const Key &k, const Value &v) {
     init();
@@ -79,6 +88,14 @@ class Map {
    * @param v Value
    * @return true Inserted successfully
    * @return false Insert failed
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.insert_const("hello", "world");
+   * assert(map["hello"] == "world");
+   * @endcode
    */
   bool insert_const(const Key &k, const Value &v) {
     init();
@@ -95,6 +112,15 @@ class Map {
    *
    * @param k Key
    * @return Value
+   *
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.insert("hello", "world");
+   * assert(map.get_const["hello"] == "world");
+   * @endcode
    */
   Value get_const(const Key &k) {
     init();
@@ -113,6 +139,14 @@ class Map {
    *
    * @param k Key
    * @return Value&
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.insert("hello", "world");
+   * assert(map.at["hello"] == "world");
+   * @endcode
    */
   Value &at(const Key &k) {
     init();
@@ -132,6 +166,14 @@ class Map {
    * @brief Delete key-value pairs
    *
    * @param k Key
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.insert("hello", "world");
+   * map.erase("hello");
+   * @endcode
    */
   void erase(const Key &k) {
     init();
@@ -147,6 +189,13 @@ class Map {
    *
    * @param k Key
    * @return Value& Get Value
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.["hello"] = "world";
+   * @endcode
    */
   Value &operator[](const Key &k) {
     init();
@@ -159,6 +208,14 @@ class Map {
    *
    * @param k Key
    * @return true if there is such an element, otherwise false.
+   * Example:
+   *
+   * @code
+   * typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+   * MapStr map;
+   * map.["hello"] = "world";
+   * assert(map.contains("hello"));
+   * @endcode
    */
   bool contains(const Key &key) {
     init();
