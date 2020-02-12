@@ -10,6 +10,13 @@
 namespace platon {
 
 /**
+ * @brief Get the unix timestamp of the current block
+ *
+ * @return The unix timestamp of the current block (second)
+ */
+int64_t platon_unix_timestamp() { return platon_timestamp() / 1000; }
+
+/**
  * @brief Gets the block hash based on the block height
  *
  * @param num Height of block
