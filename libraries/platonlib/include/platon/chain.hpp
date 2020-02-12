@@ -8,10 +8,10 @@ extern "C" {
 /**
  * @brief Get the value of gas price
  *
- * @param void
- * @return the value of gas price
+ * @param gas_price The big-endian represents the gas price
+ * @return the length of gas price
  */
-uint64_t platon_gas_price();
+uint8_t platon_gas_price(uint8_t gas_price[32]);
 
 /**
  * @brief Get the height of the current block

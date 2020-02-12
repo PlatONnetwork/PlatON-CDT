@@ -10,6 +10,17 @@
 namespace platon {
 
 /**
+ * @brief Get the value of gas price
+ *
+ * @return The value of gas price
+ */
+u256 platon_gas_price() {
+  byte gas_price[32];
+  ::platon_gas_price(gas_price);
+  return fromBigEndian<u256>(gas_price);
+}
+
+/**
  * @brief Get the unix timestamp of the current block
  *
  * @return The unix timestamp of the current block (second)
