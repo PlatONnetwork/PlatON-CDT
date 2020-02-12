@@ -70,7 +70,6 @@ inline void get_call_output(T& t) {
   result.resize(len);
   ::platon_get_call_output(result.data());
   fetch(RLP(result), t);
-  return t;
 }
 
 }  // namespace platon
