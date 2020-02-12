@@ -38,7 +38,7 @@ CONTRACT user : public platon::Contract {
             platon::bytes paras = platon::cross_call_args("add_message", one_message);
             platon::platon_delegate_call(Address(target_address), paras, gas_value);
             std::vector<my_message> return_value;
-            return_value = get_call_output<std::vector<my_message>>();
+            get_call_output(return_value);
             return return_value;
         }
 

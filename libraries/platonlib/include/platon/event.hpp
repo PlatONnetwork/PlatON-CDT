@@ -44,55 +44,48 @@
 #define func10(a, ...) a arg10, func9(__VA_ARGS__)
 
 #define PLATON_EVENT(NAME, ...)                               \
-  EVENT void M_CAT(platon_event0_, NAME)(VA_F(__VA_ARGS__)) { \
+  EVENT void NAME(VA_F(__VA_ARGS__)) { \
     platon::emit_event(PA_F(__VA_ARGS__));                    \
   }
 
-#define PLATON_EMIT_EVENT(NAME, ...) M_CAT(platon_event0_, NAME)(__VA_ARGS__)
+#define PLATON_EMIT_EVENT(NAME, ...) NAME(__VA_ARGS__)
+
+#define PLATON_EVENT0(NAME, ...)                               \
+  EVENT void NAME(VA_F(__VA_ARGS__)) { \
+    platon::emit_event0(#NAME, PA_F(__VA_ARGS__));              \
+  }
+
+#define PLATON_EMIT_EVENT0(NAME, ...) NAME(__VA_ARGS__)
 
 #define PLATON_EVENT1(NAME, TOPIC_TYPE, ...)                       \
-  EVENT1 void M_CAT(platon_event1_, NAME)(const TOPIC_TYPE &topic, \
+  EVENT1 void NAME(const TOPIC_TYPE &topic, \
                                           VA_F(__VA_ARGS__)) {     \
-    platon::emit_event1(topic, PA_F(__VA_ARGS__));                 \
+    platon::emit_event1(#NAME, topic, PA_F(__VA_ARGS__));                 \
   }
 
 #define PLATON_EMIT_EVENT1(NAME, TOPIC_DATA, ...) \
-  M_CAT(platon_event1_, NAME)(TOPIC_DATA, __VA_ARGS__)
+  NAME(TOPIC_DATA, __VA_ARGS__)
 
 #define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)           \
-  EVENT2 void M_CAT(platon_event2_, NAME)(const TOPIC_TYPE1 &topic1, \
+  EVENT2 void NAME(const TOPIC_TYPE1 &topic1, \
                                           const TOPIC_TYPE2 &topic2, \
                                           VA_F(__VA_ARGS__)) {       \
-    platon::emit_event2(topic1, topic2, PA_F(__VA_ARGS__));          \
+    platon::emit_event2(#NAME, topic1, topic2, PA_F(__VA_ARGS__));          \
   }
 
 #define PLATON_EMIT_EVENT2(NAME, TOPIC1_DATA, TOPIC2_DATA, ...) \
-  M_CAT(platon_event2_, NAME)(TOPIC1_DATA, TOPIC2_DATA, __VA_ARGS__)
+  NAME(TOPIC1_DATA, TOPIC2_DATA, __VA_ARGS__)
 
 #define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...) \
-  EVENT3 void M_CAT(platon_event3_, NAME)(                              \
+  EVENT3 void NAME(                              \
       const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,             \
       const TOPIC_TYPE3 &topic3, VA_F(__VA_ARGS__)) {                   \
-    platon::emit_event3(topic1, topic2, topic3, PA_F(__VA_ARGS__));     \
+    platon::emit_event3(#NAME, topic1, topic2, topic3, PA_F(__VA_ARGS__));     \
   }
 
 #define PLATON_EMIT_EVENT3(NAME, TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, ...) \
-  M_CAT(platon_event3_, NAME)                                                \
-  (TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, __VA_ARGS__)
+  NAME(TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, __VA_ARGS__)
 
-#define PLATON_EVENT4(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3,          \
-                      TOPIC_TYPE4, ...)                                     \
-  EVENT4 void M_CAT(platon_event4_, NAME)(                                  \
-      const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,                 \
-      const TOPIC_TYPE3 &topic3, const TOPIC_TYPE4 &topic4,                 \
-      VA_F(__VA_ARGS__)) {                                                  \
-    platon::emit_event4(topic1, topic2, topic3, topic4, PA_F(__VA_ARGS__)); \
-  }
-
-#define PLATON_EMIT_EVENT4(NAME, TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, \
-                           TOPIC4_DATA, ...)                            \
-  M_CAT(platon_event4_, NAME)                                           \
-  (TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, TOPIC4_DATA, __VA_ARGS__)
 
 namespace platon {
 
@@ -112,7 +105,7 @@ inline bytes event_args(const Args &... args) {
 } 
 
 /**
- * @brief Send event items that are not indexed
+ * @brief Send events that are unindexed and anonymous
  *
  * @param args Any number of event parameters of any type
  *             
@@ -125,17 +118,35 @@ inline void emit_event(const Args &... args) {
 }
 
 /**
+ * @brief Send event items that are not indexed
+ *
+ * @param name The name of the event
+ * @param args Any number of event parameters of any type
+ *          
+ * @return void
+ */
+template <typename... Args>
+inline void emit_event0(const std::string &name, const Args &... args) {
+  RLPStream stream(1);
+  stream << name;
+  bytes topic_data = stream.out();
+  bytes args_data = event_args(args...);
+  ::platon_event(topic_data.data(), topic_data.size(), args_data.data(), args_data.size());
+}
+
+/**
  * @brief Sends an event that has only one index entry
  *
+ * @param name The name of the event
  * @param topic Event index value
  * @param args Any number of event parameters of any type
  *             
  * @return void
  */
 template <class Topic, typename... Args>
-inline void emit_event1(const Topic &topic, const Args &... args) {
-  RLPStream stream(1);
-  stream << topic;
+inline void emit_event1(const std::string &name, const Topic &topic, const Args &... args) {
+  RLPStream stream(2);
+  stream << name << topic;
   bytes topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
@@ -145,6 +156,7 @@ inline void emit_event1(const Topic &topic, const Args &... args) {
 /**
  * @brief Sends an event with two index values
  *
+ * @param name The name of the event
  * @param topic1 The first index value of the event
  * @param topic2 The second index value of the event
  * @param args Any number of event parameters of any type
@@ -152,10 +164,10 @@ inline void emit_event1(const Topic &topic, const Args &... args) {
  * @return void
  */
 template <class Topic1, class Topic2, typename... Args>
-inline void emit_event2(const Topic1 &topic1, const Topic2 &topic2,
+inline void emit_event2(const std::string &name, const Topic1 &topic1, const Topic2 &topic2,
                         const Args &... args) {
-  RLPStream stream(2);
-  stream << topic1 << topic2;
+  RLPStream stream(3);
+  stream << name << topic1 << topic2;
   bytes topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
@@ -165,6 +177,7 @@ inline void emit_event2(const Topic1 &topic1, const Topic2 &topic2,
 /**
  * @brief Sends an event with three event index values
  *
+ * @param name The name of the event
  * @param topic1 The first index value of the event
  * @param topic2 The second index value of the event
  * @param topic3 The third index value of the event
@@ -173,34 +186,10 @@ inline void emit_event2(const Topic1 &topic1, const Topic2 &topic2,
  * @return void
  */
 template <class Topic1, class Topic2, class Topic3, typename... Args>
-inline void emit_event3(const Topic1 &topic1, const Topic2 &topic2,
+inline void emit_event3(const std::string &name, const Topic1 &topic1, const Topic2 &topic2,
                         const Topic3 &topic3, const Args &... args) {
-  RLPStream stream(3);
-  stream << topic1 << topic2 << topic3;
-  bytes topic_data = stream.out();
-  bytes rlp_data = event_args(args...);
-  ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
-                 rlp_data.size());
-}
-
-/**
- * @brief Sends an event with four event index values
- *
- * @param topic1 The first index value of the event
- * @param topic2 The second index value of the event
- * @param topic3 The third index value of the event
- * @param topic4 The four index value of the event
- * @param args Any number of event parameters of any type
- *             
- * @return void
- */
-template <class Topic1, class Topic2, class Topic3, class Topic4,
-          typename... Args>
-inline void emit_event4(const Topic1 &topic1, const Topic2 &topic2,
-                        const Topic3 &topic3, const Topic4 &topic4,
-                        const Args &... args) {
   RLPStream stream(4);
-  stream << topic1 << topic2 << topic3 << topic4;
+  stream << name << topic1 << topic2 << topic3;
   bytes topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
