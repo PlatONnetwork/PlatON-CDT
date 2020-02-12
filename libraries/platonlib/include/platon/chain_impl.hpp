@@ -10,52 +10,11 @@
 namespace platon {
 
 /**
- * @brief Get the value of gas price
+ * @brief Get the unix timestamp of the current block
  *
- * @param void
- * @return the value of gas price
+ * @return The unix timestamp of the current block (second)
  */
-uint64_t platon_gas_price() { return ::platon_gas_price(); }
-
-/**
- * @brief Get the height of the current block
- *
- * @param void
- * @return the height of the current block
- */
-uint64_t platon_block_number() { return ::platon_block_number(); }
-
-/**
- * @brief Get the value of gas price limit
- *
- * @param void
- * @return the value of gas price limit
- */
-uint64_t platon_gas_limit() { return ::platon_gas_limit(); }
-
-/**
- * @brief Get the value of gas
- *
- * @param void
- * @return the value of gas
- */
-uint64_t platon_gas() { return ::platon_gas(); }
-
-/**
- * @brief Get the timestamp of the current block
- *
- * @param void
- * @return the timestamp of the current block
- */
-int64_t platon_timestamp() { return ::platon_timestamp(); }
-
-/**
- * @brief Get the value of the caller's nonce
- *
- * @param void
- * @return the value of the caller's nonce
- */
-uint64_t platon_caller_nonce() { return ::platon_caller_nonce(); }
+int64_t platon_unix_timestamp() { return platon_timestamp() / 1000; }
 
 /**
  * @brief Gets the block hash based on the block height
@@ -147,16 +106,6 @@ bytes get_input();
 void platon_debug(const std::string& data) {
   ::platon_debug(reinterpret_cast<const uint8_t*>(data.c_str()), data.size());
 }
-
-/**
- * @brief Terminate transaction, deduct all gas given by transaction
- */
-void platon_panic() { ::platon_panic(); }
-
-/**
- * @brief Terminate the transaction and deduct the gas consumed
- */
-void platon_revert() { ::platon_revert(); }
 
 /**
  * @brief Destory contract
