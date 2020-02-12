@@ -39,10 +39,8 @@ git checkout feature/wasm
 默认情况下不带单元测试模块。构建操作如下
 
 ``` sh
-mkdir build && cd build
-
-cmake .. 
-make -j4
+./scripts/build.sh
+cd build
 sudo make install
 ```
 

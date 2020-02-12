@@ -17,7 +17,7 @@ contract writing for the PlatON platform.
 - Tar
 - Wget
 
-### Ubuntu 
+### Ubuntu
 
 **Required:** 16.04+
 
@@ -40,10 +40,8 @@ git checkout feature/wasm
 Unit test modules are not included by default. The build operation is as follows.
 
 ``` sh
-mkdir build && cd build
-
-cmake ..
-make -j4
+./scripts/build.sh
+cd build
 sudo make install
 ```
 
