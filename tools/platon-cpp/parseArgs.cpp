@@ -97,6 +97,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
   clangArgs.push_back("-Werror=return-type");
   clangArgs.push_back("-std=c++17");
   clangArgs.push_back("-g");
+  clangArgs.push_back("-DNDEBUG");
   clangArgs.push_back("-O0");
 
   if(!NoStdlib){
