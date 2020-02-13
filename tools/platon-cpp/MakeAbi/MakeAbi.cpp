@@ -49,7 +49,11 @@ typedef multimap<llvm::DISubprogram*, llvm::DILocalVariable*> ParamsMap;
 
 void exportParams(DISubprogram* SP, ParamsMap &PMap, vector<DILocalVariable*> &Params){
 
+  if(!isa<DICompositeType>(SP->getScope()))
+    report_fatal_error("Action or Event function must be class member");
+
   unsigned num = SP->getType()->getTypeArray()->getNumOperands();
+
   Params.resize(num-2);
 
   for(auto iter = PMap.lower_bound(SP); iter != PMap.upper_bound(SP); iter++) {
@@ -130,12 +134,10 @@ void makeAbi(Module* M, MakeAbi &MABI){
   collectAnnote(Annote, SPMap);
 
   if(SPMap.size()==0)
-    report_fatal_error("have not Action and Event");
+    report_fatal_error("have not define Action or Event function");
 
   collectParams(M->getFunction("llvm.dbg.declare"), SPMap, PMap);
   collectParams(M->getFunction("llvm.dbg.value"), SPMap, PMap);
-
-  assert(SPMap.size());
 
   for(auto iter : SPMap){
     DISubprogram* SP = iter.first;
