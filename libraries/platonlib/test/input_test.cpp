@@ -50,7 +50,7 @@ struct Info {
     std::string desc;
     std::vector<std::string> children;
     friend std::ostream &operator<<( std::ostream &output, const Info &one_info){
-        output << one_info.number << ' ' << one_info.age << ' ' << one_info.married << ' ' << one_info.desc << ' ';
+        output << one_info.number << ' ' << one_info.age << ' ' << int(one_info.married) << ' ' << one_info.desc << ' ';
         for (auto one_children : one_info.children){
             output << one_children << ' ';
         }
@@ -70,7 +70,21 @@ CONTRACT input_test : public platon::Contract{
 PLATON_DISPATCH(input_test, (init))
 
 int main(int argc, char **argv) {
-    std::vector<byte> one_test = {0xd9, 0x84, 0x69, 0x6e, 0x69, 0x74, 0x62, 0xd2, 0x65, 0x57, 0x80, 0x85, 0x31, 0x32, 0x33, 0x34, 0x35, 0xc8, 0x83, 0x31, 0x32, 0x33, 0x83, 0x34, 0x35, 0x36};
+    Info info;
+    info.number = 10;
+    info.age = 30;
+    info.married = 11;
+    info.desc = "input_test";
+    info.children = std::vector<std::string>{"children1", "children2"};
+    RLPStream stream(3);
+    stream << "init" << uint64_t(5) << info;
+    std::vector<byte> result = stream.out();
+    for(auto i: result) {
+        std::cout << int(i) << " ";
+    }
+    std::cout << std::endl;
+    std::vector<byte> one_test = {234, 132, 105, 110, 105, 116, 5, 227, 10, 30, 11, 138, 105, 110, 112, 117, 116, 95, 
+    116, 101, 115, 116, 212, 137, 99, 104, 105, 108, 100, 114, 101, 110, 49, 137, 99, 104, 105, 108, 100, 114, 101, 110, 50};
     input_result = one_test;
     invoke();
 }

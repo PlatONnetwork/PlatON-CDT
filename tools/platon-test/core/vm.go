@@ -33,7 +33,7 @@ func addFuncExport(m *wasm.Module, sig wasm.FunctionSig, function wasm.Function,
 func Debug(proc *exec.Process, dst uint32, len uint32) {
 	buf := make([]byte, len)
 	proc.ReadAt(buf, int64(dst))
-	fmt.Printf("\t%s", string(buf))
+	fmt.Printf("%s", string(buf))
 }
 
 func Panic(proc *exec.Process) {
