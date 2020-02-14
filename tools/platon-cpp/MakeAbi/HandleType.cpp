@@ -18,14 +18,8 @@ using namespace std;
 
 json::Value handleType(DINode* Node, DIType* DT);
 
-bool isString(DIDerivedType* DerT){
-  if (DerT->getTag() == llvm::dwarf::DW_TAG_typedef)
-    if (DerT->getName() == "string") 
-      if(auto M = DerT->getBaseType().resolve())
-        if (DICompositeType *CT = dyn_cast<DICompositeType>(M)) 
-          if (CT->getIdentifier() == "_ZTSNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE")
-            return true;
-  return false;
+bool isString(DICompositeType *CT){
+  return CT->getIdentifier() == "_ZTSNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE";
 }
 
 bool isVector(DICompositeType* CT){
@@ -139,9 +133,6 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
 
 StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT){
 
-  if(isString(DevT))
-    return "string";
-
   DIType* BT = DevT->getBaseType().resolve();
 
   switch(DevT->getTag()){
@@ -201,12 +192,12 @@ StringRef MakeAbi::handleStructType(DINode* Node, DICompositeType* CT){
 
 StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
-  if(CT->getElements().get() == nullptr){
+  if(isString(CT)){
+    return "string";
+  } else if(CT->getElements().get() == nullptr){
     report_error(Node);
     report_fatal_error("StructType have define but never used");
-  }
-
-  if(isVector(CT)){
+  } else if(isVector(CT)){
     return handleVector(Node, CT);
 
   } else if(CT->getTag() == dwarf::DW_TAG_structure_type || CT->getTag() == dwarf::DW_TAG_class_type){
