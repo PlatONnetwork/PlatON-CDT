@@ -7,11 +7,11 @@ import (
 	"math"
 	"reflect"
 )
-var (
 
+var (
 	db = NewDB()
 
-	 importer = func(name string) (*wasm.Module, error) {
+	importer = func(name string) (*wasm.Module, error) {
 		switch name {
 		case "env":
 			return NewHostModule(), nil
@@ -33,7 +33,7 @@ func addFuncExport(m *wasm.Module, sig wasm.FunctionSig, function wasm.Function,
 func Debug(proc *exec.Process, dst uint32, len uint32) {
 	buf := make([]byte, len)
 	proc.ReadAt(buf, int64(dst))
-	fmt.Printf("\t%s", string(buf))
+	fmt.Printf("%s", string(buf))
 }
 
 func Panic(proc *exec.Process) {
@@ -71,6 +71,13 @@ func GetState(proc *exec.Process, key uint32, keyLen uint32, val uint32, valLen 
 	}
 	proc.WriteAt(valBuf, int64(val))
 	return 0
+}
+
+func ReturnContract(proc *exec.Process, dst uint32, len uint32) {
+	buf := make([]byte, len)
+	proc.ReadAt(buf, int64(dst))
+	fmt.Printf("platon_return:")
+	fmt.Println(buf)
 }
 
 func NewHostModule() *wasm.Module {
@@ -156,6 +163,20 @@ func NewHostModule() *wasm.Module {
 		},
 		wasm.ExportEntry{
 			FieldStr: "platon_set_state",
+			Kind:     wasm.ExternalFunction,
+		},
+	)
+
+	addFuncExport(m,
+		wasm.FunctionSig{
+			ParamTypes: []wasm.ValueType{wasm.ValueTypeI32, wasm.ValueTypeI32},
+		},
+		wasm.Function{
+			Host: reflect.ValueOf(ReturnContract),
+			Body: &wasm.FunctionBody{},
+		},
+		wasm.ExportEntry{
+			FieldStr: "platon_return",
 			Kind:     wasm.ExternalFunction,
 		},
 	)

@@ -8,8 +8,9 @@
 
 using namespace platon;
 
-class TestResult {
+CONTRACT TestResult : public platon::Contract {
   public:
+    ACTION void init(){}
     TestResult(): testcases(0), assertions(0), failures(0), isContinue(false), skip(false) {}
     size_t testcases;
     size_t assertions ;
@@ -83,7 +84,7 @@ class TestResult {
 //    void testSuit(TestResult &testResult)
 
 #define UNITTEST_MAIN()                                                     \
-ACTION void testSuit(TestResult &testResult);                                    \
+void testSuit(TestResult &testResult);                                    \
 extern "C" {                                                                \
     int invoke() {                                                          \
         TestResult testResult;                                              \
@@ -94,4 +95,4 @@ extern "C" {                                                                \
         return 0;                                                           \
     }                                                                       \
 }                                                                           \
-ACTION void testSuit(TestResult &testResult)
+void testSuit(TestResult &testResult)
