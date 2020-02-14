@@ -104,7 +104,8 @@ int main(int argc, char **argv) {
 
   std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
 
-  GenerateABI(Option.Output, M.get());
+  if(!Option.NoABI)
+    GenerateABI(Option.Output, M.get());
 
   PCCPass(*M);
 

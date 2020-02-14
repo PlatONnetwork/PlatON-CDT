@@ -6,6 +6,7 @@ public:
   std::string bindir;
   std::vector<std::string> InputFiles;
   std::string Output;
+  bool NoABI;
   bool Help;
   bool OutputIR;
   std::vector<std::string> ldArgs;

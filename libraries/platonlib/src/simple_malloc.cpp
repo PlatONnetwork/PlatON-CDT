@@ -45,6 +45,10 @@ struct dsmalloc {
     }
     __builtin_wasm_memory_grow(0, pages_to_alloc);
     const uint32_t current_pages = __builtin_wasm_memory_size(0);
+
+    if(current_pages != next_page)
+      return 0;
+
     return ret;
   }
 
