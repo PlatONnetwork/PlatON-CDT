@@ -88,24 +88,38 @@ void platon_event(const uint8_t* topic, size_t topicLen, const uint8_t* args, si
 }
 #endif
 
-PLATON_EVENT(jatel_test, std::string, uint32_t)
+class EventTest {
+    PLATON_EVENT(jatel_test, std::string, uint32_t)
 
-PLATON_EVENT0(jatel_test0, std::string, uint32_t)
+    PLATON_EVENT0(jatel_test0, std::string, uint32_t)
 
-PLATON_EVENT1(jatel_test1, std::string, std::string, uint32_t)
+    PLATON_EVENT1(jatel_test1, std::string, std::string, uint32_t)
 
-PLATON_EVENT2(jatel_test2, std::string, std::string, std::string, uint32_t)
+    PLATON_EVENT2(jatel_test2, std::string, std::string, std::string, uint32_t)
 
-PLATON_EVENT3(jatel_test3, std::string, std::string, std::string, std::string, uint32_t)
+    PLATON_EVENT3(jatel_test3, std::string, std::string, std::string, std::string, uint32_t)
+public:
+    void TestEvent(){PLATON_EMIT_EVENT(jatel_test, "event", 0);}
+
+    void TestEvent0(){PLATON_EMIT_EVENT0(jatel_test0, "event0", 0);}
+
+    void TestEvent1(){PLATON_EMIT_EVENT1(jatel_test1, "index_1", "event1", 1);}
+
+    void TestEvent2(){PLATON_EMIT_EVENT2(jatel_test2, "index_1", "index_2", "event2", 2);}
+
+    void TestEvent3(){PLATON_EMIT_EVENT3(jatel_test3, "index_1", "index_2", "index_3", "event3", 3);}
+};
 
 TEST_CASE(event, event) {
-    PLATON_EMIT_EVENT(jatel_test, "event", 0);
+    EventTest event_test;
+    event_test.TestEvent();
     std::tuple<std::string, uint32_t> event_args(std::make_tuple("event", 0));
     ASSERT_EQ(g_args, event_args);
 }
 
 TEST_CASE(event, event0) {
-    PLATON_EMIT_EVENT0(jatel_test0, "event0", 0);
+    EventTest event_test;
+    event_test.TestEvent0();
     std::vector<std::string> event_topics = {"jatel_test0"};
     ASSERT_EQ(g_topic, event_topics);
     std::tuple<std::string, uint32_t> event_args(std::make_tuple("event0", 0));
@@ -114,7 +128,8 @@ TEST_CASE(event, event0) {
 
 
 TEST_CASE(event, event1) {
-    PLATON_EMIT_EVENT1(jatel_test1, "index_1", "event1", 1);
+    EventTest event_test;
+    event_test.TestEvent1();
     std::vector<std::string> event_topics = {"jatel_test1", "index_1"};
     ASSERT_EQ(g_topic, event_topics);
     std::tuple<std::string, uint32_t> event_args(std::make_tuple("event1", 1));
@@ -122,7 +137,8 @@ TEST_CASE(event, event1) {
 }
 
 TEST_CASE(event, event2) {
-    PLATON_EMIT_EVENT2(jatel_test2, "index_1", "index_2", "event2", 2);
+    EventTest event_test;
+    event_test.TestEvent2();
     std::vector<std::string> event_topics = {"jatel_test2", "index_1", "index_2"};
     ASSERT_EQ(g_topic, event_topics);
     std::tuple<std::string, uint32_t> event_args(std::make_tuple("event2", 2));
@@ -130,7 +146,8 @@ TEST_CASE(event, event2) {
 }
 
 TEST_CASE(event, event3) {
-    PLATON_EMIT_EVENT3(jatel_test3, "index_1", "index_2", "index_3", "event3", 3);
+    EventTest event_test;
+    event_test.TestEvent3();    
     std::vector<std::string> event_topics = {"jatel_test3", "index_1", "index_2", "index_3"};
     ASSERT_EQ(g_topic, event_topics);
     std::tuple<std::string, uint32_t> event_args(std::make_tuple("event3", 3));
