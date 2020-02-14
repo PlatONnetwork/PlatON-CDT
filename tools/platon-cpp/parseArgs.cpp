@@ -53,7 +53,10 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       ldArgs.push_back(A->getValue());
     } else if(Option.matches(clang::driver::options::OPT_Wl_COMMA)) {
       for(unsigned i=0; i<A->getNumValues(); i++) {
-        ldArgs.push_back(A->getValue(i));
+        if(strcmp(A->getValue(i), "-no-abi") == 0)
+          NoABI = true;
+        else 
+          ldArgs.push_back(A->getValue(i));
       }
     } else {
       ArgStringList ASL;
