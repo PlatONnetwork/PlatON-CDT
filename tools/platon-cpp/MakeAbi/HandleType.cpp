@@ -28,6 +28,9 @@ bool isList(DICompositeType*);
 bool isMap(DICompositeType*);
 bool isPair(DICompositeType*);
 
+bool isFixedHash(DICompositeType*);
+bool isWideInteger(DICompositeType*);
+
 StringRef getName(DINode* Node){
   if(DILocalVariable* LV = dyn_cast<DILocalVariable>(Node)){ 
     return LV->getName();
@@ -192,6 +195,12 @@ StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
   } else if(isList(CT)){
     return handleStd1(Node, CT, "list");
+
+  } else if(isFixedHash(CT)){
+    return handleFixedHash(Node, CT);
+
+  } else if(isWideInteger(CT)){
+    return handleWideInteger(Node, CT);
 
   } else if(CT->getElements().get() == nullptr){
     report_error(Node);

@@ -50,6 +50,17 @@ DIType* getTypeParam(DICompositeType* CT, unsigned i){
   return TP->getType().resolve();
 }
 
+Value* getValueParam(DICompositeType* CT, unsigned i){
+  if(CT->getTemplateParams().get() == nullptr)
+    report_fatal_error("has not value params");
+
+  const MDOperand &Op = CT->getTemplateParams()->getOperand(i);
+  const DITemplateValueParameter* VP = cast<const DITemplateValueParameter>(Op);
+  ValueAsMetadata* MV = cast<ValueAsMetadata>(VP->getValue());
+  return MV->getValue();
+}
+
+
 StringRef MakeAbi::handleVector(DINode* Node, DICompositeType* CT){
 
   DIType* T = getTypeParam(CT, 0);
@@ -67,10 +78,8 @@ StringRef MakeAbi::handleArray(DINode* Node, DICompositeType* CT){
   DIType* T = getTypeParam(CT, 0);
   StringRef s = handleType(Node, T);
 
-  const MDOperand &Op1 = CT->getTemplateParams()->getOperand(1);
-  const DITemplateValueParameter* VP = cast<const DITemplateValueParameter>(Op1);
-  ValueAsMetadata* MV = cast<ValueAsMetadata>(VP->getValue());
-  ConstantInt* CI = cast<ConstantInt>(MV->getValue());
+  Value* V  = getValueParam(CT, 1);
+  ConstantInt* CI = cast<ConstantInt>(V);
 
   std::string str;
   raw_string_ostream OS(str);
