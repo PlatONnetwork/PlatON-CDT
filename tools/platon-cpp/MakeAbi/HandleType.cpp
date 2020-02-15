@@ -5,7 +5,6 @@
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Instructions.h"
-#include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/JSON.h"
 #include <set>
 #include <map>
@@ -18,27 +17,16 @@ using namespace std;
 
 json::Value handleType(DINode* Node, DIType* DT);
 
-bool isString(DICompositeType *CT){
-  return CT->getIdentifier() == "_ZTSNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE";
-}
+bool isString(DICompositeType*);
 
-bool isVector(DICompositeType* CT){
-  if (CT->getTemplateParams().get() != nullptr) {
-    if (CT->getElements().size() > 1) {
-      const MDOperand &Op = CT->getElements()->getOperand(1);
-      if (const DISubprogram *SP = dyn_cast<DISubprogram>(Op.get()))
-        if (SP->getName() == "vector")
-          return true;
-    }
-  }
-  return false;
-}
+bool isVector(DICompositeType*);
+bool isArray(DICompositeType*);
 
-DIType* getVectorParam(DICompositeType* CT){
-  const MDOperand &Op = CT->getTemplateParams()->getOperand(0);
-  const DITemplateTypeParameter* TP = cast<const DITemplateTypeParameter>(Op);
-  return TP->getType().resolve();
-}
+bool isSet(DICompositeType*);
+bool isList(DICompositeType*);
+
+bool isMap(DICompositeType*);
+bool isPair(DICompositeType*);
 
 StringRef getName(DINode* Node){
   if(DILocalVariable* LV = dyn_cast<DILocalVariable>(Node)){ 
@@ -122,8 +110,12 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
       }
 
     case llvm::dwarf::DW_ATE_float:
-      report_error(Node);
-      report_fatal_error("can not support float type");
+      if(size==32)return "float";
+      else if(size==64)return "double";
+      else {
+        report_error(Node);
+        report_fatal_error("unknown base type");
+      }
 
     default:
       report_error(Node);
@@ -151,18 +143,6 @@ StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT){
   }
 }
 
-StringRef MakeAbi::handleVector(DINode* Node, DICompositeType* CT){
-
-  DIType* T = getVectorParam(CT);
-  StringRef s = handleType(Node, T);
-
-  unsigned len = StringBuf.size();
-  StringBuf.append(s);
-  StringBuf.append("[]");
-  
-  StringRef ss(StringBuf.data()+len, s.size()+2);
-  return ss;
-}
 
 StringRef MakeAbi::handleStructType(DINode* Node, DICompositeType* CT){
   json::Value Elems = {};
@@ -194,11 +174,28 @@ StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
   if(isString(CT)){
     return "string";
+
+  } else if(isVector(CT)){
+    return handleVector(Node, CT);
+
+  } else if(isArray(CT)){
+    return handleArray(Node, CT);
+
+  } else if(isPair(CT)){
+    return handleStd2(Node, CT, "pair");
+   
+  } else if(isSet(CT)){
+    return handleStd1(Node, CT, "set");
+
+  } else if(isMap(CT)){
+    return handleStd2(Node, CT, "map");
+
+  } else if(isList(CT)){
+    return handleStd1(Node, CT, "list");
+
   } else if(CT->getElements().get() == nullptr){
     report_error(Node);
     report_fatal_error("StructType have define but never used");
-  } else if(isVector(CT)){
-    return handleVector(Node, CT);
 
   } else if(CT->getTag() == dwarf::DW_TAG_structure_type || CT->getTag() == dwarf::DW_TAG_class_type){
     return handleStructType(Node, CT);
