@@ -10,6 +10,7 @@
 #include "llvm/Support/JSON.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/FileSystem.h"
+#include "llvm/Support/StringSaver.h"
 #include "llvm/ADT/SmallString.h"
 #include <map>
 #include <vector>
@@ -21,13 +22,16 @@ class MakeAbi {
   public:
     llvm::json::Value contents = llvm::json::Array{};
     std::map<llvm::DIType*, llvm::StringRef> TypeMap;
-    std::string StringBuf;
+
+    llvm::BumpPtrAllocator Alloc;
+    llvm::StringSaver SSaver;
+
+    MakeAbi();
 
     llvm::json::Value handleAction(llvm::DISubprogram* SP, llvm::json::Value Params, bool isConst);
     llvm::json::Value handleEvent(llvm::DISubprogram* SP, llvm::json::Value Params, unsigned num);
     void handleSubprogram(llvm::DISubprogram* SP, std::vector<llvm::DILocalVariable*> &LVs, Attr attr);
 
-    llvm::StringRef handleVector(llvm::DINode* Node, llvm::DICompositeType* CT);
     llvm::StringRef handleStructType(llvm::DINode* Node, llvm::DICompositeType* CT);
     llvm::StringRef handleCompositeType(llvm::DINode* Node, llvm::DICompositeType* CT);
 
@@ -37,4 +41,10 @@ class MakeAbi {
 
     llvm::StringRef handleType_(llvm::DINode* Node, llvm::DIType* DT);
     llvm::StringRef handleType(llvm::DINode* Node, llvm::DIType* DT);
+
+
+    llvm::StringRef handleVector(llvm::DINode* Node, llvm::DICompositeType* CT);
+    llvm::StringRef handleArray(llvm::DINode* Node, llvm::DICompositeType* CT);
+    llvm::StringRef handleStd1(llvm::DINode* Node, llvm::DICompositeType* CT, char*);
+    llvm::StringRef handleStd2(llvm::DINode* Node, llvm::DICompositeType* CT, char*);
 };

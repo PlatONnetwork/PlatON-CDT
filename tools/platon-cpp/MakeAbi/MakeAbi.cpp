@@ -149,6 +149,8 @@ void makeAbi(Module* M, MakeAbi &MABI){
   }
 }
 
+MakeAbi::MakeAbi():SSaver(Alloc){}
+
 int GenerateABI(std::string &WasmOutput, llvm::Module* M){
   SmallString<128> abiPath(WasmOutput);
   llvm::sys::path::replace_extension(abiPath, "abi.json");
