@@ -32,6 +32,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
   Help = false;
   OutputIR = false;
   bool NoStdlib = false;
+  NoABI = false;
 
   for (const Arg *A : Args) {
     const Option &Option = A->getOption();
