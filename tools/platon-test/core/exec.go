@@ -116,7 +116,14 @@ func ExecFile(filePath string) error {
 	fidx := wasmModule.Function.Types[int(index)]
 	ftype := wasmModule.Types.Entries[int(fidx)]
 
+	gasCost := uint64(0)
+	opCodes := uint64(0)
+	vm.SetUseGas(func(b byte) {
+		gasCost += WasmGasCostTable[b]
+		opCodes++
+	})
 	result, err := vm.ExecCode(index)
+	fmt.Fprintf(os.Stdin,"gas cost:%d, opcodes:%d\n", gasCost, opCodes)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,"execute code failed!!! err=%v\n", err)
 		return err
