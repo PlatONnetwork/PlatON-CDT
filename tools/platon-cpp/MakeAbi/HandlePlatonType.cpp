@@ -41,11 +41,13 @@ StringRef MakeAbi::handleWideInteger(DINode* Node, DICompositeType* CT){
   ConstantInt* CI = cast<ConstantInt>(V);
 
   DIType* T = getTypeParam(CT, 1);
-  StringRef s = handleType(Node, T);
+  DIBasicType* BT = cast<DIBasicType>(T);
+  bool sign = BT->getEncoding() == llvm::dwarf::DW_ATE_signed;
+  const char* prefix = sign?"int":"uint";
 
   std::string str;
   raw_string_ostream OS(str);
-  OS << format("wide_integer<%llu,%s>", CI->getZExtValue(), s.data());
+  OS << format("%s%llu", prefix, CI->getZExtValue());
   OS.flush();
 
   return SSaver.save(str);
