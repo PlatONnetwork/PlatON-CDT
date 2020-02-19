@@ -274,7 +274,8 @@ json::Value MakeAbi::handleEvent(DISubprogram* SP, json::Value Params, unsigned 
                 {"name", SP->getName()},
                 {"input", Params},
                 {"type", "Event"},
-                {"topic", num}
+                {"topic", num},
+                {"anonymous", false}
                 };
 }
 
