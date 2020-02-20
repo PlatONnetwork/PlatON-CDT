@@ -14,8 +14,17 @@
 #include "RLP.h"
 #include "rlp_extend.hpp"
 #include "chain.hpp"
+#include "panic.hpp"
 
 namespace platon {
+
+inline std::vector<byte> get_input(void) {
+  std::vector<byte> result;
+  size_t len = ::platon_get_input_length();
+  result.resize(len);
+  ::platon_get_input(result.data());
+  return result;
+}
 
 template <typename... Args>
 void get_para(RLP& rlp, std::tuple<Args...>& t) {
@@ -30,7 +39,7 @@ template <typename T>
 void platon_return(const T& t) {
   RLPStream rlp_stream;
   rlp_stream << t;
-  std::vector<byte> result = rlp_stream.out();
+  const std::vector<byte> &result = rlp_stream.out();
   ::platon_return(result.data(), result.size());
 }
 
@@ -111,11 +120,11 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
     RLP rlp(input);                        \
     fetch(rlp[0], method);                 \
     if (method.empty()) {                  \
-      platon_throw("valid method\n");      \
+      internal::platon_throw("valid method\n");      \
     }                                      \
     PLATON_DISPATCH_HELPER(TYPE, MEMBERS)  \
     else {                                 \
-      platon_throw("no method to call\n"); \
+      internal::platon_throw("no method to call\n"); \
     }                                      \
   }                                        \
   }

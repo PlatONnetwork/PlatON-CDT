@@ -4,6 +4,7 @@
 #include "chain.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
+#include "panic.hpp"
 
 namespace platon {
 
@@ -264,7 +265,7 @@ Energon operator+(const Energon& lhs, const Energon& rhs) {
  */
 Energon operator-(const Energon& lhs, const Energon& rhs) {
   if (lhs < rhs) {
-    platon_throw("overflow");
+    internal::platon_throw("overflow");
   }
   return Energon(lhs.Get() - rhs.Get());
 }

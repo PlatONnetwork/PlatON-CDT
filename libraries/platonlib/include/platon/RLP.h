@@ -60,7 +60,7 @@ static const byte c_rlpListIndLenZero =
 
 template <class T>
 struct Converter {
-  static T convert(RLP const&, int) { platon_throw("bad cast"); }
+  static T convert(RLP const&, int) { internal::platon_throw("bad cast"); }
 };
 
 /**
@@ -125,14 +125,14 @@ class RLP {
   /// @returns the number of items in the list, or zero if it isn't a list.
   size_t itemCount() const { return isList() ? items() : 0; }
   size_t itemCountStrict() const {
-    if (!isList()) platon_throw("bad cast");
+    if (!isList()) internal::platon_throw("bad cast");
     return items();
   }
 
   /// @returns the number of bytes in the data, or zero if it isn't data.
   size_t size() const { return isData() ? length() : 0; }
   size_t sizeStrict() const {
-    if (!isData()) platon_throw("bad cast");
+    if (!isData()) internal::platon_throw("bad cast");
     return length();
   }
 
@@ -260,7 +260,7 @@ class RLP {
   bytes toBytes(int _flags = LaissezFaire) const {
     if (!isData()) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return bytes();
     }
@@ -270,7 +270,7 @@ class RLP {
   bytesConstRef toBytesConstRef(int _flags = LaissezFaire) const {
     if (!isData()) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return bytesConstRef();
     }
@@ -280,7 +280,7 @@ class RLP {
   std::string toString(int _flags = LaissezFaire) const {
     if (!isData()) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return std::string();
     }
@@ -296,7 +296,7 @@ class RLP {
       ret.reserve(itemCount());
       for (auto const& i : *this) ret.push_back(i.convert<T>(_flags));
     } else if (_flags & ThrowOnFail)
-      platon_throw("bad cast");
+      internal::platon_throw("bad cast");
     return ret;
   }
 
@@ -306,7 +306,7 @@ class RLP {
     if (isList())
       for (auto const& i : *this) ret.insert(i.convert<T>(_flags));
     else if (_flags & ThrowOnFail)
-      platon_throw("bad cast");
+      internal::platon_throw("bad cast");
     return ret;
   }
 
@@ -316,7 +316,7 @@ class RLP {
     if (isList())
       for (auto const& i : *this) ret.insert(i.convert<T>(_flags));
     else if (_flags & ThrowOnFail)
-      platon_throw("bad cast");
+      internal::platon_throw("bad cast");
     return ret;
   }
 
@@ -325,7 +325,7 @@ class RLP {
     std::pair<T, U> ret;
     if (itemCountStrict() != 2) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return ret;
     }
@@ -338,7 +338,7 @@ class RLP {
   std::array<T, N> toArray(int _flags = LaissezFaire) const {
     if (itemCountStrict() != N) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return std::array<T, N>();
     }
@@ -359,7 +359,7 @@ class RLP {
     requireGood();
     if ((!isInt() && !(_flags & AllowNonCanon)) || isList() || isNull()) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return 0;
     }
@@ -367,7 +367,7 @@ class RLP {
     auto p = payload();
     if (p.size() > intTraits<_T>::maxSize && (_flags & FailIfTooBig)) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return 0;
     }
@@ -395,7 +395,7 @@ class RLP {
 
   int64_t toPositiveInt64(int _flags = Strict) const {
     int64_t i = toInt<int64_t>(_flags);
-    if ((_flags & ThrowOnFail) && i < 0) platon_throw("bad cast");
+    if ((_flags & ThrowOnFail) && i < 0) internal::platon_throw("bad cast");
     return i;
   }
 
@@ -407,7 +407,7 @@ class RLP {
     if (!isData() || (l > _N::size && (_flags & FailIfTooBig)) ||
         (l < _N::size && (_flags & FailIfTooSmall))) {
       if (_flags & ThrowOnFail)
-        platon_throw("bad cast");
+        internal::platon_throw("bad cast");
       else
         return _N();
     }
@@ -421,7 +421,7 @@ class RLP {
   /// @returns the data payload. Valid for all types.
   bytesConstRef payload() const {
     auto l = length();
-    if (l > m_data.size()) platon_throw("bad cast");
+    if (l > m_data.size()) internal::platon_throw("bad cast");
     return m_data.cropped(payloadOffset(), l);
   }
 
@@ -762,19 +762,19 @@ class RLPStream {
 
   /// Read the byte stream.
   bytes const& out() const {
-    if (!m_listStack.empty()) platon_throw("listStack is not empty");
+    if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
     return m_out;
   }
 
   /// Invalidate the object and steal the output byte stream.
   bytes&& invalidate() {
-    if (!m_listStack.empty()) platon_throw("listStack is not empty");
+    if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
     return std::move(m_out);
   }
 
   /// Swap the contents of the output stream out for some other byte array.
   void swapOut(bytes& _dest) {
-    if (!m_listStack.empty()) platon_throw("listStack is not empty");
+    if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
     swap(m_out, _dest);
   }
 

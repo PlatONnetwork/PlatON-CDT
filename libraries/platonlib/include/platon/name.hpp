@@ -2,6 +2,7 @@
 #include <string>
 #include "platon/assert.h"
 #include "platon/rlp_serialize.hpp"
+#include "panic.hpp"
 
 namespace platon {
 namespace detail {
@@ -64,7 +65,7 @@ struct Name {
    */
   constexpr explicit Name(std::string_view str) : value(0) {
     if (str.size() > 13) {
-      internal::assert_inner(false, "string is too long to be a valid name");
+      internal::platon_throw("string is too long to be a valid name");
     }
     if (str.empty()) {
       return;
@@ -79,7 +80,7 @@ struct Name {
     if (str.size() == 13) {
       uint64_t v = char_to_value(str[12]);
       if (v > 0x0Full) {
-        internal::assert_inner(false,
+        internal::platon_throw(
                                "thirteenth character in name cannot be a letter"
                                "that comes after j");
       }
@@ -101,8 +102,7 @@ struct Name {
     else if (c >= 'a' && c <= 'z')
       return (c - 'a') + 6;
     else
-      internal::assert_inner(
-          false, "character is not in allowed character set for names");
+      internal::platon_throw("character is not in allowed character set for names");
 
     return 0;  // control flow will never reach here; just added to suppress
                // warning
