@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#include "platon/rlp_serialize.hpp"
 #include "platon/assert.h"
+#include "platon/rlp_serialize.hpp"
 
 namespace platon {
 namespace detail {
@@ -64,7 +64,7 @@ struct Name {
    */
   constexpr explicit Name(std::string_view str) : value(0) {
     if (str.size() > 13) {
-            internal::assert_inner( false, "string is too long to be a valid name" );
+      internal::assert_inner(false, "string is too long to be a valid name");
     }
     if (str.empty()) {
       return;
@@ -79,8 +79,9 @@ struct Name {
     if (str.size() == 13) {
       uint64_t v = char_to_value(str[12]);
       if (v > 0x0Full) {
-        internal::assert_inner(false, "thirteenth character in name cannot be a letter"
-                                      "that comes after j");
+        internal::assert_inner(false,
+                               "thirteenth character in name cannot be a letter"
+                               "that comes after j");
       }
       value |= v;
     }
@@ -99,9 +100,9 @@ struct Name {
       return (c - '1') + 1;
     else if (c >= 'a' && c <= 'z')
       return (c - 'a') + 6;
-        else
-      internal::assert_inner( false, "character is not in allowed character set for names"
-          );
+    else
+      internal::assert_inner(
+          false, "character is not in allowed character set for names");
 
     return 0;  // control flow will never reach here; just added to suppress
                // warning
