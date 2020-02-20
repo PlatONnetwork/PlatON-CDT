@@ -21,7 +21,6 @@
 #include "bigint.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
-#include "service.hpp"
 #include "vector_ref.h"
 #include "panic.hpp"
 

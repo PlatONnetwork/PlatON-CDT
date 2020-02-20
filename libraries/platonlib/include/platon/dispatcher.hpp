@@ -7,8 +7,6 @@
 #include "boost/preprocessor/seq/for_each.hpp"
 
 #include <boost/mp11/tuple.hpp>
-
-#include <platon/service.hpp>
 #include <tuple>
 #include <type_traits>
 #include "RLP.h"
