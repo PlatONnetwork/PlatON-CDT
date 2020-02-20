@@ -1,0 +1,503 @@
+//
+// Created by yangzhou on 2/18/20.
+//
+
+#pragma once
+#include <stdbool.h>
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+namespace platon {
+namespace container {
+
+/***** DEFINITIONS *****/
+
+#define VECTOR_MINIMUM_CAPACITY 2
+#define VECTOR_GROWTH_FACTOR 2
+#define VECTOR_SHRINK_THRESHOLD (1 / 4)
+
+#define VECTOR_ERROR -1
+#define VECTOR_SUCCESS 0
+
+#define VECTOR_UNINITIALIZED NULL
+#define VECTOR_INITIALIZER \
+  { 0, 0, 0, VECTOR_UNINITIALIZED }
+
+/***** STRUCTURES *****/
+
+typedef struct Vector {
+  size_t size;
+  size_t capacity;
+  size_t element_size;
+
+  void* data;
+} Vector;
+
+typedef struct Iterator {
+  void* pointer;
+  size_t element_size;
+} Iterator;
+
+/***** METHODS *****/
+
+/* Constructor */
+int vector_setup(Vector* vector, size_t capacity, size_t element_size);
+
+/* Copy Constructor */
+int vector_copy(Vector* destination, Vector* source);
+
+/* Copy Assignment */
+int vector_copy_assign(Vector* destination, Vector* source);
+
+/* Move Constructor */
+int vector_move(Vector* destination, Vector* source);
+
+/* Move Assignment */
+int vector_move_assign(Vector* destination, Vector* source);
+
+int vector_swap(Vector* destination, Vector* source);
+
+/* Destructor */
+int vector_destroy(Vector* vector);
+
+/* Insertion */
+int vector_push_back(Vector* vector, void* element);
+int vector_push_front(Vector* vector, void* element);
+int vector_insert(Vector* vector, size_t index, void* element);
+int vector_assign(Vector* vector, size_t index, void* element);
+
+/* Deletion */
+int vector_pop_back(Vector* vector);
+int vector_pop_front(Vector* vector);
+int vector_erase(Vector* vector, size_t index);
+int vector_clear(Vector* vector);
+
+/* Lookup */
+void* vector_get(Vector* vector, size_t index);
+const void* vector_const_get(const Vector* vector, size_t index);
+void* vector_front(Vector* vector);
+void* vector_back(Vector* vector);
+#define VECTOR_GET_AS(type, vector_pointer, index) \
+  *((type*)vector_get((vector_pointer), (index)))
+
+/* Information */
+bool vector_is_initialized(const Vector* vector);
+size_t vector_byte_size(const Vector* vector);
+size_t vector_free_space(const Vector* vector);
+bool vector_is_empty(const Vector* vector);
+
+/* Memory management */
+int vector_resize(Vector* vector, size_t new_size);
+int vector_reserve(Vector* vector, size_t minimum_capacity);
+int vector_shrink_to_fit(Vector* vector);
+
+/* Iterators */
+Iterator vector_begin(Vector* vector);
+Iterator vector_end(Vector* vector);
+Iterator vector_iterator(Vector* vector, size_t index);
+
+void* iterator_get(Iterator* iterator);
+#define ITERATOR_GET_AS(type, iterator) *((type*)iterator_get((iterator)))
+
+int iterator_erase(Vector* vector, Iterator* iterator);
+
+void iterator_increment(Iterator* iterator);
+void iterator_decrement(Iterator* iterator);
+
+void* iterator_next(Iterator* iterator);
+void* iterator_previous(Iterator* iterator);
+
+bool iterator_equals(Iterator* first, Iterator* second);
+bool iterator_is_before(Iterator* first, Iterator* second);
+bool iterator_is_after(Iterator* first, Iterator* second);
+
+size_t iterator_index(Vector* vector, Iterator* iterator);
+
+#define VECTOR_FOR_EACH(vector_pointer, iterator_name)           \
+  for (Iterator(iterator_name) = vector_begin((vector_pointer)), \
+      end = vector_end((vector_pointer));                        \
+       !iterator_equals(&(iterator_name), &end);                 \
+       iterator_increment(&(iterator_name)))
+
+/***** PRIVATE *****/
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+bool _vector_should_grow(Vector* vector);
+bool _vector_should_shrink(Vector* vector);
+
+size_t _vector_free_bytes(const Vector* vector);
+void* _vector_offset(Vector* vector, size_t index);
+const void* _vector_const_offset(const Vector* vector, size_t index);
+
+void _vector_assign(Vector* vector, size_t index, void* element);
+
+int _vector_move_right(Vector* vector, size_t index);
+void _vector_move_left(Vector* vector, size_t index);
+
+int _vector_adjust_capacity(Vector* vector);
+int _vector_reallocate(Vector* vector, size_t new_capacity);
+
+void _vector_swap(size_t* first, size_t* second);
+template <typename Iter>
+class iter_wrap {
+  typedef Iter iterator_type;
+  typedef typename std::iterator_traits<iterator_type>::iterator_category
+      iterator_category;
+  typedef typename std::iterator_traits<iterator_type>::value_type value_type;
+  typedef typename std::iterator_traits<iterator_type>::difference_type
+      difference_type;
+  typedef typename std::iterator_traits<iterator_type>::pointer pointer;
+  typedef typename std::iterator_traits<iterator_type>::reference reference;
+
+ public:
+  reference operator*() const { return *iter_; }
+  pointer operator->() const { return iter_; }
+
+  iter_wrap& operator++() {
+    ++iter_;
+    return *this;
+  }
+  iter_wrap operator++(int) {
+    iter_wrap retval = *this;
+    ++(*this);
+    return retval;
+  }
+
+  iter_wrap& operator--() {
+    --iter_;
+    return *this;
+  }
+  iter_wrap operator--(int) {
+    iter_wrap retval = *this;
+    --(*this);
+    return retval;
+  }
+
+  iter_wrap operator+(difference_type n) const {
+    iter_wrap retval = *this;
+    retval += n;
+    return retval;
+  }
+  iter_wrap& operator+=(difference_type n) {
+    iter_ += n;
+    return *this;
+  }
+  iter_wrap operator-(difference_type n) const {
+    iter_wrap retval = *this;
+    retval -= n;
+    return retval;
+  }
+  iter_wrap& operator-=(difference_type n) {
+    iter_ -= n;
+    return *this;
+  }
+
+  //  bool operator==(iter_wrap other) const { return iter_ == other.iter_; }
+  //  bool operator!=(iter_wrap other) const { return !(*this == other); }
+
+  template <typename R1, typename R2>
+  friend bool operator==(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {
+    return x.iter_ == y.iter_;
+  }
+  template <typename R1, typename R2>
+  friend bool operator!=(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {
+    return !(x == y);
+  }
+  template <typename R1, typename R2>
+  friend bool operator<(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {
+    return x.iter_ < y.iter_;
+  }
+  template <typename R1, typename R2>
+  friend bool operator<=(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {
+    return x.iter_ <= y.iter_;
+  }
+  template <typename R1, typename R2>
+  friend bool operator>(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {
+    return x.iter_ > y.iter_;
+  }
+  template <typename R1, typename R2>
+  friend bool operator>=(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {
+    return x.iter_ >= y.iter_;
+  }
+  template <typename R1, typename R2>
+  friend auto operator+(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {}
+  template <typename R1, typename R2>
+  friend auto operator-(const iter_wrap<R1>& x, const iter_wrap<R2>& y) {}
+
+ private:
+  explicit iter_wrap(Iter iter) : iter_(iter) {}
+
+ private:
+  iterator_type iter_;
+};
+
+template <typename T>
+class vector {
+ public:
+  typedef T value_type;
+  typedef value_type& reference;
+  typedef value_type* pointer;
+  typedef const pointer const_pointer;
+  typedef const value_type& const_reference;
+  typedef size_t size_type;
+  typedef iter_wrap<pointer> iterator;
+  typedef iter_wrap<const_pointer> const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<iterator> const_reverse_iterator;
+
+  explicit vector() { vector_setup(&vector_, 2, sizeof(T)); }
+  explicit vector(size_type count, const T& value = T()) {
+    vector_setup(&vector_, count, sizeof(T));
+    for (size_type i = 0; i < count; i++) {
+      T* obj = new (vector_get(&vector_, i)) T;
+      *obj = value;
+    }
+  }
+  explicit vector(size_type count) { vector_setup(&vector_, count, sizeof(T)); }
+  template <typename InputIt>
+  vector(InputIt first, InputIt last) {
+    vector_setup(&vector_, 2, sizeof(T));
+    for (; first != last; ++first) {
+      emplace_back(*first);
+    }
+  }
+  vector(const vector& other) { vector_copy(&vector_, other.vector_); }
+  vector(vector&& other) { vector_move(&vector_, other); }
+  vector(std::initializer_list<T> init) {
+    vector_setup(&vector_, init.size(), sizeof(T));
+    for (auto first = init.begin(); first != init.end(); ++first) {
+      emplace_back(*first);
+    }
+  }
+  ~vector() { vector_destroy(&vector_); }
+  vector& operator=(const vector& other) {
+    free_all_objects();
+    vector_copy(&vector_, other.vector_);
+  }
+  vector& operator=(vector&& other) { vector_move(&vector_, other); }
+  vector& operator=(std::initializer_list<T> ilist) {
+    free_all_objects();
+    vector_setup(&vector_, ilist.size(), sizeof(T));
+    for (auto first = ilist.begin(); first != ilist.end(); ++first) {
+      emplace_back(*first);
+    }
+  }
+
+  template <typename InputIt>
+  void assign(InputIt first, InputIt last) {
+    clear();
+    for (; first != last; ++first) {
+      emplace_back(*first);
+    }
+  }
+  void assign(size_type count, const value_type& value) {
+    clear();
+    for (size_type i = 0; i < count; i++) {
+      T* obj = new (vector_get(&vector_, i)) T;
+      *obj = value;
+    }
+  }
+  void assign(std::initializer_list<value_type> ilist) {
+    clear();
+    for (auto first = ilist.begin(); first != ilist.end(); ++first) {
+      emplace_back(*first);
+    }
+  }
+
+  reference at(size_type pos) {
+    return *reinterpret_cast<pointer>(vector_get(&vector_, pos));
+  }
+  const_reference at(size_type pos) const {
+    return *reinterpret_cast<const_pointer>(vector_get(&vector_, pos));
+  }
+  reference operator[](size_type pos) { return at(pos); }
+  const_reference operator[](size_type pos) const { return at(pos); }
+
+  reference front() {
+    return *reinterpret_cast<pointer>(vector_get(&vector_, 0));
+  }
+  const_reference front() const {
+    *reinterpret_cast<const_pointer>(vector_get(&vector_, 0));
+  }
+
+  reference back() { return *reinterpret_cast<pointer>(vector_back(&vector_)); }
+  const_reference back() const {
+    return *reinterpret_cast<const_pointer>(vector_back(&vector_));
+  }
+
+  pointer data() { return reinterpret_cast<pointer>(vector_front(vector_)); }
+  const_pointer data() const {
+    return reinterpret_cast<const_pointer>(vector_front(vector_));
+  }
+
+  iterator begin() { return iterator(vector_get(&vector_, 0)); }
+  const_iterator cbegin() const {
+    return const_iterator(vector_get(&vector_, 0));
+  }
+  iterator end() {
+    return iterator(reinterpret_cast<pointer>(vector_back(&vector_)) + 1);
+  }
+  const_iterator cend() const {
+    return const_iterator(
+        reinterpret_cast<const_pointer>(vector_back(&vector_)) + 1);
+  }
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
+  const_reverse_iterator crbegin() const {
+    return const_reverse_iterator(cend());
+  }
+  reverse_iterator rend() { return reverse_iterator(begin()); }
+  const_reverse_iterator crend() const { const_reverse_iterator(rbegin()); }
+
+  size_type size() const { return vector_.size; }
+  size_type max_size() const { return 1 << 63; }
+  void reserve(size_type new_cap) { vector_reserve(&vector_, new_cap); }
+  bool empty() const { return vector_is_empty(&vector_); }
+  size_type capacity() const { return vector_.capacity; }
+  void shrink_to_fit() { vector_shrink_to_fit(&vector_); }
+  void clear() {
+    free_all_objects();
+    vector_clear(&vector_);
+  }
+
+  iterator insert(const_iterator pos, const_reference value) {
+    vector_insert(&vector_, pos - cbegin(), reinterpret_cast<void*>(&value));
+  }
+  iterator insert(const_iterator pos, value_type&& value) {
+    value_type lvalue = std::move(value);
+    vector_insert(&vector_, pos - cbegin(), reinterpret_cast<void*>(&lvalue));
+  }
+  iterator insert(const_iterator pos, size_type count,
+                  const value_type& value) {
+    auto start = pos - cbegin();
+    for (size_type i = 0; i < count; ++i) {
+      vector_insert(&vector_, start + i, reinterpret_cast<void*>(&value));
+    }
+  }
+  template <class InputIt>
+  iterator insert(const_iterator pos, InputIt first, InputIt last) {
+    auto start = pos - cbegin();
+    for (size_type i = 0; first < last; ++first, ++i) {
+      vector_insert(&vector_, start + i, reinterpret_cast<void*>(&*first));
+    }
+  }
+  iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
+    auto start = pos - cbegin();
+    auto first = ilist.begin();
+    auto last = ilist.end();
+    for (size_type i = 0; first < last; ++first, ++i) {
+      vector_insert(&vector_, start + i, reinterpret_cast<void*>(&*first));
+    }
+  }
+
+  template <class... Args>
+  iterator emplace(const_iterator pos, Args&&... args) {
+    T obj(std::forward<Args>(args)...);
+    vector_insert(&vector_, pos - cbegin(), reinterpret_cast<void*>(&obj));
+    return iterator(*reinterpret_cast<pointer>(vector_back(&vector_)));
+  }
+
+  // iterator erase(iterator pos) {}
+  iterator erase(const_iterator pos) {
+    auto index = pos - cbegin();
+    free_object(index);
+    vector_erase(&vector_, index);
+  }
+  iterator erase(const_iterator first, const_iterator last) {
+    for (auto pos = first - cbegin(); first < last; ++first, ++pos) {
+      free_object(pos);
+      vector_erase(&vector_, pos);
+    }
+  }
+  //  iterator erase(const_iterator first, const_iterator last) {}
+  void push_back(const value_type& value) {
+    vector_push_back(&vector_, reinterpret_cast<void*>(&value));
+  }
+  void push_back(value_type&& value) {
+    value_type obj = std::move(value);
+    vector_push_back(&vector_, reinterpret_cast<void*>(&obj));
+  }
+
+  template <class... Args>
+  reference emplace_back(Args&&... args) {
+    T obj(std::forward<Args>(args)...);
+    vector_push_back(&vector_, reinterpret_cast<void*>(&obj));
+    return *reinterpret_cast<pointer>(vector_back(&vector_));
+  }
+
+  void pop_back() {
+    if (!empty()) {
+      pointer obj = reinterpret_cast<pointer>(vector_back(&vector_));
+      delete obj;
+      vector_pop_back(&vector_);
+    }
+  }
+
+  void resize(size_type count) {
+    free_range_of_objects(count, vector_.size);
+    size_type old_size = vector_.size;
+    vector_resize(&vector_, count);
+    for (size_type i = old_size; i < count; ++i) {
+      T* obj = new (vector_get(&vector_, i)) T;
+    }
+  }
+  void resize(size_type count, const value_type& value) {
+    free_range_of_objects(count, vector_.size);
+    size_type old_size = vector_.size;
+    vector_resize(&vector_, count);
+    for (size_type i = old_size; i < count; ++i) {
+      T* obj = new (vector_get(&vector_, i)) T;
+      *obj = value;
+    }
+  }
+
+ private:
+  void free_all_objects() {
+    for (size_type i = 0; i < vector_.size; ++i) {
+      free_object(i);
+    }
+  }
+  void free_range_of_objects(size_type first, size_type last) {
+    for (; first < last; ++first) {
+      free_object(first);
+    }
+  }
+  void free_object(size_type pos) {
+    value_type* obj = reinterpret_cast<pointer>(vector_get(&vector_, pos));
+    delete obj;
+  }
+
+ private:
+  Vector vector_;
+};
+
+template <class T>
+bool operator==(const vector<T>& lhs, const vector<T>& rhs) {
+  return lhs.size() == rhs.size() &&
+         std::equal(lhs.begin(), rhs.begin(), rhs.end());
+}
+template <class T>
+bool operator!=(const vector<T>& lhs, const vector<T>& rhs) {
+  return !(lhs == rhs);
+}
+
+template <class T>
+bool operator<(const vector<T>& lhs, const vector<T>& rhs) {
+  return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                      rhs.end());
+}
+template <class T>
+bool operator<=(const vector<T>& lhs, const vector<T>& rhs) {
+  return !(rhs > lhs);
+}
+template <class T>
+bool operator>(const vector<T>& lhs, const vector<T>& rhs){
+  return rhs > lhs;
+}
+template <class T>
+bool operator>=(const vector<T>& lhs, const vector<T>& rhs){
+  return !(lhs < rhs);
+}
+
+}  // namespace container
+}  // namespace platon
