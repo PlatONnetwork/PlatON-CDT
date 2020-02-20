@@ -100,9 +100,12 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
  * (init)(set_message)(change_message)(delete_message)(get_message) )
  * @endcode
  */
+
 #define PLATON_DISPATCH(TYPE, MEMBERS)     \
   extern "C" {                             \
+  void __wasm_call_ctors();                \
   void invoke(void) {                      \
+    __wasm_call_ctors();                    \
     std::string method;                    \
     auto input = get_input();              \
     RLP rlp(input);                        \
