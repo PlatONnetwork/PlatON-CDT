@@ -86,7 +86,9 @@ CONTRACT TestResult : public platon::Contract {
 #define UNITTEST_MAIN()                                                     \
 void testSuit(TestResult &testResult);                                    \
 extern "C" {                                                                \
+void __wasm_call_ctors(); \
     int invoke() {                                                          \
+        __wasm_call_ctors();                  \
         TestResult testResult;                                              \
         testResult.isContinue = true;                                       \
         testSuit(testResult);                                               \
