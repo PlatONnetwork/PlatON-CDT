@@ -1,13 +1,13 @@
 #pragma once
+#include "chain.hpp"
 #include "fixedhash.hpp"
 #include "storagetype.hpp"
-#include "chain.hpp"
 
 namespace platon {
 
 static const size_t address_len = 20;
-//static const char sys_whitelist_name[] = "$platon$whitelist";
-static const char sys_owner_name[] = "$platon$owner";
+// static const char sys_whitelist_name[] = "$platon$whitelist";
+static const char sys_owner_name[] = "platonowner";
 
 /**
  * @brief Get the address of the transaction initiator
@@ -21,7 +21,6 @@ Address platon_caller() {
   return Address(address_bytes);
 }
 
-
 /**
  * @brief Get the address of the original transaction initiator
  *
@@ -34,7 +33,6 @@ Address platon_origin() {
   ::platon_origin(address_bytes.data());
   return Address(address_bytes);
 }
-
 
 /**
  * @brief Get the address of contract
@@ -61,7 +59,7 @@ void set_owner(const std::string &address = std::string()) {
     platon_addr = platon_caller();
   }
 
-  StorageType<"$platon$owner"_n, Address> owner_addr;
+  StorageType<"platonowner"_n, Address> owner_addr;
   owner_addr.self() = platon_addr;
 }
 
@@ -71,7 +69,7 @@ void set_owner(const std::string &address = std::string()) {
  * @return The address of contract
  */
 Address owner() {
-  StorageType<"$platon$owner"_n, Address> owner_addr;
+  StorageType<"platonowner"_n, Address> owner_addr;
   return owner_addr.self();
 }
 
@@ -88,7 +86,7 @@ bool is_owner(const std::string &addr = std::string()) {
     platon_addr = platon_origin();
   }
 
-  StorageType<"$platon$owner"_n, Address> owner_addr;
+  StorageType<"platonowner"_n, Address> owner_addr;
   return owner_addr.self() == platon_addr;
 }
 
@@ -158,6 +156,6 @@ class WhiteList {
 /**
  * @brief System default whitelist
  */
-using SysWhitelist = WhiteList<"$platon$whitelist"_n>;
+using SysWhitelist = WhiteList<"pwhitelist"_n>;
 
 }  // namespace platon

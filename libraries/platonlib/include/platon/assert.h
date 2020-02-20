@@ -6,8 +6,8 @@
 
 #include "chain.hpp"
 
-namespace platon{
-  namespace internal {
+namespace platon {
+namespace internal {
 void assert_inner(bool cond, const char *msg) {
   if (!cond) {
 #ifdef NDEBUG
@@ -16,5 +16,5 @@ void assert_inner(bool cond, const char *msg) {
     platon_revert();
   }
 }
-}
-}
+}  // namespace internal
+}  // namespace platon

@@ -835,7 +835,7 @@ struct wide_integer<Bits, Signed>::_impl {
     } else {  // dec
       while (*c) {
         if (*c < '0' || *c > '9') {
-          platon::internal::assert_inner(false,"invalid char from");
+          platon::internal::assert_inner(false, "invalid char from");
         }
         res = operator_star(res, 10U);
         res = operator_plus_T(res, *c - '0');
@@ -877,13 +877,13 @@ struct wide_integer<Bits, Signed>::_impl {
           res = operator_plus_T(res, *c - L'A' + 10U);
           ++c;
         } else {
-          platon::internal::assert_inner(false,"invalid char from");
+          platon::internal::assert_inner(false, "invalid char from");
         }
       }
     } else {  // dec
       while (*c) {
         if (*c < L'0' || *c > L'9') {
-          platon::internal::assert_inner(false,"invalid char from");
+          platon::internal::assert_inner(false, "invalid char from");
         }
         res = operator_star(res, 10U);
         res = operator_plus_T(res, *c - L'0');
