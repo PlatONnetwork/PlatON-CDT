@@ -1,8 +1,7 @@
 #pragma once
 #include <string>
-#include "platon/assert.h"
 #include "platon/rlp_serialize.hpp"
-#include "panic.hpp"
+#include "platon/panic.hpp"
 
 namespace platon {
 namespace detail {

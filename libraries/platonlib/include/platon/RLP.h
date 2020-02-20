@@ -23,6 +23,7 @@
 #include "fixedhash.hpp"
 #include "service.hpp"
 #include "vector_ref.h"
+#include "panic.hpp"
 
 namespace platon {
 

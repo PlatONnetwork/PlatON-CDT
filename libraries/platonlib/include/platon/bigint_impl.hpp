@@ -2,9 +2,8 @@
 
 #include <array>
 #include <cstring>
-#include <panic.hpp>
+#include "platon/panic.hpp"
 #include "bigint.hpp"
-#include "platon/assert.h"
 
 namespace std {
 #define CT(x)                                       \
