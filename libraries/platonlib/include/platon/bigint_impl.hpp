@@ -3,7 +3,7 @@
 #include <array>
 #include <cstring>
 #include "bigint.hpp"
-#include "service.hpp"
+#include "platon/assert.h"
 
 namespace std {
 #define CT(x)                                       \
@@ -292,7 +292,8 @@ struct wide_integer<Bits, Signed>::_impl {
     // static_assert(is_negative(rhs), "shift left for negative lhsbers is
     // underfined!");
     if (is_negative(rhs)) {
-      platon::platon_throw("shift left for negative lhsbers is underfined!");
+      platon::internal::assert_inner(
+          false, "shift left for negative lhsbers is underfined!");
     }
     return wide_integer<Bits, signed>(
         shift_left(wide_integer<Bits, unsigned>(rhs), n));
@@ -711,7 +712,7 @@ struct wide_integer<Bits, Signed>::_impl {
     }
 
     if (is_zero) {
-      platon::platon_throw("divide by zero");
+      platon::internal::assert_inner(false, "divide by zero");
     }
 
     T n = lhserator;
@@ -828,13 +829,13 @@ struct wide_integer<Bits, Signed>::_impl {
           res = operator_plus_T(res, *c - 'A' + 10U);
           ++c;
         } else {
-          platon::platon_throw("invalid char from");
+          platon::internal::assert_inner(false, "invalid char from");
         }
       }
     } else {  // dec
       while (*c) {
         if (*c < '0' || *c > '9') {
-          platon::platon_throw("invalid char from");
+          platon::internal::assert_inner(false,"invalid char from");
         }
         res = operator_star(res, 10U);
         res = operator_plus_T(res, *c - '0');
@@ -876,13 +877,13 @@ struct wide_integer<Bits, Signed>::_impl {
           res = operator_plus_T(res, *c - L'A' + 10U);
           ++c;
         } else {
-          platon::platon_throw("invalid char from");
+          platon::internal::assert_inner(false,"invalid char from");
         }
       }
     } else {  // dec
       while (*c) {
         if (*c < L'0' || *c > L'9') {
-          platon::platon_throw("invalid char from");
+          platon::internal::assert_inner(false,"invalid char from");
         }
         res = operator_star(res, 10U);
         res = operator_plus_T(res, *c - L'0');
