@@ -10,6 +10,7 @@
 
 #include <tuple>
 #include "platon/RLP.h"
+#include "panic.hpp"
 
 namespace platon {
 
@@ -99,7 +100,7 @@ inline void fetch(const RLP& rlp, std::vector<T>& ret) {
       ret.push_back(one);
     }
   } else {
-    platon_throw("bad cast");
+    internal::platon_throw("bad cast");
   }
 }
 
@@ -112,7 +113,7 @@ inline void fetch(const RLP& rlp, std::set<T>& ret) {
       ret.insert(one);
     }
   } else {
-    platon_throw("bad cast");
+    internal::platon_throw("bad cast");
   }
 }
 
@@ -125,14 +126,14 @@ inline void fetch(const RLP& rlp, std::unordered_set<T>& ret) {
       ret.insert(one);
     }
   } else {
-    platon_throw("bad cast");
+    internal::platon_throw("bad cast");
   }
 }
 
 template <class T, class U>
 inline void fetch(const RLP& rlp, std::pair<T, U>& ret) {
   if (rlp.itemCountStrict() != 2) {
-    platon_throw("bad cast");
+    internal::platon_throw("bad cast");
   }
   T one;
   fetch(rlp[0], one);
@@ -145,7 +146,7 @@ inline void fetch(const RLP& rlp, std::pair<T, U>& ret) {
 template <class T, size_t N>
 inline void fetch(const RLP& rlp, std::array<T, N>& ret) {
   if (rlp.itemCountStrict() != N) {
-    platon_throw("bad cast");
+    internal::platon_throw("bad cast");
   }
   for (size_t i = 0; i < N; ++i) {
     T one;
@@ -163,7 +164,7 @@ inline void fetch(const RLP& rlp, std::map<T, U>& ret) {
       ret.insert(one);
     }
   } else {
-    platon_throw("bad cast");
+    internal::platon_throw("bad cast");
   }
 }
 
