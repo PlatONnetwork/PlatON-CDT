@@ -136,7 +136,6 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   std::vector<const char*> lldArgs;
   lldArgs.push_back("platon-cpp");
-  lldArgs.push_back(TempPath.data());
   lldArgs.push_back("-L.");
 
   for(unsigned i=0; i<Option.ldArgs.size(); i++){
@@ -150,6 +149,8 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   lldArgs.push_back("--export=__wasm_call_ctors");
   lldArgs.push_back("--export=__funcs_on_exit");
+
+  lldArgs.push_back(TempPath.data());
   lldArgs.push_back("-o");
   lldArgs.push_back(Option.Output.data());
 
