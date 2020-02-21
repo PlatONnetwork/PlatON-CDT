@@ -122,6 +122,8 @@ void PCCOption::AdjustLLDArgs(bool NoStdlib){
   if(!NoStdlib) {
     ldArgs.push_back("-L");
     ldArgs.push_back(libdir);
+
+    ldArgs.push_back("-lmalloc");
     ldArgs.push_back("-lc");
     ldArgs.push_back("-lc++");
     ldArgs.push_back("-lbuiltins");
