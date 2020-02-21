@@ -1,7 +1,5 @@
 
 #include <stdio.h>
-#define CURRENT_MEMORY(X) __builtin_wasm_memory_size(X)
-#define GROW_MEMORY(X) __builtin_wasm_memory_grow(0, X)
 
 namespace platon {
 struct dsmalloc {
@@ -26,14 +24,16 @@ struct dsmalloc {
   char *operator()(size_t sz, uint8_t align_amt = 8) {
     if (sz == 0)
       return 0;
-    static bool initialized;
 
-    if (!initialized) {
-      uint32_t heap_base = __builtin_wasm_memory_size(0) * wasm_page_size;
-      last_ptr = (char *)heap_base;
-      next_page = __builtin_wasm_memory_size(0);
-      initialized = true;
-    }
+    // initialize  
+    // static bool initialized;
+
+    // if (!initialized) {
+    //   uint32_t heap_base = __builtin_wasm_memory_size(0) * wasm_page_size;
+    //   last_ptr = (char *)heap_base;
+    //   next_page = __builtin_wasm_memory_size(0);
+    //   initialized = true;
+    // }
 
     char *ret = last_ptr;
     last_ptr = align(last_ptr + sz, align_amt);
@@ -43,11 +43,13 @@ struct dsmalloc {
       next_page++;
       pages_to_alloc++;
     }
-    __builtin_wasm_memory_grow(0, pages_to_alloc);
-    const uint32_t current_pages = __builtin_wasm_memory_size(0);
 
-    if(current_pages != next_page)
+    __builtin_wasm_memory_grow(0, pages_to_alloc);
+    uint32_t  current_pages = __builtin_wasm_memory_size(0);
+
+    if(current_pages != next_page){
       return 0;
+    }
 
     return ret;
   }
