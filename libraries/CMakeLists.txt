@@ -16,6 +16,7 @@ add_subdirectory(libc)
 add_subdirectory(libc++)
 add_subdirectory(builtins)
 add_subdirectory(platonlib/src)
+add_subdirectory(platonlib/malloc)
 
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/platonlib/include/ DESTINATION ${INC_OUTPUT})
