@@ -8,7 +8,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <platon/print.hpp>
-#include <stdexcept>
 #include <string>
 
 namespace platon {
@@ -106,7 +105,606 @@ inline void* checked_realloc(void* ptr, size_t size) {
   return p;
 }
 
+/**
+ * This function tries to reallocate a buffer of which only the first
+ * currentSize bytes are used. The problem with using realloc is that
+ * if currentSize is relatively small _and_ if realloc decides it
+ * needs to move the memory chunk to a new buffer, then realloc ends
+ * up copying data that is not used. It's generally not a win to try
+ * to hook in to realloc() behavior to avoid copies - at least in
+ * jemalloc, realloc() almost always ends up doing a copy, because
+ * there is little fragmentation / slack space to take advantage of.
+ */
+inline void* smart_realloc(void* p, const size_t current_size,
+                           const size_t current_capacity,
+                           const size_t new_capacity) {
+  assert(p);
+  assert(current_size <= current_capacity && current_capacity < new_capacity);
+
+  auto const slack = current_capacity - current_size;
+  if (slack * 2 > current_size) {
+    // Too much slack, malloc-copy-free cycle:
+    auto const result = checked_malloc(new_capacity);
+    std::memcpy(result, p, current_size);
+    free(p);
+    return result;
+  }
+  // If there's not too much slack, we realloc in hope of coalescing
+  return checked_realloc(p, new_capacity);
+}
+
 }  // namespace detail
+
+template <class Char>
+class string_core {
+ public:
+  string_core() noexcept { reset(); }
+
+  string_core(const string_core& rhs) {
+    assert(&rhs != this);
+    switch (rhs.category()) {
+      case Category::IsSmall:
+        CopySmall(rhs);
+        break;
+      case Category::IsMedium:
+        CopyMedium(rhs);
+        break;
+      case Category::IsLarge:
+        CopyLarge(rhs);
+        break;
+      default:
+        std::abort();
+    }
+    assert(size() == rhs.size());
+    assert(memcmp(data(), rhs.data(), size() * sizeof(Char)) == 0);
+  }
+
+  string_core& operator=(const string_core& rhs) = delete;
+
+  string_core(string_core&& goner) noexcept {
+    // Take goner's guts
+    ml_ = goner.ml_;
+    // Clean goner's carcass
+    goner.reset();
+  }
+
+  string_core(const Char* const data, const size_t size) {
+    if (size <= kMaxSmallSize) {
+      InitSmall(data, size);
+    } else if (size <= kMaxMediumSize) {
+      InitMedium(data, size);
+    } else {
+      InitLarge(data, size);
+    }
+    assert(this->size() == size);
+    assert(size == 0 || memcmp(this->data(), data, size * sizeof(Char)) == 0);
+  }
+
+  ~string_core() noexcept {
+    if (category() == Category::IsSmall) {
+      return;
+    }
+    DestroyMediumLarge();
+  }
+
+  // swap below doesn't test whether &rhs == this (and instead
+  // potentially does extra work) on the premise that the rarity of
+  // that situation actually makes the check more expensive than is
+  // worth.
+  void swap(string_core& rhs) {
+    auto const t = ml_;
+    ml_ = rhs.ml_;
+    rhs.ml_ = t;
+  }
+
+  // In C++11 data() and c_str() are 100% equivalent.
+  const Char* data() const { return c_str(); }
+
+  Char* data() { return c_str(); }
+
+  Char* MutableData() {
+    switch (category()) {
+      case Category::IsSmall:
+        return small_;
+      case Category::IsMedium:
+        return ml_.data_;
+      case Category::IsLarge:
+        return MutableDataLarge();
+    }
+  }
+
+  const Char* c_str() const {
+    const Char* ptr = ml_.data_;
+    // With this syntax, GCC and Clang generate a CMOV instead of a branch.
+    ptr = (category() == Category::IsSmall) ? small_ : ptr;
+    return ptr;
+  }
+
+  void shrink(const size_t delta) {
+    if (category() == Category::IsSmall) {
+      ShrinkSmall(delta);
+    } else if (category() == Category::IsMedium ||
+               RefCounted::Refs(ml_.data_) == 1) {
+      ShrinkMedium(delta);
+    } else {
+      ShrinkLarge(delta);
+    }
+  }
+
+  void reserve(size_t min_capacity) {
+    switch (category()) {
+      case Category::IsSmall:
+        ReserveSmall(min_capacity);
+        break;
+      case Category::IsMedium:
+        ReserveMedium(min_capacity);
+        break;
+      case Category::IsLarge:
+        ReserveLarge(min_capacity);
+        break;
+      default:
+        std::abort();
+    }
+    assert(capacity() >= min_capacity);
+  }
+
+  Char* ExpandNoinit(const size_t delta, bool exp_growth = false);
+
+  void push_back(Char c) { *ExpandNoinit(1, /* exp_growth = */ true) = c; }
+
+  size_t size() const {
+    size_t ret = ml_.size_;
+
+    // We can save a couple instructions, because the category is
+    // small iff the last char, as unsigned, is <= maxSmallSize.
+    typedef typename std::make_unsigned<Char>::type UChar;
+    auto maybe_small_size = size_t(kMaxSmallSize) -
+                            size_t(static_cast<UChar>(small_[kMaxSmallSize]));
+    // With this syntax, GCC and Clang generate a CMOV instead of a branch.
+    ret = (static_cast<size_t>(maybe_small_size) >= 0) ? maybe_small_size : ret;
+    return ret;
+  }
+
+  size_t capacity() const {
+    switch (category()) {
+      case Category::IsSmall:
+        return kMaxSmallSize;
+      case Category::IsLarge:
+        // For large-sized strings, a multi-referenced chunk has no
+        // available capacity. This is because any attempt to append
+        // data would trigger a new allocation.
+        if (RefCounted::Refs(ml_.data_) > 1) {
+          return ml_.size_;
+        }
+        break;
+      case Category::IsMedium:
+      default:
+        break;
+    }
+    return ml_.capacity();
+  }
+
+  bool IsShared() const {
+    return category() == Category::IsLarge && RefCounted::Refs(ml_.data_) > 1;
+  }
+
+ private:
+  Char* c_str() {
+    Char* ptr = ml_.data_;
+    // With this syntax, GCC and Clang generate a CMOV instead of a branch.
+    ptr = (category() == Category::IsSmall) ? small_ : ptr;
+    return ptr;
+  }
+
+  void reset() { set_small_size(0); }
+
+  void DestroyMediumLarge() noexcept {
+    auto const c = category();
+    assert(c != Category::IsSmall);
+    if (c == Category::IsMedium) {
+      free(ml_.data_);
+    } else {
+      RefCounted::DecrementRefs(ml_.data_);
+    }
+  }
+
+  struct RefCounted {
+    size_t ref_count_;
+    Char data_[1];
+
+    constexpr static size_t GetDataOffset() {
+      return offsetof(RefCounted, data_);
+    }
+
+    static RefCounted* FromData(Char* p) {
+      return static_cast<RefCounted*>(static_cast<void*>(
+          static_cast<unsigned char*>(static_cast<void*>(p)) -
+          GetDataOffset()));
+    }
+
+    static size_t Refs(Char* p) { return FromData(p)->ref_count_; }
+
+    static void IncrementRefs(Char* p) { FromData(p)->ref_count_++; }
+
+    static void DecrementRefs(Char* p) {
+      auto const dis = FromData(p);
+      size_t oldcnt = dis->ref_count_;
+      dis->ref_count_--;
+      assert(oldcnt > 0);
+      if (oldcnt == 1) {
+        free(dis);
+      }
+    }
+
+    static RefCounted* Create(size_t* size) {
+      const size_t alloc_size = detail::good_malloc_size(
+          GetDataOffset() + (*size + 1) * sizeof(Char));
+      auto result =
+          static_cast<RefCounted*>(detail::checked_malloc(alloc_size));
+      result->ref_count_ = 1;
+      *size = (alloc_size - GetDataOffset()) / sizeof(Char) - 1;
+      return result;
+    }
+
+    static RefCounted* Create(const Char* data, size_t* size) {
+      const size_t effective_size = *size;
+      auto result = Create(size);
+      if (effective_size > 0) {
+        detail::pod_copy(data, data + effective_size, result->data_);
+      }
+      return result;
+    }
+
+    static RefCounted* Reallocate(Char* const data, const size_t current_size,
+                                  const size_t current_capacity,
+                                  size_t* new_capacity) {
+      assert(*new_capacity > 0 && *new_capacity > current_size);
+      const size_t alloc_new_capacity = detail::good_malloc_size(
+          GetDataOffset() + (*new_capacity + 1) * sizeof(Char));
+      auto const dis = FromData(data);
+      assert(dis->ref_count_ == 1);
+      auto result = static_cast<RefCounted*>(detail::smart_realloc(
+          dis, GetDataOffset() + (current_size + 1) * sizeof(Char),
+          GetDataOffset() + (current_capacity + 1) * sizeof(Char),
+          alloc_new_capacity));
+      assert(result->ref_count_ == 1);
+      *new_capacity = (alloc_new_capacity - GetDataOffset()) / sizeof(Char) - 1;
+      return result;
+    }
+  };
+
+  typedef uint8_t category_type;
+
+  enum class Category : category_type {
+    IsSmall = 0,
+    IsMedium = 0x80,
+    IsLarge = 0x40,
+  };
+
+  Category category() const {
+    // works for both big-endian and little-endian
+    return static_cast<Category>(bytes_[kLastChar] & kCategoryExtractMask);
+  }
+
+  struct MediumLarge {
+    Char* data_;
+    size_t size_;
+    size_t capacity_;
+
+    size_t capacity() const { return capacity_ & kCapacityExtractMask; }
+
+    void set_capacity(size_t cap, Category cat) {
+      capacity_ = cap | (static_cast<size_t>(cat) << kCategoryShift);
+    }
+  };
+
+  union {
+    uint8_t bytes_[sizeof(MediumLarge)];  // For accessing the last byte.
+    Char small_[sizeof(MediumLarge) / sizeof(Char)];
+    MediumLarge ml_;
+  };
+
+  constexpr static size_t kLastChar = sizeof(MediumLarge) - 1;
+  constexpr static size_t kMaxSmallSize = kLastChar / sizeof(Char);
+  constexpr static size_t kMaxMediumSize = 254 / sizeof(Char);
+  constexpr static uint8_t kCategoryExtractMask = 0xC0;
+  constexpr static size_t kCategoryShift = (sizeof(size_t) - 1) * 8;
+  constexpr static size_t kCapacityExtractMask =
+      ~(size_t(kCategoryExtractMask) << kCategoryShift);
+
+  static_assert(!(sizeof(MediumLarge) % sizeof(Char)),
+                "Corrupt memory layout for string.");
+
+  size_t small_size() const {
+    assert(category() == Category::IsSmall);
+    auto small = static_cast<size_t>(small_[kMaxSmallSize]);
+    assert(static_cast<size_t>(kMaxSmallSize) >= small);
+    return static_cast<size_t>(kMaxSmallSize) - small;
+  }
+
+  void set_small_size(size_t s) {
+    // Warning: this should work with uninitialized strings too,
+    // so don't assume anything about the previous value of
+    // small_[kMaxSmallSize].
+    assert(s <= kMaxSmallSize);
+    small_[kMaxSmallSize] = char(kMaxSmallSize - s);
+    small_[s] = '\0';
+    assert(category() == Category::IsSmall && size() == s);
+  }
+
+  void CopySmall(const string_core&);
+  void CopyMedium(const string_core&);
+  void CopyLarge(const string_core&);
+
+  void InitSmall(const Char* data, size_t size);
+  void InitMedium(const Char* data, size_t size);
+  void InitLarge(const Char* data, size_t size);
+
+  void ReserveSmall(size_t min_capacity);
+  void ReserveMedium(size_t min_capacity);
+  void ReserveLarge(size_t min_capacity);
+
+  void ShrinkSmall(size_t delta);
+  void ShrinkMedium(size_t delta);
+  void ShrinkLarge(size_t delta);
+
+  void unshare(size_t minCapacity = 0);
+  Char* MutableDataLarge();
+};  // namespace container
+
+template <class Char>
+inline void string_core<Char>::CopySmall(const string_core& rhs) {
+  static_assert(offsetof(MediumLarge, data_) == 0, "string layout failure");
+  static_assert(offsetof(MediumLarge, size_) == sizeof(ml_.data_),
+                "string layout failure");
+  static_assert(offsetof(MediumLarge, capacity_) == 2 * sizeof(ml_.data_),
+                "string layout failure");
+  // Just write the whole thing, don't look at details. In
+  // particular we need to copy capacity anyway because we want
+  // to set the size (don't forget that the last character,
+  // which stores a short string's length, is shared with the
+  // ml_.capacity field).
+  ml_ = rhs.ml_;
+  assert(category() == Category::IsSmall && this->size() == rhs.size());
+}
+
+template <class Char>
+inline void string_core<Char>::CopyMedium(const string_core& rhs) {
+  // Medium strings are copied eagerly. Don't forget to allocate
+  // one extra Char for the null terminator.
+  auto const alloc_size =
+      detail::good_malloc_size((1 + rhs.ml_.size_) * sizeof(Char));
+  ml_.data_ = static_cast<Char*>(detail::checked_malloc(alloc_size));
+  // Also copies terminator.
+  detail::pod_copy(rhs.ml_.data_, rhs.ml_.data_ + rhs.ml_.size_ + 1, ml_.data_);
+  ml_.size_ = rhs.ml_.size_;
+  ml_.set_capacity(alloc_size / sizeof(Char) - 1, Category::IsMedium);
+  assert(category() == Category::IsMedium);
+}
+
+template <class Char>
+inline void string_core<Char>::CopyLarge(const string_core& rhs) {
+  // Large strings are just refcounted
+  ml_ = rhs.ml_;
+  RefCounted::IncrementRefs(ml_.data_);
+  assert(category() == Category::IsLarge && size() == rhs.size());
+}
+
+// Small strings are bitblitted
+template <class Char>
+inline void string_core<Char>::InitSmall(const Char* const data,
+                                         const size_t size) {
+  // Layout is: Char* data_, size_t size_, size_t capacity_
+  static_assert(sizeof(*this) == sizeof(Char*) + 2 * sizeof(size_t),
+                "string has unexpected size");
+  static_assert(sizeof(Char*) == sizeof(size_t),
+                "string size assumption violation");
+  // sizeof(size_t) must be a power of 2
+  static_assert((sizeof(size_t) & (sizeof(size_t) - 1)) == 0,
+                "string size assumption violation");
+
+  if (size != 0) {
+    detail::pod_copy(data, data + size, small_);
+  }
+
+  set_small_size(size);
+}
+
+template <class Char>
+inline void string_core<Char>::InitMedium(const Char* const data,
+                                          const size_t size) {
+  // Medium strings are allocated normally. Don't forget to
+  // allocate one extra Char for the terminating null.
+  auto const alloc_size = detail::good_malloc_size((1 + size) * sizeof(Char));
+  ml_.data_ = static_cast<Char*>(detail::checked_malloc(alloc_size));
+  if (size > 0) {
+    detail::pod_copy(data, data + size, ml_.data_);
+  }
+  ml_.size_ = size;
+  ml_.set_capacity(alloc_size / sizeof(Char) - 1, Category::IsMedium);
+  ml_.data_[size] = '\0';
+}
+
+template <class Char>
+inline void string_core<Char>::InitLarge(const Char* const data,
+                                         const size_t size) {
+  // Large strings are allocated differently
+  size_t effective_capacity = size;
+  auto const new_rc = RefCounted::Create(data, &effective_capacity);
+  ml_.data_ = new_rc->data_;
+  ml_.size_ = size;
+  ml_.set_capacity(effective_capacity, Category::IsLarge);
+  ml_.data_[size] = '\0';
+}
+
+template <class Char>
+inline void string_core<Char>::unshare(size_t min_capacity) {
+  assert(category() == Category::IsLarge);
+  size_t effective_capacity = std::max(min_capacity, ml_.capacity());
+  auto const new_rc = RefCounted::Create(&effective_capacity);
+  // If this fails, someone placed the wrong capacity in an
+  // string.
+  assert(effective_capacity >= ml_.capacity());
+  // Also copies terminator.
+  detail::pod_copy(ml_.data_, ml_.data_ + ml_.size_ + 1, new_rc->data_);
+  RefCounted::DecrementRefs(ml_.data_);
+  ml_.data_ = new_rc->data_;
+  ml_.set_capacity(effective_capacity, Category::IsLarge);
+  // size_ remains unchanged.
+}
+
+template <class Char>
+inline Char* string_core<Char>::MutableDataLarge() {
+  assert(category() == Category::IsLarge);
+  if (RefCounted::Refs(ml_.data_) > 1) {  // Ensure unique.
+    unshare();
+  }
+  return ml_.data_;
+}
+
+template <class Char>
+inline void string_core<Char>::ReserveLarge(size_t min_capacity) {
+  assert(category() == Category::IsLarge);
+  if (RefCounted::Refs(ml_.data_) > 1) {  // Ensure unique
+    // We must make it unique regardless; in-place reallocation is
+    // useless if the string is shared. In order to not surprise
+    // people, reserve the new block at current capacity or
+    // more. That way, a string's capacity never shrinks after a
+    // call to reserve.
+    unshare(min_capacity);
+  } else {
+    // String is not shared, so let's try to realloc (if needed)
+    if (min_capacity > ml_.capacity()) {
+      // Asking for more memory
+      auto const new_rc = RefCounted::Reallocate(ml_.data_, ml_.size_,
+                                                 ml_.capacity(), &min_capacity);
+      ml_.data_ = new_rc->data_;
+      ml_.set_capacity(min_capacity, Category::IsLarge);
+    }
+    assert(capacity() >= min_capacity);
+  }
+}
+
+template <class Char>
+inline void string_core<Char>::ReserveMedium(const size_t min_capacity) {
+  assert(category() == Category::IsMedium);
+  // String is not shared
+  if (min_capacity <= ml_.capacity()) {
+    return;  // nothing to do, there's enough room
+  }
+  if (min_capacity <= kMaxMediumSize) {
+    // Keep the string at medium size. Don't forget to allocate
+    // one extra Char for the terminating null.
+    size_t capacity_bytes =
+        detail::good_malloc_size((1 + min_capacity) * sizeof(Char));
+    // Also copies terminator.
+    ml_.data_ = static_cast<Char*>(detail::smart_realloc(
+        ml_.data_, (ml_.size_ + 1) * sizeof(Char),
+        (ml_.capacity() + 1) * sizeof(Char), capacity_bytes));
+    ml_.set_capacity(capacity_bytes / sizeof(Char) - 1, Category::IsMedium);
+  } else {
+    // Conversion from medium to large string
+    string_core nascent;
+    // Will recurse to another branch of this function
+    nascent.reserve(min_capacity);
+    nascent.ml_.size_ = ml_.size_;
+    // Also copies terminator.
+    detail::pod_copy(ml_.data_, ml_.data_ + ml_.size_ + 1, nascent.ml_.data_);
+    nascent.swap(*this);
+    assert(capacity() >= min_capacity);
+  }
+}
+
+template <class Char>
+inline void string_core<Char>::ReserveSmall(size_t min_capacity) {
+  assert(category() == Category::IsSmall);
+  if (min_capacity <= kMaxSmallSize) {
+    // small
+    // Nothing to do, everything stays put
+  } else if (min_capacity <= kMaxMediumSize) {
+    // medium
+    // Don't forget to allocate one extra Char for the terminating null
+    auto const alloc_size_bytes =
+        detail::good_malloc_size((1 + min_capacity) * sizeof(Char));
+    auto const data =
+        static_cast<Char*>(detail::checked_malloc(alloc_size_bytes));
+    auto const size = small_size();
+    // Also copies terminator.
+    detail::pod_copy(small_, small_ + size + 1, data);
+    ml_.data_ = data;
+    ml_.size_ = size;
+    ml_.set_capacity(alloc_size_bytes / sizeof(Char) - 1, Category::IsMedium);
+  } else {
+    // large
+    auto const new_rc = RefCounted::Create(&min_capacity);
+    auto const size = small_size();
+    // Also copies terminator.
+    detail::pod_copy(small_, small_ + size + 1, new_rc->data_);
+    ml_.data_ = new_rc->data_;
+    ml_.size_ = size;
+    ml_.set_capacity(min_capacity, Category::IsLarge);
+    assert(capacity() >= min_capacity);
+  }
+}
+
+template <class Char>
+inline Char* string_core<Char>::ExpandNoinit(const size_t delta,
+                                             bool exp_growth) {
+  // Strategy is simple: make room, then change size
+  assert(capacity() >= size());
+  size_t sz, new_sz;
+  if (category() == Category::IsSmall) {
+    sz = small_size();
+    new_sz = sz + delta;
+    if (new_sz <= kMaxSmallSize) {
+      set_small_size(new_sz);
+      return small_ + sz;
+    }
+    ReserveSmall(exp_growth ? std::max(new_sz, 2 * kMaxSmallSize) : new_sz);
+  } else {
+    sz = ml_.size_;
+    new_sz = sz + delta;
+    if (new_sz > capacity()) {
+      // ensures not shared
+      reserve(exp_growth ? std::max(new_sz, 1 + capacity() * 3 / 2) : new_sz);
+    }
+  }
+  assert(capacity() >= new_sz);
+  // Category can't be small - we took care of that above
+  assert(category() == Category::IsMedium || category() == Category::IsLarge);
+  ml_.size_ = new_sz;
+  ml_.data_[new_sz] = '\0';
+  assert(size() == new_sz);
+  return ml_.data_ + sz;
+}
+
+template <class Char>
+inline void string_core<Char>::ShrinkSmall(const size_t delta) {
+  // Check for underflow
+  assert(delta <= small_size());
+  set_small_size(small_size() - delta);
+}
+
+template <class Char>
+inline void string_core<Char>::ShrinkMedium(const size_t delta) {
+  // Medium strings and unique large strings need no special
+  // handling.
+  assert(ml_.size_ >= delta);
+  ml_.size_ -= delta;
+  ml_.data_[ml_.size_] = '\0';
+}
+
+template <class Char>
+inline void string_core<Char>::ShrinkLarge(const size_t delta) {
+  assert(ml_.size_ >= delta);
+  // Shared large string, must make unique. This is because of the
+  // durn terminator must be written, which may trample the shared
+  // data.
+  if (delta) {
+    string_core(ml_.data_, ml_.size_ - delta).swap(*this);
+  }
+  // No need to write the terminator.
+}
 
 template <class CharT, class Traits = std::char_traits<CharT>>
 class basic_string {
@@ -143,14 +741,10 @@ class basic_string {
   static constexpr size_type npos = size_type(-1);
 
  public:
-  basic_string() noexcept {
-    detail::pod_fill(this->small_, this->small_ + kMaxSmallSize, '\0');
-    set_small_size(0);
-  }
+  basic_string() noexcept {}
 
   basic_string(size_type count, value_type ch) {
-    detail::pod_fill(this->small_, this->small_ + kMaxSmallSize, '\0');
-    value_type* data = ExpandNoinit(count);
+    auto const data = store_.ExpandNoinit(count);
     detail::pod_fill(data, data + count, ch);
   }
 
@@ -159,13 +753,7 @@ class basic_string {
     assign(other, pos, count);
   }
 
-  basic_string(const value_type* s, size_type count) {
-    if (count <= kMaxSmallSize) {
-      InitSmall(s, count);
-    } else {
-      InitLarge(s, count);
-    }
-  }
+  basic_string(const value_type* s, size_type count) : store_(s, count) {}
 
   basic_string(const value_type* s) : basic_string(s, TraitsLength(s)) {}
 
@@ -174,36 +762,13 @@ class basic_string {
     assign(first, last);
   }
 
-  basic_string(const basic_string& rhs) {
-    assert(&rhs != this);
-    switch (rhs.category()) {
-      case Category::IsSmall:
-        CopySmall(rhs);
-        break;
-      case Category::IsLarge:
-        CopyLarge(rhs);
-        break;
-      default:
-        std::abort();
-    }
-    assert(size() == rhs.size());
-    assert(memcmp(data(), rhs.data(), size() * sizeof(CharT)) == 0);
-  }
+  basic_string(const basic_string& rhs) : store_(rhs.store_) {}
 
-  basic_string(basic_string&& rhs) noexcept {
-    this->l_ = rhs.l_;
-    rhs.set_small_size(0);
-  }
+  basic_string(basic_string&& rhs) noexcept : store_(std::move(rhs.store_)) {}
 
   basic_string(std::initializer_list<char> il) { assign(il.begin(), il.end()); }
 
-  ~basic_string() noexcept {
-    if (category() == Category::IsSmall) {
-      return;
-    }
-
-    free(this->l_.data_);
-  }
+  ~basic_string() noexcept {}
 
   basic_string& operator=(const basic_string& str);
 
@@ -268,21 +833,17 @@ class basic_string {
 
   const value_type* data() const noexcept { return c_str(); }
 
-  value_type* data() noexcept { return c_str(); }
+  value_type* data() noexcept { return store_.data(); }
 
-  const value_type* c_str() const {
-    const value_type* ptr = this->l_.data_;
-    ptr = (category() == Category::IsSmall) ? this->small_ : ptr;
-    return ptr;
-  }
+  const value_type* c_str() const { return store_.c_str(); }
 
   // Iterators
-  iterator begin() noexcept { return MutableData(); }
-  const_iterator begin() const noexcept { return data(); }
+  iterator begin() noexcept { return store_.MutableData(); }
+  const_iterator begin() const noexcept { return store_.data(); }
   const_iterator cbegin() const noexcept { return begin(); }
 
-  iterator end() noexcept { return MutableData() + size(); }
-  const_iterator end() const noexcept { return data() + size(); }
+  iterator end() noexcept { return store_.MutableData() + store_.size(); }
+  const_iterator end() const noexcept { return store_.data() + store_.size(); }
   const_iterator cend() const noexcept { return end(); }
 
   reverse_iterator rbegin() noexcept { return reverse_iterator(begin()); }
@@ -300,25 +861,15 @@ class basic_string {
   // Capacity
   bool empty() const noexcept { return size() == 0; }
 
-  size_type size() const noexcept {
-    return category() == Category::IsSmall ? small_size() : this->l_.size_;
-  }
+  size_type size() const noexcept { return store_.size(); }
+
   size_type length() const noexcept { return size(); }
 
   size_type max_size() const noexcept { std::numeric_limits<size_type>::max(); }
 
-  void reserve(size_type new_cap) {
-    switch (category()) {
-      case Category::IsSmall:
-        ReserveSmall(new_cap);
-        break;
-      case Category::IsLarge:
-        ReserveLarge(new_cap);
-    }
-    assert(capacity() >= new_cap);
-  }
+  void reserve(size_type new_cap) { store_.reserve(new_cap); }
 
-  size_type capacity() const noexcept { return this->l_.capacity(); }
+  size_type capacity() const noexcept { return store_.capacity(); }
 
   void shrink_to_fit() {
     // Shrink only if slack memory is sufficiently large
@@ -366,7 +917,7 @@ class basic_string {
     const size_type pos = i - cbegin();
 
     auto old_size = size();
-    ExpandNoinit(n, true);
+    store_.ExpandNoinit(n, true);
     auto b = begin();
     detail::pod_move(b + pos, b + old_size, b + pos + n);
     detail::pod_fill(b + pos, b + pos + n, ch);
@@ -404,8 +955,8 @@ class basic_string {
     return begin() + pos;
   }
 
-  void push_back(char ch) { *ExpandNoinit(1, true) = ch; }
-  void pop_back() { Shrink(1); }
+  void push_back(char ch) { store_.push_back(ch); }
+  void pop_back() { store_.shrink(1); }
 
   basic_string& append(size_type count, CharT ch);
 
@@ -561,20 +1112,16 @@ class basic_string {
   void resize(size_type count, value_type ch = value_type()) {
     auto size = this->size();
     if (count <= size) {
-      Shrink(size - count);
+      store_.shrink(size - count);
     } else {
       auto const delta = count - size;
-      auto data = ExpandNoinit(delta);
+      auto data = store_.ExpandNoinit(delta);
       detail::pod_fill(data, data + delta, ch);
     }
     assert(this->size() == count);
   }
 
-  void swap(basic_string& rhs) noexcept {
-    auto const t = rhs.l_;
-    this->l_ = rhs.l_;
-    rhs.l_ = t;
-  }
+  void swap(basic_string& rhs) noexcept { store_.swap(rhs.store_); }
 
   size_type find(const basic_string& str, size_type pos = 0) const noexcept {
     return find(str.data(), pos, str.length());
@@ -668,22 +1215,6 @@ class basic_string {
   }
 
  private:
-  CharT* MutableData() {
-    switch (category()) {
-      case Category::IsSmall:
-        return this->small_;
-
-      case Category::IsLarge:
-        return this->l_.data_;
-    }
-  }
-
-  value_type* c_str() {
-    value_type* ptr = this->l_.data_;
-    ptr = (category() == Category::IsSmall) ? this->small_ : ptr;
-    return ptr;
-  }
-
   template <class FwdIterator>
   iterator InsertImpl(const_iterator it, FwdIterator first, FwdIterator last,
                       std::forward_iterator_tag);
@@ -711,75 +1242,7 @@ class basic_string {
                    std::input_iterator_tag);
 
  private:
-  typedef uint8_t category_type;
-
-  enum class Category : category_type {
-    IsSmall = 0,
-    IsLarge = 0x40,
-  };
-
- public:
-  Category category() const {
-    return static_cast<Category>(this->bytes_[kLastChar]);
-  }
-
- private:
-  struct Large {
-    CharT* data_;
-    size_t size_;
-    size_t capacity_;
-
-    size_t capacity() const { return capacity_ & kCapacityExtractMask; }
-
-    void set_capacity(size_t cap, Category cat) {
-      capacity_ = cap | (static_cast<size_t>(cat) << kCategoryShift);
-    }
-  };
-
-  union {
-    uint8_t bytes_[sizeof(Large)];  // For accessing the last byte.
-    CharT small_[sizeof(Large) / sizeof(CharT)];
-    Large l_;
-  };
-
- public:
-  constexpr static size_t kLastChar = sizeof(Large) - 1;
-  constexpr static size_t kMaxSmallSize = kLastChar / sizeof(CharT);
-  constexpr static uint8_t kCategoryExtractMask = 0xC0;
-  constexpr static size_t kCategoryShift = (sizeof(size_t) - 1) * 8;
-  constexpr static size_t kCapacityExtractMask =
-      ~(size_t(kCategoryExtractMask) << kCategoryShift);
-
- private:
-  size_t small_size() const {
-    assert(category() == Category::IsSmall);
-    auto small = static_cast<size_t>(this->small_[kMaxSmallSize]);
-    assert(kMaxSmallSize >= small);
-    return kMaxSmallSize - small;
-  }
-
-  void set_small_size(size_t s) {
-    assert(s <= kMaxSmallSize);
-    this->small_[kMaxSmallSize] = char(kMaxSmallSize - s);
-    this->small_[s] = '\0';
-    assert(category() == Category::IsSmall && size() == s);
-  }
-
-  void CopySmall(const basic_string&);
-  void CopyLarge(const basic_string&);
-
-  void Init(const value_type* data, size_t size);
-  void InitSmall(const value_type* data, size_t size);
-  void InitLarge(const value_type* data, size_t size);
-
-  void ReserveSmall(size_t min_capacity);
-  void ReserveLarge(size_t min_capacity);
-
-  void Shrink(size_t delta);
-  void ShrinkSmall(size_t delta);
-  void ShrinkLarge(size_t delta);
-
-  CharT* ExpandNoinit(const size_t delta, bool exp_growth = false);
+  string_core<CharT> store_;
 };
 
 using string = basic_string<char>;
@@ -801,16 +1264,19 @@ basic_string<CharT, Traits>& basic_string<CharT, Traits>::operator=(
     return *this;
   }
   this->~basic_string();
-  this->basic_string(std::move(str));
+  new (&store_) string_core<CharT>(std::move(str.store_));
   return *this;
 }
 template <class CharT, class Traits>
 basic_string<CharT, Traits>& basic_string<CharT, Traits>::operator=(
     value_type ch) {
   if (empty()) {
-    ExpandNoinit(1);
+    store_.ExpandNoinit(1);
+  } else if (store_.IsShared()) {
+    basic_string(1, ch).swap(*this);
+    return *this;
   } else {
-    Shrink(size() - 1);
+    store_.shrink(size() - 1);
   }
   front() = ch;
   return *this;
@@ -836,8 +1302,8 @@ basic_string<CharT, Traits>& basic_string<CharT, Traits>::assign(
   if (count == 0) {
     resize(0);
   } else if (size() >= count) {
-    detail::pod_move(s, s + count, this->MutableData());
-    Shrink(size() - count);
+    detail::pod_move(s, s + count, store_.MutableData());
+    store_.shrink(size() - count);
     assert(size() == count);
   } else {
     // If n is larger than size(), s cannot alias this string's
@@ -845,7 +1311,7 @@ basic_string<CharT, Traits>& basic_string<CharT, Traits>::assign(
     resize(0);
     // Do not use exponential growth here: assign() should be tight,
     // to mirror the behavior of the equivalent constructor.
-    detail::pod_copy(s, s + count, ExpandNoinit(count));
+    detail::pod_copy(s, s + count, store_.ExpandNoinit(count));
   }
 
   assert(size() == count);
@@ -864,7 +1330,7 @@ basic_string<CharT, Traits>::InsertImpl(const_iterator it, FwdIterator first,
   assert(n >= 0);
 
   auto old_size = size();
-  ExpandNoinit(n, true);
+  store_.ExpandNoinit(n, true);
   auto b = begin();
   detail::pod_move(b + pos, b + old_size, b + pos + n);
   std::copy(first, last, b + pos);
@@ -946,20 +1412,9 @@ void basic_string<CharT, Traits>::ReplaceImpl(iterator i1, iterator i2,
 }
 
 template <class CharT, class Traits>
-void basic_string<CharT, Traits>::CopySmall(const basic_string& rhs) {
-  static_assert(offsetof(Large, data_) == 0, "basic_string layout failure");
-  static_assert(offsetof(Large, size_) == sizeof(this->l_.data_),
-                "basic_string layout failure");
-  static_assert(offsetof(Large, capacity_) == sizeof(this->l_.size_),
-                "basic_string layout failure");
-
-  this->l_ = rhs.l_;
-}
-
-template <class CharT, class Traits>
 basic_string<CharT, Traits>& basic_string<CharT, Traits>::append(
     size_type count, value_type ch) {
-  auto const data = ExpandNoinit(count, true);
+  auto const data = store_.ExpandNoinit(count, true);
   detail::pod_fill(data, data + count, ch);
   return *this;
 }
@@ -987,7 +1442,7 @@ basic_string<CharT, Traits>& basic_string<CharT, Traits>::append(
   }
   auto const old_size = size();
   auto const old_data = data();
-  auto data = ExpandNoinit(n, true);
+  auto data = store_.ExpandNoinit(n, true);
 
   std::less_equal<const value_type*> le;
   if (le(old_data, s) && !le(old_data + old_size, s)) {
@@ -1063,175 +1518,6 @@ basic_string<CharT, Traits>::find(const value_type* needle, size_type pos,
     }
   }
   return npos;
-}
-
-template <class CharT, class Traits>
-typename basic_string<CharT, Traits>::size_type
-basic_string<CharT, Traits>::rfind(const value_type* s, size_type pos,
-                                   size_type n) const {
-  if (n > length()) {
-    return npos;
-  }
-  pos = std::min(pos, length() - n);
-  if (n == 0) {
-    return pos;
-  }
-
-  const_iterator i(begin() + pos);
-  for (;; --i) {
-    if (traits_type::eq(*i, *s) && traits_type::compare(&*i, s, n) == 0) {
-      return i - begin();
-    }
-    if (i == begin()) {
-      break;
-    }
-  }
-  return npos;
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::CopyLarge(const basic_string& rhs) {
-  size_t alloc_size =
-      detail::good_malloc_size((1 + rhs.size()) * sizeof(CharT));
-  auto const new_data = static_cast<CharT*>(detail::checked_malloc(alloc_size));
-  free(this->l_.data_);
-  detail::pod_copy(rhs.l_.data_, rhs.l_.data_ + rhs.l_.size_, new_data);
-  this->l_.data_ = new_data;
-  this->l_.size_ = rhs.l_.size_;
-  this->l_.set_capacity(alloc_size / sizeof(CharT) - 1, Category::IsLarge);
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::Init(const value_type* data, size_t size) {
-  if (size <= kMaxSmallSize) {
-    InitSmall(data, size);
-  } else {
-    InitLarge(data, size);
-  }
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::InitSmall(const value_type* data,
-                                            size_t size) {
-  // Layout is: CharT* data_, size_t size_, size_t capacity_
-  static_assert(sizeof(*this) == sizeof(CharT*) + 2 * sizeof(size_t),
-                "basic_string has unexpected size");
-  static_assert(sizeof(CharT*) == sizeof(size_t),
-                "basic_string size assumption violation");
-  // sizeof(size_t) must be a power of 2
-  static_assert((sizeof(size_t) & (sizeof(size_t) - 1)) == 0,
-                "basic_string size assumption violation");
-
-  if (size != 0) {
-    detail::pod_copy(data, data + size, this->small_);
-  }
-  set_small_size(size);
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::InitLarge(const value_type* data,
-                                            size_t size) {
-  size_t effective_capacity =
-      detail::good_malloc_size((1 + size) * sizeof(CharT));
-  this->l_.data_ = detail::checked_malloc(effective_capacity);
-  this->l_.size_ = size;
-  this->l_.set_capacity(effective_capacity / sizeof(CharT) - 1,
-                        Category::IsLarge);
-  this->l_.data_[size] = '\0';
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::ReserveSmall(size_t min_capacity) {
-  assert(category() == Category::IsSmall);
-  if (min_capacity <= kMaxSmallSize) {
-    // small
-    // Nothing to do, everything stays put
-  } else {
-    size_t alloc_size_bytes =
-        detail::good_malloc_size((1 + min_capacity) * sizeof(CharT));
-    auto const new_data =
-        static_cast<CharT*>(detail::checked_malloc(alloc_size_bytes));
-    auto const size = small_size();
-    detail::pod_copy(this->small_, this->small_ + size, new_data);
-    this->l_.data_ = new_data;
-    this->l_.size_ = size;
-    this->l_.set_capacity(alloc_size_bytes / sizeof(CharT) - 1,
-                          Category::IsLarge);
-    assert(capacity() >= min_capacity);
-  }
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::ReserveLarge(size_t min_capacity) {
-  assert(category() == Category::IsLarge);
-  if (min_capacity > this->l_.capacity()) {
-    auto const new_data = static_cast<CharT*>(
-        detail::checked_realloc(this->l_.data_, min_capacity));
-    this->l_.data_ = new_data;
-    this->l_.set_capacity(min_capacity, Category::IsLarge);
-  } else {
-    size_type alloc_size = (1 + min_capacity) * sizeof(CharT);
-    auto const new_data = static_cast<CharT*>(
-        detail::checked_realloc(this->l_.data_, alloc_size));
-    this->l_.data_ = new_data;
-    this->l_.set_capacity(alloc_size, Category::IsLarge);
-  }
-  assert(capacity() >= min_capacity);
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::Shrink(size_t delta) {
-  if (category() == Category::IsSmall) {
-    ShrinkSmall(delta);
-  } else {
-    ShrinkLarge(delta);
-  }
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::ShrinkSmall(size_t delta) {
-  // Check for underflow
-  assert(delta <= small_size());
-  set_small_size(small_size() - delta);
-}
-
-template <class CharT, class Traits>
-void basic_string<CharT, Traits>::ShrinkLarge(size_t delta) {
-  assert(l_.size_ >= delta);
-  if (delta) {
-    basic_string(this->l_.data_, this->l_.size_ - delta).swap(*this);
-  }
-}
-
-template <class CharT, class Traits>
-CharT* basic_string<CharT, Traits>::ExpandNoinit(const size_t delta,
-                                                 bool exp_growth) {
-  assert(capacity() >= size());
-  size_t sz, new_sz;
-  if (category() == Category::IsSmall) {
-    sz = small_size();
-    new_sz = sz + delta;
-
-    if (new_sz <= kMaxSmallSize) {
-      set_small_size(new_sz);
-      return this->small_ + sz;
-    }
-
-    ReserveSmall(exp_growth ? std::max(new_sz, 2 * kMaxSmallSize) : new_sz);
-  } else {
-    sz = this->l_.size_;
-    new_sz = sz + delta;
-    if (new_sz > capacity()) {
-      reserve(exp_growth ? std::max(new_sz, 1 + capacity() * 3 / 2) : new_sz);
-    }
-  }
-  assert(capacity() >= new_sz);
-  // Category can't be small - we took care of that above
-  assert(category() == Category::IsLarge);
-  this->l_.size_ = new_sz;
-  this->l_.data_[new_sz] = '\0';
-  assert(size() == new_sz);
-  return this->l_.data_ + sz;
 }
 
 // operator +
