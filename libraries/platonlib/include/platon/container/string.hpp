@@ -253,16 +253,7 @@ class string_core {
   void push_back(Char c) { *ExpandNoinit(1, /* exp_growth = */ true) = c; }
 
   size_t size() const {
-    size_t ret = ml_.size_;
-
-    // We can save a couple instructions, because the category is
-    // small iff the last char, as unsigned, is <= maxSmallSize.
-    typedef typename std::make_unsigned<Char>::type UChar;
-    auto maybe_small_size = size_t(kMaxSmallSize) -
-                            size_t(static_cast<UChar>(small_[kMaxSmallSize]));
-    // With this syntax, GCC and Clang generate a CMOV instead of a branch.
-    ret = (static_cast<size_t>(maybe_small_size) >= 0) ? maybe_small_size : ret;
-    return ret;
+    return (category() == Category::IsSmall) ? small_size() : ml_.size_;
   }
 
   size_t capacity() const {
@@ -1442,16 +1433,16 @@ basic_string<CharT, Traits>& basic_string<CharT, Traits>::append(
   }
   auto const old_size = size();
   auto const old_data = data();
-  auto data = store_.ExpandNoinit(n, true);
+  auto new_data = store_.ExpandNoinit(n, true);
 
   std::less_equal<const value_type*> le;
   if (le(old_data, s) && !le(old_data + old_size, s)) {
     assert(le(s + n, old_data + old_size));
     // expandNoinit() could have moved the storage, restore the source.
     s = data() + (s - old_data);
-    detail::pod_move(s, s + n, data);
+    detail::pod_move(s, s + n, new_data);
   } else {
-    detail::pod_copy(s, s + n, data);
+    detail::pod_copy(s, s + n, new_data);
   }
 
   assert(size() == old_size + n);
@@ -1739,7 +1730,7 @@ operator<<(
         _Ip;
     size_t __len = str.size();
     bool __left =
-        (os.flags() && _ostream_type::adjustfield) == _ostream_type::left;
+        (os.flags() & _ostream_type::adjustfield) == _ostream_type::left;
     if (__pad_and_output(_Ip(os), str.data(),
                          __left ? str.data() + __len : str.data(),
                          str.data() + __len, os, os.fill())
