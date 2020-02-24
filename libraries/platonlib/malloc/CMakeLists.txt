@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4.3)
 project(malloc)
 
 
-SET(SRC_FILENAMES malloc.cpp)
+SET(SRC_FILENAMES simple_malloc.cpp)
 
 add_library(malloc ${SRC_FILENAMES})
 

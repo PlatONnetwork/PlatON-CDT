@@ -1,5 +1,8 @@
 
+#include "platon/panic.hpp"
+#include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 namespace platon {
 struct dsmalloc {
@@ -25,33 +28,28 @@ struct dsmalloc {
     if (sz == 0)
       return 0;
 
-    // initialize  
-    // static bool initialized;
-
-    // if (!initialized) {
-    //   uint32_t heap_base = __builtin_wasm_memory_size(0) * wasm_page_size;
-    //   last_ptr = (char *)heap_base;
-    //   next_page = __builtin_wasm_memory_size(0);
-    //   initialized = true;
-    // }
+    size_t length_size = sizeof(size_t);
+    size_t real_size = sz + length_size;
 
     char *ret = last_ptr;
-    last_ptr = align(last_ptr + sz, align_amt);
-    size_t pages_to_alloc = sz >> 16;
+    last_ptr = align(last_ptr + real_size, align_amt);
+    size_t pages_to_alloc = real_size >> 16;
     next_page += pages_to_alloc;
     if ((next_page << 16) <= (size_t)last_ptr) {
       next_page++;
       pages_to_alloc++;
     }
 
-    __builtin_wasm_memory_grow(0, pages_to_alloc);
-    uint32_t  current_pages = __builtin_wasm_memory_size(0);
-
-    if(current_pages != next_page){
-      return 0;
+    // allocate memeory
+    size_t alloc_result = __builtin_wasm_memory_grow(0, pages_to_alloc);
+    if (0 == alloc_result) {
+      internal::platon_throw("failed to allocate pages");
     }
 
-    return ret;
+    // set size
+    memcpy(ret, &sz, length_size);
+
+    return ret + length_size;
   }
 
   char *heap;
@@ -78,7 +76,25 @@ void *calloc(size_t count, size_t size) {
   return nullptr;
 }
 
-void *realloc(void *ptr, size_t size) { return platon::_dsmalloc(size); }
+void *realloc(void *ptr, size_t size) {
+  if (size == 0 || nullptr == ptr)
+    return 0;
+
+  char *old_alloc = static_cast<char *>(ptr);
+  char *new_alloc = nullptr;
+  size_t length_size = sizeof(size_t);
+  size_t copy_size = 0;
+
+  memcpy(&copy_size, old_alloc - length_size, length_size);
+  if (size <= copy_size) {
+    new_alloc = old_alloc;
+  } else {
+    new_alloc = platon::_dsmalloc(size);
+    memcpy(new_alloc, ptr, copy_size);
+  }
+
+  return new_alloc;
+}
 
 void free(void *ptr) {}
 }
