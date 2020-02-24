@@ -757,7 +757,9 @@ class basic_string {
 
   basic_string(basic_string&& rhs) noexcept : store_(std::move(rhs.store_)) {}
 
-  basic_string(std::initializer_list<char> il) { assign(il.begin(), il.end()); }
+  basic_string(std::initializer_list<value_type> il) {
+    assign(il.begin(), il.end());
+  }
 
   ~basic_string() noexcept {}
 
@@ -769,14 +771,14 @@ class basic_string {
 
   basic_string& operator=(CharT ch);
 
-  basic_string& operator=(std::initializer_list<char> il) {
+  basic_string& operator=(std::initializer_list<value_type> il) {
     return assign(il.begin(), il.end());
   }
 
   basic_string& assign(size_type count, CharT ch);
 
   basic_string& assign(const basic_string& str) {
-    if (&str == *this) {
+    if (&str == this) {
       return *this;
     }
     return assign(str.data(), str.size());
@@ -798,7 +800,7 @@ class basic_string {
     return replace(begin(), end(), first, last);
   }
 
-  basic_string& assign(std::initializer_list<char> ilist) {
+  basic_string& assign(std::initializer_list<value_type> ilist) {
     return assign(ilist.begin(), ilist.end());
   }
 
@@ -837,15 +839,15 @@ class basic_string {
   const_iterator end() const noexcept { return store_.data() + store_.size(); }
   const_iterator cend() const noexcept { return end(); }
 
-  reverse_iterator rbegin() noexcept { return reverse_iterator(begin()); }
+  reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
   const_reverse_iterator rbegin() const noexcept {
-    return const_reverse_iterator(begin());
+    return const_reverse_iterator(end());
   }
   const_reverse_iterator crbegin() const noexcept { return rbegin(); }
 
-  reverse_iterator rend() noexcept { return reverse_iterator(end()); }
+  reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
   const_reverse_iterator rend() const noexcept {
-    return const_reverse_iterator(end());
+    return const_reverse_iterator(begin());
   }
   const_reverse_iterator crend() const noexcept { return rend(); }
 
@@ -856,7 +858,9 @@ class basic_string {
 
   size_type length() const noexcept { return size(); }
 
-  size_type max_size() const noexcept { std::numeric_limits<size_type>::max(); }
+  size_type max_size() const noexcept {
+    return std::numeric_limits<size_type>::max();
+  }
 
   void reserve(size_type new_cap) { store_.reserve(new_cap); }
 
@@ -891,10 +895,10 @@ class basic_string {
     return insert(index, str.data(), str.size());
   }
 
-  basic_string& insetr(size_type index, const basic_string& str,
+  basic_string& insert(size_type index, const basic_string& str,
                        size_type index_str, size_type count = npos) {
     Procrustes(count, str.length() - index_str);
-    insert(begin() + index, str.data() + index_str, count);
+    return insert(index, str.data() + index_str, count);
   }
 
   iterator insert(const_iterator pos, CharT ch) {
@@ -923,12 +927,12 @@ class basic_string {
         typename std::iterator_traits<InputIt>::iterator_category());
   }
 
-  iterator insert(const_iterator pos, std::initializer_list<char> ilist) {
+  iterator insert(const_iterator pos, std::initializer_list<value_type> ilist) {
     return insert(pos, ilist.begin(), ilist.end());
   }
 
   basic_string& erase(size_type index = 0, size_type n = npos) {
-    Procrustes(n, index);
+    Procrustes(n, length() - index);
     std::copy(begin() + index + n, end(), begin() + index);
     resize(length() - n);
     return *this;
@@ -962,10 +966,11 @@ class basic_string {
 
   template <class InputIt>
   basic_string& append(InputIt first, InputIt last) {
-    return insert(end(), first, last);
+    insert(end(), first, last);
+    return *this;
   }
 
-  basic_string& append(std::initializer_list<char> ilist) {
+  basic_string& append(std::initializer_list<value_type> ilist) {
     return append(ilist.begin(), ilist.end());
   }
 
@@ -978,7 +983,7 @@ class basic_string {
 
   basic_string& operator+=(const CharT* s) { return append(s); }
 
-  basic_string& operator+=(std::initializer_list<char> il) {
+  basic_string& operator+=(std::initializer_list<value_type> il) {
     append(il);
     return *this;
   }
@@ -1022,22 +1027,23 @@ class basic_string {
     return replace(pos, count, str.data(), str.length());
   }
 
-  basic_string& replace(const_iterator first, const_iterator last,
+  basic_string& replace(iterator first, iterator last,
                         const basic_string& str) {
     return replace(first, last, str.data(), str.length());
   }
 
-  basic_string& replace(size_type pos, size_type count, basic_string& str,
+  basic_string& replace(size_type pos, size_type count, const basic_string& str,
                         size_type pos2, size_type count2) {
     return replace(pos, count, str.data() + pos2,
                    std::min(count2, str.size() - pos2));
   }
 
   template <class InputIt>
-  basic_string& replace(const_iterator first, const_iterator last,
-                        InputIt first2, InputIt last2) {
+  basic_string& replace(iterator first, iterator last, InputIt first2,
+                        InputIt last2) {
     using Cat = typename std::iterator_traits<InputIt>::iterator_category;
-    return ReplaceImpl(first, last, first2, last2, Cat());
+    ReplaceImpl(first, last, first2, last2, Cat());
+    return *this;
   }
 
   basic_string& replace(size_type pos, size_type count, const value_type* s,
@@ -1047,8 +1053,8 @@ class basic_string {
     return replace(b, b + count, s, count2);
   }
 
-  basic_string& replace(const_iterator first, const_iterator last,
-                        const value_type* s, size_type count2) {
+  basic_string& replace(iterator first, iterator last, const value_type* s,
+                        size_type count2) {
     assert(first <= last);
     assert(begin() <= first && first <= end());
     assert(begin() <= last && last <= end());
@@ -1058,8 +1064,7 @@ class basic_string {
   basic_string& replace(size_type pos, size_type count, const value_type* s) {
     return replace(pos, count, s, TraitsLength(s));
   }
-  basic_string& replace(const_iterator first, const_iterator last,
-                        const value_type* s) {
+  basic_string& replace(iterator first, iterator last, const value_type* s) {
     return replace(first, last, s, TraitsLength(s));
   }
 
@@ -1070,8 +1075,8 @@ class basic_string {
     return replace(b, b + count, count2, ch);
   }
 
-  basic_string& replace(const_iterator first, const_iterator last,
-                        size_type count2, value_type ch) {
+  basic_string& replace(iterator first, iterator last, size_type count2,
+                        value_type ch) {
     size_type count = last - first;
     if (count > count2) {
       std::fill(first, first + count2, ch);
@@ -1083,8 +1088,8 @@ class basic_string {
     return *this;
   }
 
-  basic_string& replace(const_iterator first, const_iterator last,
-                        std::initializer_list<char> il) {
+  basic_string& replace(iterator first, iterator last,
+                        std::initializer_list<value_type> il) {
     return replace(first, last, il.begin(), il.end());
   }
 
@@ -1202,7 +1207,7 @@ class basic_string {
   }
 
   size_type find_last_not_of(CharT ch, size_type pos = npos) const noexcept {
-    return find_last_not_of(ch, pos, 1);
+    return find_last_not_of(&ch, pos, 1);
   }
 
  private:
@@ -1245,7 +1250,7 @@ basic_string<CharT, Traits>& basic_string<CharT, Traits>::operator=(
     return *this;
   }
 
-  assign(str.data(), str.length());
+  return assign(str.data(), str.length());
 }
 
 template <class CharT, class Traits>
@@ -1511,7 +1516,110 @@ basic_string<CharT, Traits>::find(const value_type* needle, size_type pos,
   return npos;
 }
 
-// operator +
+template <class CharT, class Traits>
+typename basic_string<CharT, Traits>::size_type
+basic_string<CharT, Traits>::rfind(const value_type* s, size_type pos,
+                                   size_type count) const {
+  if (count > length()) {
+    return npos;
+  }
+  pos = std::min(pos, length() - count);
+  if (count == 0) {
+    return pos;
+  }
+
+  const_iterator i(begin() + pos);
+  for (;; --i) {
+    if (traits_type::eq(*i, *s) && traits_type::compare(&*i, s, count) == 0) {
+      return i - begin();
+    }
+    if (i == begin()) {
+      break;
+    }
+  }
+  return npos;
+}
+
+template <class CharT, class Traits>
+typename basic_string<CharT, Traits>::size_type
+basic_string<CharT, Traits>::find_first_of(const value_type* s, size_type pos,
+                                           size_type n) const {
+  if (n > length()) {
+    return npos;
+  }
+  pos = std::min(pos, length() - n);
+  if (n == 0) {
+    return pos;
+  }
+
+  const_iterator i(begin() + pos);
+  for (;; --i) {
+    if (traits_type::eq(*i, *s) && traits_type::compare(&*i, s, n) == 0) {
+      return i - begin();
+    }
+    if (i == begin()) {
+      break;
+    }
+  }
+  return npos;
+}
+
+template <class CharT, class Traits>
+typename basic_string<CharT, Traits>::size_type
+basic_string<CharT, Traits>::find_last_of(const value_type* s, size_type pos,
+                                          size_type n) const {
+  if (!empty() && n > 0) {
+    pos = std::min(pos, length() - 1);
+    const_iterator i(begin() + pos);
+    for (;; --i) {
+      if (traits_type::find(s, n, *i) != nullptr) {
+        return i - begin();
+      }
+      if (i == begin()) {
+        break;
+      }
+    }
+  }
+  return npos;
+}
+
+template <class CharT, class Traits>
+typename basic_string<CharT, Traits>::size_type
+basic_string<CharT, Traits>::find_first_not_of(const value_type* s,
+                                               size_type pos,
+                                               size_type n) const {
+  if (pos < length()) {
+    const_iterator i(begin() + pos), finish(end());
+    for (; i != finish; ++i) {
+      if (traits_type::find(s, n, *i) == nullptr) {
+        return i - begin();
+      }
+    }
+  }
+  return npos;
+}
+
+template <class CharT, class Traits>
+typename basic_string<CharT, Traits>::size_type
+basic_string<CharT, Traits>::find_last_not_of(const value_type* s,
+                                              size_type pos,
+                                              size_type n) const {
+  if (!this->empty()) {
+    pos = std::min(pos, size() - 1);
+    const_iterator i(begin() + pos);
+    for (;; --i) {
+      if (traits_type::find(s, n, *i) == nullptr) {
+        return i - begin();
+      }
+      if (i == begin()) {
+        break;
+      }
+    }
+  }
+  return npos;
+}
+
+// non-member functions
 template <class CharT, class Traits>
 basic_string<CharT, Traits> operator+(const basic_string<CharT, Traits>& lhs,
                                       const basic_string<CharT, Traits>& rhs) {
@@ -1548,6 +1656,16 @@ basic_string<CharT, Traits> operator+(const CharT* lhs,
   const auto len = basic_string<CharT, Traits>::traits_type::length(lhs);
   result.reserve(len + rhs.size());
   result.append(lhs, len).append(rhs);
+  return result;
+}
+
+template <class CharT, class Traits>
+basic_string<CharT, Traits> operator+(CharT lhs,
+                                      const basic_string<CharT, Traits>& rhs) {
+  basic_string<CharT, Traits> result;
+  result.reserve(1 + rhs.size());
+  result.push_back(lhs);
+  result.append(rhs);
   return result;
 }
 
@@ -1590,7 +1708,7 @@ basic_string<CharT, Traits> operator+(const CharT* lhs,
                                       basic_string<CharT, Traits>&& rhs) {
   auto const len = basic_string<CharT, Traits>::traits_type::length(lhs);
   if (rhs.capacity() >= len + rhs.size()) {
-    rhs.insert(rhs.begin(), lhs, len);
+    rhs.insert(rhs.begin(), lhs, lhs + len);
     return std::move(rhs);
   }
   basic_string<CharT, Traits> result;
@@ -1747,7 +1865,7 @@ std::basic_istream<typename basic_string<CharT, Traits>::value_type,
 operator>>(
     std::basic_istream<typename basic_string<CharT, Traits>::value_type,
                        typename basic_string<CharT, Traits>::traits_type>& is,
-    const basic_string<CharT, Traits>& str) {
+    basic_string<CharT, Traits>& str) {
   typedef std::basic_istream<typename basic_string<CharT, Traits>::value_type,
                              typename basic_string<CharT, Traits>::traits_type>
       _istream_type;
