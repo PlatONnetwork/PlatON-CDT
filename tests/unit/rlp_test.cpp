@@ -257,6 +257,17 @@ TEST_CASE(rlp, array) {
   ASSERT_EQ(result, data, result, data);
 }
 
+TEST_CASE(rlp, list) {
+  std::list<std::string> list_data = {"abc", "def", "ghi"};
+  RLPStream stream;
+  stream << list_data;
+  std::vector<byte> result = stream.out();
+  print_rlp_code("list", "list_data", result);
+  std::list<std::string> fetch_data;
+  fetch(RLP(result), fetch_data);
+  ASSERT_EQ(fetch_data, list_data);
+}
+
 TEST_CASE(rlp, append){
   std::vector<uint32_t> vect_result;
   RLPStream stream(4);
@@ -330,6 +341,7 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, string)
   RUN_TEST(rlp, address)
   RUN_TEST(rlp, array)
+  RUN_TEST(rlp, list)
   RUN_TEST(rlp, append)
   RUN_TEST(rlp, struct)
   RUN_TEST(rlp, group)

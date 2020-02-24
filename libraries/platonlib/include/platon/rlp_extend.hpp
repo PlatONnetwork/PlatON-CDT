@@ -28,6 +28,15 @@ inline RLPStream& RLPStream::operator<<(std::vector<_T> const& _s) {
   return *this;
 }
 
+template <class _T>
+inline RLPStream& RLPStream::operator<<(std::list<_T> const& _s) {
+  appendList(_s.size());
+  for (auto const& i : _s) {
+    *this << i;
+  }
+  return *this;
+}
+
 template <class _T, size_t S>
 inline RLPStream& RLPStream::operator<<(std::array<_T, S> const& _s) {
   appendList(_s.size());
@@ -94,6 +103,19 @@ template <class T>
 inline void fetch(const RLP& rlp, std::vector<T>& ret) {
   if (rlp.isList()) {
     ret.reserve(rlp.itemCount());
+    for (auto const& i : rlp) {
+      T one;
+      fetch(i, one);
+      ret.push_back(one);
+    }
+  } else {
+    internal::platon_throw("bad cast");
+  }
+}
+
+template <class T>
+inline void fetch(const RLP& rlp, std::list<T>& ret) {
+  if (rlp.isList()) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
