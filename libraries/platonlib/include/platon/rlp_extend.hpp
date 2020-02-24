@@ -20,7 +20,7 @@ inline RLPStream& RLPStream::operator<<(bytes const& _s) {
 }
 
 template <class _T>
-inline RLPStream& RLPStream::operator<<(std::vector<_T> const& _s) {
+inline RLPStream& RLPStream::operator<<(container::vector<_T> const& _s) {
   appendList(_s.size());
   for (auto const& i : _s) {
     *this << i;
@@ -91,7 +91,7 @@ inline void fetch(const RLP& rlp, bool& value) { value = rlp.toBool(); }
 inline void fetch(const RLP& rlp, bytes& value) { value = rlp.toBytes(); }
 
 template <class T>
-inline void fetch(const RLP& rlp, std::vector<T>& ret) {
+inline void fetch(const RLP& rlp, container::vector<T>& ret) {
   if (rlp.isList()) {
     ret.reserve(rlp.itemCount());
     for (auto const& i : rlp) {

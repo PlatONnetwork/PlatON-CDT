@@ -6,14 +6,14 @@
 #include <iterator>
 #include <string>
 #include <type_traits>
-#include <vector>
+#include "container/vector.h"
 #include "vector_ref.h"
 
 namespace platon {
 
 typedef uint8_t byte;
 
-using bytes = std::vector<byte>;
+using bytes = container::vector<byte>;
 using bytesRef = vector_ref<byte>;
 using bytesConstRef = vector_ref<byte const>;
 
@@ -37,7 +37,7 @@ inline int fromHexChar(char _i) noexcept {
  */
 inline bytes fromHex(std::string const& _s) {
   unsigned s = (_s.size() >= 2 && _s[0] == '0' && _s[1] == 'x') ? 2 : 0;
-  std::vector<uint8_t> ret;
+  container::vector<uint8_t> ret;
   ret.reserve((_s.size() - s + 1) / 2);
 
   if (_s.size() % 2) {

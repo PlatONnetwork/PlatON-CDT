@@ -160,7 +160,7 @@ int vector_insert(Vector* vector, size_t index, void* element) {
   }
 
   /* Insert the element */
-  offset = _vector_offset(vector, index);
+  offset = vector_offset(vector, index);
   memcpy(offset, element, vector->element_size);
   ++vector->size;
 
@@ -234,7 +234,7 @@ void* vector_get(Vector* vector, size_t index) {
   if (vector->element_size == 0) return NULL;
   if (index >= vector->size) return NULL;
 
-  return _vector_offset(vector, index);
+  return vector_offset(vector, index);
 }
 
 const void* vector_const_get(const Vector* vector, size_t index) {
@@ -319,7 +319,7 @@ Iterator vector_iterator(Vector* vector, size_t index) {
   if (index > vector->size) return iterator;
   if (vector->element_size == 0) return iterator;
 
-  iterator.pointer = _vector_offset(vector, index);
+  iterator.pointer = vector_offset(vector, index);
   iterator.element_size = vector->element_size;
 
   return iterator;
@@ -406,7 +406,7 @@ size_t _vector_free_bytes(const Vector* vector) {
   return vector_free_space(vector) * vector->element_size;
 }
 
-void* _vector_offset(Vector* vector, size_t index) {
+void* vector_offset(Vector* vector, size_t index) {
   return static_cast<void*>(static_cast<char*>(vector->data) +
                             (index * vector->element_size));
 }
@@ -418,7 +418,7 @@ const void* _vector_const_offset(const Vector* vector, size_t index) {
 
 void _vector_assign(Vector* vector, size_t index, void* element) {
   /* Insert the element */
-  void* offset = _vector_offset(vector, index);
+  void* offset = vector_offset(vector, index);
   memcpy(offset, element, vector->element_size);
 }
 
@@ -426,7 +426,7 @@ int _vector_move_right(Vector* vector, size_t index) {
   assert(vector->size < vector->capacity);
 
   /* The location where to start to move from. */
-  void* offset = _vector_offset(vector, index);
+  void* offset = vector_offset(vector, index);
 
   /* How many to move to the right. */
   size_t elements_in_bytes = (vector->size - index) * vector->element_size;
@@ -458,7 +458,7 @@ void _vector_move_left(Vector* vector, size_t index) {
   void* offset;
 
   /* The offset into the memory */
-  offset = _vector_offset(vector, index);
+  offset = vector_offset(vector, index);
 
   /* How many to move to the left */
   right_elements_in_bytes = (vector->size - index - 1) * vector->element_size;

@@ -13,7 +13,7 @@
 #include <map>
 #include <set>
 #include <tuple>
-#include <vector>
+#include "container/vector.h"
 
 namespace platon {
 
@@ -191,7 +191,7 @@ template <Name::Raw name>
 using String = class StorageType<name, std::string>;
 
 template <Name::Raw name, typename T>
-using Vector = class StorageType<name, std::vector<T>>;
+using Vector = class StorageType<name, container::vector<T>>;
 
 template <Name::Raw name, typename T>
 using Set = class StorageType<name, std::set<T>>;

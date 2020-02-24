@@ -3,7 +3,7 @@
 #include <array>
 #include <initializer_list>
 #include <string>
-#include <vector>
+#include "container/vector.h"
 #include "common.h"
 
 namespace platon {
