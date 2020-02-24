@@ -18,6 +18,7 @@
 #include <set>
 #include <unordered_set>
 //#include "container/vector.h"
+#include <vector>
 #include "bigint.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
@@ -245,7 +246,11 @@ class RLP {
   }
   template <class T>
   explicit operator container::vector<T>() const {
-    return toVector<T>();
+    return toVector<container::vector<T>, T>();
+  }
+  template <class T>
+  explicit operator std::vector<T>() const {
+    return toVector<std::vector<T>, T>();
   }
   template <class T>
   explicit operator std::set<T>() const {
@@ -289,9 +294,9 @@ class RLP {
   /// Converts to string. @throws BadCast if not a string.
   std::string toStringStrict() const { return toString(Strict); }
 
-  template <class T>
-  container::vector<T> toVector(int _flags = LaissezFaire) const {
-    container::vector<T> ret;
+  template <class V, class T>
+  V toVector(int _flags = LaissezFaire) const {
+    V ret;
     if (isList()) {
       ret.reserve(itemCount());
       for (auto const& i : *this) ret.push_back(i.convert<T>(_flags));
@@ -590,7 +595,14 @@ struct Converter<std::pair<T, U>> {
 template <class T>
 struct Converter<container::vector<T>> {
   static container::vector<T> convert(RLP const& _r, int _flags) {
-    return _r.toVector<T>(_flags);
+    return _r.toVector<container::vector<T>, T>(_flags);
+  }
+};
+
+template <class T>
+struct Converter<std::vector<T>> {
+  static std::vector<T> convert(RLP const& _r, int _flags) {
+    return _r.toVector<std::vector<T>, T>(_flags);
   }
 };
 template <class T>
@@ -682,7 +694,11 @@ class RLPStream {
     return appendVector(_s);
   }
   template <class _T>
-  RLPStream& appendVector(container::vector<_T> const& _s) {
+  RLPStream& append(std::vector<_T> const& _s) {
+    return appendVector(_s);
+  }
+  template <class _T>
+  RLPStream& appendVector(_T const& _s) {
     appendList(_s.size());
     for (auto const& i : _s) append(i);
     return *this;
