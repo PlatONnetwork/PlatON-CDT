@@ -133,26 +133,6 @@ TEST_CASE(vector, data) {
     ASSERT(obj->i == 3);
   }
 }
-template <class _Tp>
-struct __has_iterator_typedefs {
- private:
-  struct __two {
-    char __lx;
-    char __lxx;
-  };
-  template <class _Up>
-  static __two __test(...);
-  template <class _Up>
-  static char __test(
-      typename std::__void_t<typename _Up::iterator_category>::type* = 0,
-      typename std::__void_t<typename _Up::difference_type>::type* = 0,
-      typename std::__void_t<typename _Up::value_type>::type* = 0,
-      typename std::__void_t<typename _Up::reference>::type* = 0,
-      typename std::__void_t<typename _Up::pointer>::type* = 0);
-
- public:
-  static const bool value = sizeof(__test<_Tp>(0, 0, 0, 0, 0)) == 1;
-};
 
 TEST_CASE(vector, iterator) {
   vector<TypeSet> v0(5, TypeSet(3));
