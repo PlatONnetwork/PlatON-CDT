@@ -4,19 +4,21 @@
 #include <boost/fusion/include/std_tuple.hpp>
 #include <boost/mp11/tuple.hpp>
 #include <tuple>
-#include "boost/fusion/algorithm/iteration/for_each.hpp"
-#include "boost/preprocessor/seq/for_each.hpp"
 
 #include "RLP.h"
+#include "boost/fusion/algorithm/iteration/for_each.hpp"
+#include "boost/preprocessor/seq/for_each.hpp"
 #include "chain.hpp"
 #include "common.h"
+#include "container/string.hpp"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
 
 namespace platon {
 
 template <typename... Args>
-inline bytes cross_call_args(const std::string &method, const Args &... args) {
+inline bytes cross_call_args(const container::string &method,
+                             const Args &... args) {
   RLPStream stream;
   std::tuple<Args...> tuple_args = std::make_tuple(args...);
   size_t num = sizeof...(Args);
@@ -64,7 +66,7 @@ inline bool platon_delegate_call(const Address &addr, const bytes &paras,
 // }
 
 template <typename T>
-inline void get_call_output(T& t) {
+inline void get_call_output(T &t) {
   bytes result;
   size_t len = ::platon_get_call_output_length();
   result.resize(len);

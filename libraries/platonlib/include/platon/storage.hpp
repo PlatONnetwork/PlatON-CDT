@@ -3,7 +3,6 @@
 //
 #pragma once
 
-#include <string>
 #include "RLP.h"
 #include "chain.hpp"
 #include "common.h"

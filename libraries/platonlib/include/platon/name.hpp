@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
-#include "platon/rlp_serialize.hpp"
+
 #include "platon/panic.hpp"
+#include "platon/rlp_serialize.hpp"
 
 namespace platon {
 namespace detail {
@@ -80,8 +81,8 @@ struct Name {
       uint64_t v = char_to_value(str[12]);
       if (v > 0x0Full) {
         internal::platon_throw(
-                               "thirteenth character in name cannot be a letter"
-                               "that comes after j");
+            "thirteenth character in name cannot be a letter"
+            "that comes after j");
       }
       value |= v;
     }
@@ -101,7 +102,8 @@ struct Name {
     else if (c >= 'a' && c <= 'z')
       return (c - 'a') + 6;
     else
-      internal::platon_throw("character is not in allowed character set for names");
+      internal::platon_throw(
+          "character is not in allowed character set for names");
 
     return 0;  // control flow will never reach here; just added to suppress
                // warning
@@ -226,7 +228,7 @@ struct Name {
    *  @brief Returns the name value as a string by calling write_as_string() and
    * returning the buffer produced by write_as_string()
    */
-  std::string to_string() const {
+  container::string to_string() const {
     char buffer[13];
     auto end = write_as_string(buffer, buffer + sizeof(buffer));
     return {buffer, end};

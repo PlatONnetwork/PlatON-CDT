@@ -3,6 +3,7 @@
 #include "RLP.h"
 #include "bigint.hpp"
 #include "chain.hpp"
+#include "container/string.hpp"
 #include "exchange.hpp"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
@@ -114,7 +115,7 @@ bytes get_input();
  *
  * @param data The debug info
  */
-void platon_debug(const std::string& data) {
+void platon_debug(const container::string& data) {
   ::platon_debug(reinterpret_cast<const uint8_t*>(data.c_str()), data.size());
 }
 

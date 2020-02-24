@@ -1,7 +1,9 @@
 #pragma once
 
 #include <map>
+
 #include "platon/assert.hpp"
+#include "platon/container/string.hpp"
 #include "platon/name.hpp"
 #include "platon/storage.hpp"
 
@@ -429,8 +431,8 @@ class Array {
    * @param index
    * @return std::string
    */
-  std::string EncodeKey(size_t index) {
-    std::string key;
+  container::string EncodeKey(size_t index) {
+    container::string key;
     key.reserve(name_.length() + 1 + sizeof(index));
     key.append(name_);
     key.append(1, 'A');
@@ -445,21 +447,22 @@ class Array {
    */
   void Flush() {
     for (auto iter : cache_) {
-      std::string key = EncodeKey(iter.first);
+      container::string key = EncodeKey(iter.first);
       set_state(key, iter.second);
     }
   }
 
  public:
-  static const std::string kType;
+  static const container::string kType;
 
  private:
   std::map<size_t, Key> cache_;
 
-  const std::string name_ = kType + std::to_string(uint64_t(TableName));
+  const container::string name_ =
+      kType + container::to_string(uint64_t(TableName));
 };
 
 template <Name::Raw TableName, typename Key, unsigned N>
-const std::string Array<TableName, Key, N>::kType = "__array__";
+const container::string Array<TableName, Key, N>::kType = "__array__";
 }  // namespace db
 }  // namespace platon
