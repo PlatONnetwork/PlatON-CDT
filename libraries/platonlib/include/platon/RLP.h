@@ -18,6 +18,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include <list>
 #include "bigint.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
@@ -735,6 +736,9 @@ class RLPStream {
 
   template <class _T>
   RLPStream& operator<<(std::vector<_T> const& _s);
+
+  template <class _T>
+  RLPStream& operator<<(std::list<_T> const& _s);
 
   template <class _T, size_t S>
   RLPStream& operator<<(std::array<_T, S> const& _s);
