@@ -1,14 +1,13 @@
 #pragma once
 
+#include <ctype.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
 #include <initializer_list>
 #include <iterator>
-#include <platon/print.hpp>
-#include <string>
 
 namespace platon {
 namespace container {
