@@ -186,7 +186,7 @@ TEST_CASE(vector, iterator) {
 TEST_CASE(vector, size) {
   vector<TypeSet> v0(5, TypeSet(3));
   ASSERT(v0.size() == 5);
-  size_t size = size_t(1 << 63);
+  size_t size = (size_t)1 << (sizeof(size_t) * 8 - 1);
   ASSERT(v0.max_size() == size);
 }
 
