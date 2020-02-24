@@ -4,7 +4,7 @@
 #include <cstring>
 #include <string>
 #include <type_traits>
-#include <vector>
+#include "container/vector.h"
 
 namespace platon {
 
@@ -39,8 +39,8 @@ class vector_ref {
   /// pointer).
   vector_ref(typename std::conditional<
              std::is_const<_T>::value,
-             std::vector<typename std::remove_const<_T>::type> const*,
-             std::vector<_T>*>::type _data)
+      container::vector<typename std::remove_const<_T>::type> const*,
+             container::vector<_T>*>::type _data)
       : m_data(_data->data()), m_count(_data->size()) {}
   /// Creates a new vector_ref pointing to the data part of a string (given as
   /// reference).
@@ -51,18 +51,18 @@ class vector_ref {
         m_count(_data.size() / sizeof(_T)) {}
   explicit operator bool() const { return m_data && m_count; }
 
-  bool contentsEqual(std::vector<mutable_value_type> const& _c) const {
+  bool contentsEqual(container::vector<mutable_value_type> const& _c) const {
     if (!m_data || m_count == 0)
       return _c.empty();
     else
       return _c.size() == m_count &&
              !memcmp(_c.data(), m_data, m_count * sizeof(_T));
   }
-  std::vector<mutable_value_type> toVector() const {
-    return std::vector<mutable_value_type>(m_data, m_data + m_count);
+  container::vector<mutable_value_type> toVector() const {
+    return container::vector<mutable_value_type>(m_data, m_data + m_count);
   }
-  std::vector<unsigned char> toBytes() const {
-    return std::vector<unsigned char>(
+  container::vector<unsigned char> toBytes() const {
+    return container::vector<unsigned char>(
         reinterpret_cast<unsigned char const*>(m_data),
         reinterpret_cast<unsigned char const*>(m_data) + m_count * sizeof(_T));
   }
@@ -122,7 +122,7 @@ class vector_ref {
     m_data = _d;
     m_count = _s;
   }
-  void retarget(std::vector<_T> const& _t) {
+  void retarget(container::vector<_T> const& _t) {
     m_data = _t.data();
     m_count = _t.size();
   }
@@ -208,11 +208,11 @@ vector_ref<_T> ref(_T& _t) {
   return vector_ref<_T>(&_t, 1);
 }
 template <class _T>
-vector_ref<_T const> ref(std::vector<_T> const& _t) {
+vector_ref<_T const> ref(container::vector<_T> const& _t) {
   return vector_ref<_T const>(&_t);
 }
 template <class _T>
-vector_ref<_T> ref(std::vector<_T>& _t) {
+vector_ref<_T> ref(container::vector<_T>& _t) {
   return vector_ref<_T>(&_t);
 }
 

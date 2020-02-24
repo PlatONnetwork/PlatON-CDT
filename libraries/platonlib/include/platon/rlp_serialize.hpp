@@ -5,7 +5,7 @@
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/seq/size.hpp>
 #include <boost/preprocessor/stringize.hpp>
-#include <vector>
+#include "container/vector.h"
 #include "platon/RLP.h"
 #include "platon/common.h"
 #include "platon/rlp_extend.hpp"

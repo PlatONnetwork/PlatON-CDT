@@ -37,7 +37,7 @@ template <typename T>
 void platon_return(const T& t) {
   RLPStream rlp_stream;
   rlp_stream << t;
-  const std::vector<byte> &result = rlp_stream.out();
+  container::vector<byte> result = rlp_stream.out();
   ::platon_return(result.data(), result.size());
 }
 

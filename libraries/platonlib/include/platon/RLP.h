@@ -17,12 +17,13 @@
 #include <map>
 #include <set>
 #include <unordered_set>
+//#include "container/vector.h"
 #include <vector>
 #include "bigint.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
-#include "vector_ref.h"
 #include "panic.hpp"
+#include "vector_ref.h"
 
 namespace platon {
 
@@ -244,8 +245,12 @@ class RLP {
     return toPair<T, U>();
   }
   template <class T>
+  explicit operator container::vector<T>() const {
+    return toVector<container::vector<T>, T>();
+  }
+  template <class T>
   explicit operator std::vector<T>() const {
-    return toVector<T>();
+    return toVector<std::vector<T>, T>();
   }
   template <class T>
   explicit operator std::set<T>() const {
@@ -289,9 +294,9 @@ class RLP {
   /// Converts to string. @throws BadCast if not a string.
   std::string toStringStrict() const { return toString(Strict); }
 
-  template <class T>
-  std::vector<T> toVector(int _flags = LaissezFaire) const {
-    std::vector<T> ret;
+  template <class V, class T>
+  V toVector(int _flags = LaissezFaire) const {
+    V ret;
     if (isList()) {
       ret.reserve(itemCount());
       for (auto const& i : *this) ret.push_back(i.convert<T>(_flags));
@@ -588,9 +593,16 @@ struct Converter<std::pair<T, U>> {
   }
 };
 template <class T>
+struct Converter<container::vector<T>> {
+  static container::vector<T> convert(RLP const& _r, int _flags) {
+    return _r.toVector<container::vector<T>, T>(_flags);
+  }
+};
+
+template <class T>
 struct Converter<std::vector<T>> {
   static std::vector<T> convert(RLP const& _r, int _flags) {
-    return _r.toVector<T>(_flags);
+    return _r.toVector<std::vector<T>, T>(_flags);
   }
 };
 template <class T>
@@ -678,11 +690,15 @@ class RLPStream {
 
   /// Appends a sequence of data to the stream as a list.
   template <class _T>
+  RLPStream& append(container::vector<_T> const& _s) {
+    return appendVector(_s);
+  }
+  template <class _T>
   RLPStream& append(std::vector<_T> const& _s) {
     return appendVector(_s);
   }
   template <class _T>
-  RLPStream& appendVector(std::vector<_T> const& _s) {
+  RLPStream& appendVector(_T const& _s) {
     appendList(_s.size());
     for (auto const& i : _s) append(i);
     return *this;
@@ -734,7 +750,7 @@ class RLPStream {
   RLPStream& operator<<(bytes const& _s);
 
   template <class _T>
-  RLPStream& operator<<(std::vector<_T> const& _s);
+  RLPStream& operator<<(container::vector<_T> const& _s);
 
   template <class _T, size_t S>
   RLPStream& operator<<(std::array<_T, S> const& _s);
@@ -775,7 +791,7 @@ class RLPStream {
   /// Swap the contents of the output stream out for some other byte array.
   void swapOut(bytes& _dest) {
     if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
-    swap(m_out, _dest);
+    std::swap(m_out, _dest);
   }
 
  private:
@@ -798,7 +814,7 @@ class RLPStream {
   /// Our output byte stream.
   bytes m_out;
 
-  std::vector<std::pair<size_t, size_t>> m_listStack;
+  container::vector<std::pair<size_t, size_t>> m_listStack;
 };
 
 template <class _T>

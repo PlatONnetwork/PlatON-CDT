@@ -88,8 +88,8 @@ struct event_type {
   static type event_data_convert(const T &data){
       RLPStream stream;
       stream << data;
-      std::vector<byte> result = stream.out();
-      std::vector<byte> hash;
+    container::vector<byte> result = stream.out();
+    container::vector<byte> hash;
       hash.resize(32);
       ::platon_sha3(result.data(), result.size(), hash.data(), hash.size());
       return hash;
