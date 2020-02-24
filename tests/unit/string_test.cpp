@@ -1095,11 +1095,11 @@ TEST_CASE(string, test_all_clauses) {
     do {
       randomString(&r);
       c = r.data();
-      ASSERT_EQ(c, r.data());
+      ASSERT_EQ(c, r.data(), "c", c.c_str(), "r", r.c_str());
       auto localSeed = seed + count;
       rng = RandomT(localSeed);
-      println("test.size", r.size(), "disc", r.end() - r.begin(), "r",
-              r.c_str());
+      // println("test.size", r.size(), "disc", r.end() - r.begin(), "r",
+      //      r.c_str());
       f_string(r, testResult_, name_, group_);
       rng = RandomT(localSeed);
       f_pstring(c, testResult_, name_, group_);
@@ -1130,77 +1130,77 @@ TEST_CASE(string, test_all_clauses) {
   TEST_CLAUSE(21_4_2_m);
   TEST_CLAUSE(21_4_2_n);
   TEST_CLAUSE(21_4_3);
-  // TEST_CLAUSE(21_4_4);
-  // TEST_CLAUSE(21_4_5);
-  // TEST_CLAUSE(21_4_6_1);
-  // TEST_CLAUSE(21_4_6_2);
-  // TEST_CLAUSE(21_4_6_3_a);
-  // TEST_CLAUSE(21_4_6_3_b);
-  // TEST_CLAUSE(21_4_6_3_c);
-  // TEST_CLAUSE(21_4_6_3_d);
-  // TEST_CLAUSE(21_4_6_3_e);
-  // TEST_CLAUSE(21_4_6_3_f);
-  // TEST_CLAUSE(21_4_6_3_g);
-  // TEST_CLAUSE(21_4_6_3_h);
-  // TEST_CLAUSE(21_4_6_3_i);
-  // TEST_CLAUSE(21_4_6_3_j);
-  // TEST_CLAUSE(21_4_6_3_k);
-  // TEST_CLAUSE(21_4_6_4);
-  // TEST_CLAUSE(21_4_6_5);
-  // TEST_CLAUSE(21_4_6_6);
-  // TEST_CLAUSE(21_4_6_7);
-  // TEST_CLAUSE(21_4_6_8);
-  // TEST_CLAUSE(21_4_7_1);
+  TEST_CLAUSE(21_4_4);
+  TEST_CLAUSE(21_4_5);
+  TEST_CLAUSE(21_4_6_1);
+  TEST_CLAUSE(21_4_6_2);
+  TEST_CLAUSE(21_4_6_3_a);
+  TEST_CLAUSE(21_4_6_3_b);
+  TEST_CLAUSE(21_4_6_3_c);
+  TEST_CLAUSE(21_4_6_3_d);
+  TEST_CLAUSE(21_4_6_3_e);
+  TEST_CLAUSE(21_4_6_3_f);
+  TEST_CLAUSE(21_4_6_3_g);
+  TEST_CLAUSE(21_4_6_3_h);
+  TEST_CLAUSE(21_4_6_3_i);
+  TEST_CLAUSE(21_4_6_3_j);
+  TEST_CLAUSE(21_4_6_3_k);
+  TEST_CLAUSE(21_4_6_4);
+  TEST_CLAUSE(21_4_6_5);
+  TEST_CLAUSE(21_4_6_6);
+  TEST_CLAUSE(21_4_6_7);
+  TEST_CLAUSE(21_4_6_8);
+  TEST_CLAUSE(21_4_7_1);
 
-  // TEST_CLAUSE(21_4_7_2_a);
-  // TEST_CLAUSE(21_4_7_2_a1);
-  // TEST_CLAUSE(21_4_7_2_a2);
-  // TEST_CLAUSE(21_4_7_2_b);
-  // TEST_CLAUSE(21_4_7_2_b1);
-  // TEST_CLAUSE(21_4_7_2_b2);
-  // TEST_CLAUSE(21_4_7_2_c);
-  // TEST_CLAUSE(21_4_7_2_c1);
-  // TEST_CLAUSE(21_4_7_2_c2);
-  // TEST_CLAUSE(21_4_7_2_d);
-  // TEST_CLAUSE(21_4_7_3_a);
-  // TEST_CLAUSE(21_4_7_3_b);
-  // TEST_CLAUSE(21_4_7_3_c);
-  // TEST_CLAUSE(21_4_7_3_d);
-  // TEST_CLAUSE(21_4_7_4_a);
-  // TEST_CLAUSE(21_4_7_4_b);
-  // TEST_CLAUSE(21_4_7_4_c);
-  // TEST_CLAUSE(21_4_7_4_d);
-  // TEST_CLAUSE(21_4_7_5_a);
-  // TEST_CLAUSE(21_4_7_5_b);
-  // TEST_CLAUSE(21_4_7_5_c);
-  // TEST_CLAUSE(21_4_7_5_d);
-  // TEST_CLAUSE(21_4_7_6_a);
-  // TEST_CLAUSE(21_4_7_6_b);
-  // TEST_CLAUSE(21_4_7_6_c);
-  // TEST_CLAUSE(21_4_7_6_d);
-  // TEST_CLAUSE(21_4_7_7_a);
-  // TEST_CLAUSE(21_4_7_7_b);
-  // TEST_CLAUSE(21_4_7_7_c);
-  // TEST_CLAUSE(21_4_7_7_d);
-  // TEST_CLAUSE(21_4_7_8);
-  // TEST_CLAUSE(21_4_7_9_a);
-  // TEST_CLAUSE(21_4_7_9_b);
-  // TEST_CLAUSE(21_4_7_9_c);
-  // TEST_CLAUSE(21_4_7_9_d);
-  // TEST_CLAUSE(21_4_7_9_e);
-  // TEST_CLAUSE(21_4_8_1_a);
-  // TEST_CLAUSE(21_4_8_1_b);
-  // TEST_CLAUSE(21_4_8_1_c);
-  // TEST_CLAUSE(21_4_8_1_d);
-  // TEST_CLAUSE(21_4_8_1_e);
-  // TEST_CLAUSE(21_4_8_1_f);
-  // TEST_CLAUSE(21_4_8_1_g);
-  // TEST_CLAUSE(21_4_8_1_h);
-  // TEST_CLAUSE(21_4_8_1_i);
-  // TEST_CLAUSE(21_4_8_1_j);
-  // TEST_CLAUSE(21_4_8_1_k);
-  // TEST_CLAUSE(21_4_8_1_l);
-  // TEST_CLAUSE(21_4_8_9_a);
+  TEST_CLAUSE(21_4_7_2_a);
+  TEST_CLAUSE(21_4_7_2_a1);
+  TEST_CLAUSE(21_4_7_2_a2);
+  TEST_CLAUSE(21_4_7_2_b);
+  TEST_CLAUSE(21_4_7_2_b1);
+  TEST_CLAUSE(21_4_7_2_b2);
+  TEST_CLAUSE(21_4_7_2_c);
+  TEST_CLAUSE(21_4_7_2_c1);
+  TEST_CLAUSE(21_4_7_2_c2);
+  TEST_CLAUSE(21_4_7_2_d);
+  TEST_CLAUSE(21_4_7_3_a);
+  TEST_CLAUSE(21_4_7_3_b);
+  TEST_CLAUSE(21_4_7_3_c);
+  TEST_CLAUSE(21_4_7_3_d);
+  TEST_CLAUSE(21_4_7_4_a);
+  TEST_CLAUSE(21_4_7_4_b);
+  TEST_CLAUSE(21_4_7_4_c);
+  TEST_CLAUSE(21_4_7_4_d);
+  TEST_CLAUSE(21_4_7_5_a);
+  TEST_CLAUSE(21_4_7_5_b);
+  TEST_CLAUSE(21_4_7_5_c);
+  TEST_CLAUSE(21_4_7_5_d);
+  TEST_CLAUSE(21_4_7_6_a);
+  TEST_CLAUSE(21_4_7_6_b);
+  TEST_CLAUSE(21_4_7_6_c);
+  TEST_CLAUSE(21_4_7_6_d);
+  TEST_CLAUSE(21_4_7_7_a);
+  TEST_CLAUSE(21_4_7_7_b);
+  TEST_CLAUSE(21_4_7_7_c);
+  TEST_CLAUSE(21_4_7_7_d);
+  TEST_CLAUSE(21_4_7_8);
+  TEST_CLAUSE(21_4_7_9_a);
+  TEST_CLAUSE(21_4_7_9_b);
+  TEST_CLAUSE(21_4_7_9_c);
+  TEST_CLAUSE(21_4_7_9_d);
+  TEST_CLAUSE(21_4_7_9_e);
+  TEST_CLAUSE(21_4_8_1_a);
+  TEST_CLAUSE(21_4_8_1_b);
+  TEST_CLAUSE(21_4_8_1_c);
+  TEST_CLAUSE(21_4_8_1_d);
+  TEST_CLAUSE(21_4_8_1_e);
+  TEST_CLAUSE(21_4_8_1_f);
+  TEST_CLAUSE(21_4_8_1_g);
+  TEST_CLAUSE(21_4_8_1_h);
+  TEST_CLAUSE(21_4_8_1_i);
+  TEST_CLAUSE(21_4_8_1_j);
+  TEST_CLAUSE(21_4_8_1_k);
+  TEST_CLAUSE(21_4_8_1_l);
+  TEST_CLAUSE(21_4_8_9_a);
 }
 
 TEST_CASE(string, test_move_ctor) {
@@ -1292,7 +1292,6 @@ TEST_CASE(string, test_iomanip) {
   ss.str("");
 }
 
-/*
 TEST_CASE(string, test_rvalue_iterators) {
   string s = "base";
   string r = "hello";
@@ -1308,7 +1307,6 @@ TEST_CASE(string, test_rvalue_iterators) {
   b.replace(ait, b.end(), b.begin(), Xit);
   ASSERT_EQ("123123abc", b);  // if things go wrong, you'd get "123123123"
 }
-*/
 
 TEST_CASE(string, test_move_terminator) {
   // The source of a move must remain in a valid state
@@ -1320,15 +1318,55 @@ TEST_CASE(string, test_move_terminator) {
   ASSERT_EQ('\0', *s.c_str());
 }
 
+TEST_CASE(string, test_null_zero_construction) {
+  char* p = nullptr;
+  int n = 0;
+  string s(p, n);
+  ASSERT_EQ(s.size(), 0);
+}
+
+TEST_CASE(string, test_compare_to_string) {
+  string a = "a";
+  string aa = a;
+  string b = "b";
+  ASSERT(a == aa);
+  ASSERT(!(a == b));
+  ASSERT(a != b);
+  ASSERT(a < b);
+  ASSERT(b > a);
+  ASSERT(a <= b);
+  ASSERT(b >= a);
+}
+
+TEST_CASE(string, test_compare_to_cstring) {
+  const char* a = "a";
+  string aa = a;
+  string b = "b";
+  ASSERT(a == aa);
+  ASSERT(aa == a);
+  ASSERT(!(a == b));
+  ASSERT(!(b == a));
+  ASSERT(a < b);
+  ASSERT(!(b < a));
+  ASSERT(b > a);
+  ASSERT(!(a > b));
+  ASSERT(a <= b);
+  ASSERT(!(b <= a));
+  ASSERT(!(a >= b));
+  ASSERT(b >= a);
+}
+
 UNITTEST_MAIN() {
   RUN_TEST(string, test_all_clauses);
-  // RUN_TEST(string, test_move_ctor);
-  // RUN_TEST(string, test_move_assign);
-  // RUN_TEST(string, test_move_operator_lhs);
-  // RUN_TEST(string, test_move_operator_rhs);
-  // RUN_TEST(string, test_find_with_npos);
-  // RUN_TEST(string, test_front_back);
-  // RUN_TEST(string, test_noexcept);
-  // RUN_TEST(string, test_iomanip);
-  // RUN_TEST(string, test_rvalue_iterators);
+  RUN_TEST(string, test_move_ctor);
+  RUN_TEST(string, test_move_assign);
+  RUN_TEST(string, test_move_operator_lhs);
+  RUN_TEST(string, test_move_operator_rhs);
+  RUN_TEST(string, test_find_with_npos);
+  RUN_TEST(string, test_front_back);
+  RUN_TEST(string, test_noexcept);
+  RUN_TEST(string, test_iomanip);
+  RUN_TEST(string, test_rvalue_iterators);
+  RUN_TEST(string, test_null_zero_construction);
+  RUN_TEST(string, test_compare_to_string);
 }
