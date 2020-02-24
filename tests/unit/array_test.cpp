@@ -3,10 +3,10 @@
 #include "platon/name.hpp"
 #include "unit_test.hpp"
 
-typedef platon::db::Array<"array_int"_n, uint8_t, 20> ArrayInt;
-typedef platon::db::Array<"array_str"_n, std::string, 2> ArrayStr;
-typedef platon::db::Array<"array_set"_n, std::string, 10> ArraySet;
-typedef platon::db::Array<"name_test"_n, std::string, 3> ArrayName;
+typedef platon::db::Array<"int"_n, uint8_t, 20> ArrayInt;
+typedef platon::db::Array<"str"_n, std::string, 2> ArrayStr;
+typedef platon::db::Array<"set"_n, std::string, 10> ArraySet;
+typedef platon::db::Array<"test"_n, std::string, 3> ArrayName;
 
 TEST_CASE(array, batch) {
   {
@@ -99,7 +99,6 @@ TEST_CASE(array, open) {
   {
     DEBUG("test reopen");
     ArrayStr arrayStr;
-
     ASSERT(arrayStr[0] == "hello", "arrayStr[0]:", arrayStr[0]);
     ASSERT(arrayStr[1] == "world", "arrayStr[1]:", arrayStr[1]);
   }
@@ -134,8 +133,8 @@ TEST_CASE(array, name) {
 }
 
 UNITTEST_MAIN() {
-  //  RUN_TEST(array, batch)
-  //  RUN_TEST(array, open)
-  //  RUN_TEST(array, set);
+  RUN_TEST(array, batch)
+  RUN_TEST(array, open)
+  RUN_TEST(array, set);
   RUN_TEST(array, name);
 }

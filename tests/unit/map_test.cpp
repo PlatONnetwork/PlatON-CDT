@@ -2,9 +2,9 @@
 #include "platon/name.hpp"
 #include "unit_test.hpp"
 
-typedef platon::db::Map<"map_str"_n, std::string, std::string> MapStr;
+typedef platon::db::Map<"str"_n, std::string, std::string> MapStr;
 
-typedef platon::db::Map<"map_insert"_n, std::string, std::string> MapInsert;
+typedef platon::db::Map<"insert"_n, std::string, std::string> MapInsert;
 
 TEST_CASE(map, operator) {
   {
@@ -51,5 +51,5 @@ TEST_CASE(map, insert) {
 
 UNITTEST_MAIN() {
   RUN_TEST(map, operator);
-  //  RUN_TEST(map, insert);
+  RUN_TEST(map, insert);
 }

@@ -152,8 +152,7 @@ class StorageType {
    */
   void Flush() { set_state(name_, t_); }
   T default_;
-  const std::string name_ =
-      std::string("_s_") + std::to_string(uint64_t(StorageName));
+  const uint64_t name_ = uint64_t(StorageName);
   T t_;
 };
 

@@ -431,8 +431,8 @@ class Array {
    */
   std::string EncodeKey(size_t index) {
     std::string key;
-    key.reserve(name_.length() + 1 + sizeof(index));
-    key.append(name_);
+    key.reserve(sizeof(name_) + 1 + sizeof(index));
+    key.append((char*)&name_, sizeof(name_));
     key.append(1, 'A');
     key.append((char*)&index, sizeof(index));
     return key;
@@ -456,7 +456,7 @@ class Array {
  private:
   std::map<size_t, Key> cache_;
 
-  const std::string name_ = kType + std::to_string(uint64_t(TableName));
+  const uint64_t name_ = uint64_t(TableName);
 };
 
 template <Name::Raw TableName, typename Key, unsigned N>
