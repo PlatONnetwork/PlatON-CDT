@@ -1741,7 +1741,7 @@ bool operator<(const basic_string<CharT, Traits>& lhs,
 template <class CharT, class Traits>
 bool operator<=(const basic_string<CharT, Traits>& lhs,
                 const basic_string<CharT, Traits>& rhs) {
-  return !(lhs < rhs);
+  return !(lhs > rhs);
 }
 
 template <class CharT>
