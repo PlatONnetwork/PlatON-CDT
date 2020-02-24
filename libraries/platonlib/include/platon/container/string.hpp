@@ -1544,21 +1544,13 @@ template <class CharT, class Traits>
 typename basic_string<CharT, Traits>::size_type
 basic_string<CharT, Traits>::find_first_of(const value_type* s, size_type pos,
                                            size_type n) const {
-  if (n > length()) {
+  if (pos > length() || n == 0) {
     return npos;
   }
-  pos = std::min(pos, length() - n);
-  if (n == 0) {
-    return pos;
-  }
-
-  const_iterator i(begin() + pos);
-  for (;; --i) {
-    if (traits_type::eq(*i, *s) && traits_type::compare(&*i, s, n) == 0) {
+  const_iterator i(begin() + pos), finish(end());
+  for (; i != finish; ++i) {
+    if (traits_type::find(s, n, *i) != nullptr) {
       return i - begin();
-    }
-    if (i == begin()) {
-      break;
     }
   }
   return npos;
