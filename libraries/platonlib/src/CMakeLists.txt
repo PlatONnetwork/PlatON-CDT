@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4.3)
 project(platonlib)
 
 
-SET(SRC_FILENAMES RLP.cpp abort.cpp container/vector.cpp)
+SET(SRC_FILENAMES RLP.cpp abort.cpp container/vector.cpp container/rbtree.cpp)
 
 add_library(platonlib ${SRC_FILENAMES})
 
