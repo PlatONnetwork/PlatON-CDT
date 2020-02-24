@@ -1892,14 +1892,57 @@ operator>>(
   return is;
 }
 
-string to_string(int value);
-string to_string(long value);
-string to_string(long long value);
-string to_string(unsigned value);
-string to_string(unsigned long value);
-string to_string(unsigned long long value);
-string to_string(float value);
-string to_string(double value);
-string to_string(long double value);
+string to_string(int value) {
+  char buf[12];
+  std::snprintf(buf, sizeof(buf), "%d", value);
+  return string(buf);
+}
+
+string to_string(long value) {
+  char buf[24];
+  std::snprintf(buf, sizeof(buf), "%ld", value);
+  return string(buf);
+}
+
+string to_string(long long value) {
+  char buf[24];
+  std::snprintf(buf, sizeof(buf), "%lld", value);
+  return string(buf);
+}
+
+string to_string(unsigned value) {
+  char buf[12];
+  std::snprintf(buf, sizeof(buf), "%u", value);
+  return string(buf);
+}
+
+string to_string(unsigned long value) {
+  char buf[24];
+  std::snprintf(buf, sizeof(buf), "%lu", value);
+  return string(buf);
+}
+
+string to_string(unsigned long long value) {
+  char buf[24];
+  std::snprintf(buf, sizeof(buf), "%llu", value);
+  return string(buf);
+}
+
+string to_string(float value) {
+  char buf[64];
+  std::snprintf(buf, sizeof(buf), "%f", value);
+  return string(buf);
+}
+string to_string(double value) {
+  char buf[64];
+  std::snprintf(buf, sizeof(buf), "%f", value);
+  return string(buf);
+}
+string to_string(long double value) {
+  char buf[64];
+  std::snprintf(buf, sizeof(buf), "%Lf", value);
+  return string(buf);
+}
+
 }  // namespace container
 }  // namespace platon

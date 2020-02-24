@@ -1356,6 +1356,84 @@ TEST_CASE(string, test_compare_to_cstring) {
   ASSERT(b >= a);
 }
 
+TEST_CASE(string, test_to_string) {
+  // to_string(int)
+  string mystr = to_string(std::numeric_limits<int>::min());
+  std::string stdstr = std::to_string(std::numeric_limits<int>::min());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(std::numeric_limits<int>::max());
+  stdstr = std::to_string(std::numeric_limits<int>::max());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(int(123));
+  stdstr = std::to_string(int(123));
+  ASSERT(mystr == stdstr.c_str());
+
+  // to_string(long)
+  mystr = to_string(std::numeric_limits<long>::min());
+  stdstr = std::to_string(std::numeric_limits<long>::min());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(std::numeric_limits<long>::max());
+  stdstr = std::to_string(std::numeric_limits<long>::max());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(long(123));
+  stdstr = std::to_string(long(123));
+  ASSERT(mystr == stdstr.c_str());
+
+  // to_string(long long)
+  mystr = to_string(std::numeric_limits<long long>::min());
+  stdstr = std::to_string(std::numeric_limits<long long>::min());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(std::numeric_limits<long long>::max());
+  stdstr = std::to_string(std::numeric_limits<long long>::max());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(static_cast<long long>(123));
+  stdstr = std::to_string(static_cast<long long>(123));
+  ASSERT(mystr == stdstr.c_str());
+
+  // to_string(unsigned)
+  mystr = to_string(std::numeric_limits<unsigned>::min());
+  stdstr = std::to_string(std::numeric_limits<unsigned>::min());
+  ASSERT(mystr == stdstr.c_str());
+
+  mystr = to_string(std::numeric_limits<unsigned>::max());
+  stdstr = std::to_string(std::numeric_limits<unsigned>::max());
+  ASSERT_EQ(mystr, stdstr.c_str());
+
+  mystr = to_string(unsigned(123));
+  stdstr = std::to_string(unsigned(123));
+  ASSERT_EQ(mystr, stdstr.c_str());
+
+  // to_string(unsigned long)
+  mystr = to_string(std::numeric_limits<unsigned long>::min());
+  stdstr = std::to_string(std::numeric_limits<unsigned long>::min());
+  ASSERT_EQ(mystr, stdstr.c_str());
+
+  mystr = to_string(std::numeric_limits<unsigned long>::max());
+  stdstr = std::to_string(std::numeric_limits<unsigned long>::max());
+  ASSERT_EQ(mystr, stdstr.c_str());
+
+  mystr = to_string(static_cast<unsigned long>(123));
+  stdstr = std::to_string(static_cast<unsigned long>(123));
+
+  // to_string(unsigned long long)
+  mystr = to_string(std::numeric_limits<unsigned long long>::min());
+  stdstr = std::to_string(std::numeric_limits<unsigned long long>::min());
+  ASSERT_EQ(mystr, stdstr.c_str());
+
+  mystr = to_string(std::numeric_limits<unsigned long long>::max());
+  stdstr = std::to_string(std::numeric_limits<unsigned long long>::max());
+  ASSERT_EQ(mystr, stdstr.c_str());
+
+  mystr = to_string(static_cast<unsigned long long>(123));
+  stdstr = std::to_string(static_cast<unsigned long long>(123));
+}
+
 UNITTEST_MAIN() {
   RUN_TEST(string, test_all_clauses);
   RUN_TEST(string, test_move_ctor);
@@ -1369,4 +1447,5 @@ UNITTEST_MAIN() {
   RUN_TEST(string, test_rvalue_iterators);
   RUN_TEST(string, test_null_zero_construction);
   RUN_TEST(string, test_compare_to_string);
+  RUN_TEST(string, test_to_string);
 }
