@@ -22,8 +22,8 @@
 #include "bigint.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
-#include "vector_ref.h"
 #include "panic.hpp"
+#include "vector_ref.h"
 
 namespace platon {
 
@@ -791,7 +791,7 @@ class RLPStream {
   /// Swap the contents of the output stream out for some other byte array.
   void swapOut(bytes& _dest) {
     if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
-    swap(m_out, _dest);
+    std::swap(m_out, _dest);
   }
 
  private:
