@@ -439,7 +439,7 @@ class vector {
 
   size_type size() const { return vector_.size; }
   size_type max_size() const {
-    return (uint64_t)1 << sizeof(size_type) * 8 - 1;
+    return (uint64_t)1 << (sizeof(size_type) * 8 - 1);
   }
   void reserve(size_type new_cap) { vector_reserve(&vector_, new_cap); }
   bool empty() const { return vector_is_empty(&vector_); }
