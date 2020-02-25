@@ -8,8 +8,10 @@
 #include <type_traits>
 
 #include "RLP.h"
+
 #include "boost/fusion/algorithm/iteration/for_each.hpp"
 #include "boost/preprocessor/seq/for_each.hpp"
+
 #include "chain.hpp"
 #include "container/string.hpp"
 #include "panic.hpp"
@@ -115,6 +117,7 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
   void invoke(void) {                                \
     __wasm_call_ctors();                             \
     container::string method;                        \
+
     auto input = get_input();                        \
     RLP rlp(input);                                  \
     fetch(rlp[0], method);                           \
