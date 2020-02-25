@@ -4,8 +4,9 @@
 #pragma once
 #include <algorithm>
 #include <iterator>
-#include <string>
 #include <type_traits>
+
+#include "container/string.hpp"
 #include "container/vector.h"
 #include "vector_ref.h"
 
@@ -35,7 +36,7 @@ inline int fromHexChar(char _i) noexcept {
  * @param _s Hex string.
  * @return The bytes represented by the hexadecimal string s.
  */
-inline bytes fromHex(std::string const& _s) {
+inline bytes fromHex(container::string const& _s) {
   unsigned s = (_s.size() >= 2 && _s[0] == '0' && _s[1] == 'x') ? 2 : 0;
   container::vector<uint8_t> ret;
   ret.reserve((_s.size() - s + 1) / 2);
@@ -63,7 +64,7 @@ inline bytes fromHex(std::string const& _s) {
  * @param _b A string.
  * @return Byte array of stringsByte array of strings.
  */
-inline bytes asBytes(std::string const& _b) {
+inline bytes asBytes(container::string const& _b) {
   return bytes((byte const*)_b.data(), (byte const*)(_b.data() + _b.size()));
 }
 
@@ -75,15 +76,15 @@ inline bytes asBytes(std::string const& _b) {
  * @return Hex string.
  */
 template <class Iterator>
-inline std::string toHex(Iterator _it, Iterator _end,
-                         std::string const& _prefix) {
+inline container::string toHex(Iterator _it, Iterator _end,
+                               container::string const& _prefix) {
   typedef std::iterator_traits<Iterator> traits;
   static_assert(sizeof(typename traits::value_type) == 1,
                 "toHex needs byte-sized element type");
 
   static char const* hexdigits = "0123456789abcdef";
   size_t off = _prefix.size();
-  std::string hex(std::distance(_it, _end) * 2 + off, '0');
+  container::string hex(std::distance(_it, _end) * 2 + off, '0');
   hex.replace(0, off, _prefix);
   for (; _it != _end; _it++) {
     hex[off++] = hexdigits[(*_it >> 4) & 0x0f];
@@ -99,7 +100,7 @@ inline std::string toHex(Iterator _it, Iterator _end,
  * @example toHex("A\x69") == "4169"
  */
 template <class T>
-inline std::string toHex(T const& _data) {
+inline container::string toHex(T const& _data) {
   return toHex(_data.begin(), _data.end(), "");
 }
 

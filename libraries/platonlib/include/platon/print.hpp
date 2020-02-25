@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdio.h>
-#include <string>
+
 #include "bigint.hpp"
 
 namespace platon {
@@ -26,7 +26,7 @@ inline void print(const T num) {
     char temp_info[100] = {};
     sprintf(temp_info, "%lf", double_data);
     all_info += std::string(temp_info);
-  }else{
+  } else {
     all_info += std::to_string(num);
   }
 }

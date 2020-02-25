@@ -19,8 +19,10 @@
 #include <unordered_set>
 //#include "container/vector.h"
 #include <vector>
+
 #include "bigint.hpp"
 #include "common.h"
+#include "container/string.hpp"
 #include "fixedhash.hpp"
 #include "panic.hpp"
 #include "vector_ref.h"
@@ -99,6 +101,9 @@ class RLP {
   explicit RLP(std::string const& _s, Strictness _st = VeryStrict)
       : RLP(bytesConstRef((byte const*)_s.data(), _s.size()), _st) {}
 
+  explicit RLP(container::string const& _s, Strictness _st = VeryStrict)
+      : RLP(bytesConstRef((byte const*)_s.data(), _s.size()), _st) {}
+
   /// The bare data of the RLP.
   bytesConstRef data() const { return m_data; }
 
@@ -141,9 +146,15 @@ class RLP {
   bool operator==(char const* _s) const { return isData() && toString() == _s; }
   bool operator!=(char const* _s) const { return isData() && toString() != _s; }
   bool operator==(std::string const& _s) const {
+    return isData() && toStdString() == _s;
+  }
+  bool operator==(container::string const& _s) const {
     return isData() && toString() == _s;
   }
   bool operator!=(std::string const& _s) const {
+    return isData() && toStdString() != _s;
+  }
+  bool operator!=(container::string const& _s) const {
     return isData() && toString() != _s;
   }
   template <unsigned _N>
@@ -220,7 +231,8 @@ class RLP {
   inline T convert(int _flags) const;
 
   /// Best-effort conversion operators.
-  explicit operator std::string() const { return toString(); }
+  explicit operator std::string() const { return toStdString(); }
+  explicit operator container::string() const { return toString(); }
   explicit operator bytes() const { return toBytes(); }
   explicit operator uint8_t() const { return toInt<uint8_t>(); }
   explicit operator uint16_t() const { return toInt<uint16_t>(); }
@@ -282,17 +294,29 @@ class RLP {
     return payload().cropped(0, length());
   }
   /// Converts to string. @returns the empty string if not a string.
-  std::string toString(int _flags = LaissezFaire) const {
+  std::string toStdString(int _flags = LaissezFaire) const {
     if (!isData()) {
       if (_flags & ThrowOnFail)
         internal::platon_throw("bad cast");
       else
         return std::string();
     }
+    return payload().cropped(0, length()).toStdString();
+  }
+
+  container::string toString(int _flags = LaissezFaire) const {
+    if (!isData()) {
+      if (_flags & ThrowOnFail)
+        internal::platon_throw("bad cast");
+      else
+        return container::string();
+    }
     return payload().cropped(0, length()).toString();
   }
+
   /// Converts to string. @throws BadCast if not a string.
-  std::string toStringStrict() const { return toString(Strict); }
+  std::string toStdStringStrict() const { return toStdString(Strict); }
+  container::string toStringStrict() const { return toString(Strict); }
 
   template <class V, class T>
   V toVector(int _flags = LaissezFaire) const {
@@ -482,11 +506,17 @@ class RLP {
   mutable size_t m_lastIndex = (size_t)-1;
   mutable size_t m_lastEnd = 0;
   mutable bytesConstRef m_lastItem;
-};
+};  // namespace platon
 
 template <>
 struct Converter<std::string> {
   static std::string convert(RLP const& _r, int _flags) {
+    return _r.toStdString(_flags);
+  }
+};
+template <>
+struct Converter<container::string> {
+  static container::string convert(RLP const& _r, int _flags) {
     return _r.toString(_flags);
   }
 };
@@ -674,6 +704,9 @@ class RLPStream {
   RLPStream& append(bytesConstRef _s, bool _compact = false);
   RLPStream& append(bytes const& _s) { return append(bytesConstRef(&_s)); }
   RLPStream& append(std::string const& _s) { return append(bytesConstRef(_s)); }
+  RLPStream& append(container::string const& _s) {
+    return append(bytesConstRef(_s));
+  }
   RLPStream& append(char const* _s) { return append(std::string(_s)); }
   template <unsigned N>
   RLPStream& append(FixedHash<N> _s, bool _compact = false,

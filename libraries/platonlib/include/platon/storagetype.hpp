@@ -3,17 +3,16 @@
 //
 
 #pragma once
-#include "platon/name.hpp"
-#include "platon/storage.hpp"
-
-#include <string>
-
 #include <array>
 #include <deque>
 #include <map>
 #include <set>
 #include <tuple>
+
+#include "container/string.hpp"
 #include "container/vector.h"
+#include "platon/name.hpp"
+#include "platon/storage.hpp"
 
 namespace platon {
 
@@ -152,8 +151,8 @@ class StorageType {
    */
   void Flush() { set_state(name_, t_); }
   T default_;
-  const std::string name_ =
-      std::string("_s_") + std::to_string(uint64_t(StorageName));
+  const container::string name_ =
+      container::string("_s_") + container::to_string(uint64_t(StorageName));
   T t_;
 };
 
@@ -188,7 +187,7 @@ template <Name::Raw name>
 using Double = class StorageType<name, double>;
 
 template <Name::Raw name>
-using String = class StorageType<name, std::string>;
+using String = class StorageType<name, container::string>;
 
 template <Name::Raw name, typename T>
 using Vector = class StorageType<name, container::vector<T>>;

@@ -4,6 +4,8 @@
 #include <cstring>
 #include <string>
 #include <type_traits>
+
+#include "container/string.hpp"
 #include "container/vector.h"
 
 namespace platon {
@@ -35,11 +37,16 @@ class vector_ref {
                                 std::string*>::type _data)
       : m_data(reinterpret_cast<_T*>(_data->data())),
         m_count(_data->size() / sizeof(_T)) {}
+  vector_ref(typename std::conditional<std::is_const<_T>::value,
+                                       container::string const*,
+                                       container::string*>::type _data)
+      : m_data(reinterpret_cast<_T*>(_data->data())),
+        m_count(_data->size() / sizeof(_T)) {}
   /// Creates a new vector_ref pointing to the data part of a vector (given as
   /// pointer).
   vector_ref(typename std::conditional<
              std::is_const<_T>::value,
-      container::vector<typename std::remove_const<_T>::type> const*,
+             container::vector<typename std::remove_const<_T>::type> const*,
              container::vector<_T>*>::type _data)
       : m_data(_data->data()), m_count(_data->size()) {}
   /// Creates a new vector_ref pointing to the data part of a string (given as
@@ -47,6 +54,11 @@ class vector_ref {
   vector_ref(
       typename std::conditional<std::is_const<_T>::value, std::string const&,
                                 std::string&>::type _data)
+      : m_data(reinterpret_cast<_T*>(_data.data())),
+        m_count(_data.size() / sizeof(_T)) {}
+  vector_ref(typename std::conditional<std::is_const<_T>::value,
+                                       container::string const&,
+                                       container::string&>::type _data)
       : m_data(reinterpret_cast<_T*>(_data.data())),
         m_count(_data.size() / sizeof(_T)) {}
   explicit operator bool() const { return m_data && m_count; }
@@ -66,9 +78,15 @@ class vector_ref {
         reinterpret_cast<unsigned char const*>(m_data),
         reinterpret_cast<unsigned char const*>(m_data) + m_count * sizeof(_T));
   }
-  std::string toString() const {
+
+  std::string toStdString() const {
     return std::string((char const*)m_data,
                        ((char const*)m_data) + m_count * sizeof(_T));
+  }
+
+  container::string toString() const {
+    return container::string((char const*)m_data,
+                             ((char const*)m_data) + m_count * sizeof(_T));
   }
 
   template <class _T2>

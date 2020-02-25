@@ -3,14 +3,17 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/std_tuple.hpp>
-#include "boost/fusion/algorithm/iteration/for_each.hpp"
-#include "boost/preprocessor/seq/for_each.hpp"
-
 #include <boost/mp11/tuple.hpp>
 #include <tuple>
 #include <type_traits>
+
 #include "RLP.h"
+
+#include "boost/fusion/algorithm/iteration/for_each.hpp"
+#include "boost/preprocessor/seq/for_each.hpp"
+
 #include "chain.hpp"
+#include "container/string.hpp"
 #include "panic.hpp"
 #include "rlp_extend.hpp"
 
@@ -113,7 +116,8 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
   void __wasm_call_ctors();                          \
   void invoke(void) {                                \
     __wasm_call_ctors();                             \
-    std::string method;                              \
+    container::string method;                        \
+
     auto input = get_input();                        \
     RLP rlp(input);                                  \
     fetch(rlp[0], method);                           \

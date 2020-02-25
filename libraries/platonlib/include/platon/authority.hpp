@@ -1,13 +1,12 @@
 #pragma once
 #include "chain.hpp"
+#include "container/string.hpp"
 #include "fixedhash.hpp"
 #include "storagetype.hpp"
 
 namespace platon {
 
 static const size_t address_len = 20;
-// static const char sys_whitelist_name[] = "$platon$whitelist";
-static const char sys_owner_name[] = "platonowner";
 
 /**
  * @brief Get the address of the transaction initiator
@@ -53,7 +52,7 @@ Address platon_address() {
  * @param address Accounts address, if address empty that
  *                set caller as contract owner
  */
-void set_owner(const std::string &address = std::string()) {
+void set_owner(const container::string &address = container::string()) {
   Address platon_addr(address);
   if (address.empty()) {
     platon_addr = platon_caller();
@@ -80,7 +79,7 @@ Address owner() {
  *             `addr` to origin caller
  * @return true if the input address is owner, false otherwise
  */
-bool is_owner(const std::string &addr = std::string()) {
+bool is_owner(const container::string &addr = container::string()) {
   Address platon_addr(addr);
   if (addr.empty()) {
     platon_addr = platon_origin();
@@ -108,7 +107,7 @@ class WhiteList {
    *
    * @param addr Accounts address
    */
-  void Add(const std::string &addr) { Add(Address(addr)); }
+  void Add(const container::string &addr) { Add(Address(addr)); }
 
   /**
    * @brief Add the address to whitelist
@@ -122,7 +121,7 @@ class WhiteList {
    *
    * @param addr Accounts address
    */
-  void Delete(const std::string &addr) { Delete(Address(addr)); }
+  void Delete(const container::string &addr) { Delete(Address(addr)); }
 
   /**
    * @brief Delete the address from whitelist
@@ -137,7 +136,7 @@ class WhiteList {
    * @param addr Accounts address
    * @return true if exists, false otherwise
    */
-  bool Exists(const std::string &addr) { return Exists(Address(addr)); }
+  bool Exists(const container::string &addr) { return Exists(Address(addr)); }
 
   /**
    * @brief Whether the address exists in whitelist

@@ -43,71 +43,64 @@
 #define func9(a, ...) a arg9, func8(__VA_ARGS__)
 #define func10(a, ...) a arg10, func9(__VA_ARGS__)
 
-#define PLATON_EVENT0(NAME, ...)                               \
-  EVENT void NAME(VA_F(__VA_ARGS__)) { \
-    platon::emit_event0(#NAME, PA_F(__VA_ARGS__));              \
+#define PLATON_EVENT0(NAME, ...)                   \
+  EVENT void NAME(VA_F(__VA_ARGS__)) {             \
+    platon::emit_event0(#NAME, PA_F(__VA_ARGS__)); \
   }
 
 #define PLATON_EMIT_EVENT0(NAME, ...) NAME(__VA_ARGS__)
 
-#define PLATON_EVENT1(NAME, TOPIC_TYPE, ...)                       \
-  EVENT1 void NAME(const TOPIC_TYPE &topic, \
-                                          VA_F(__VA_ARGS__)) {     \
-    platon::emit_event1(#NAME, topic, PA_F(__VA_ARGS__));                 \
+#define PLATON_EVENT1(NAME, TOPIC_TYPE, ...)                     \
+  EVENT1 void NAME(const TOPIC_TYPE &topic, VA_F(__VA_ARGS__)) { \
+    platon::emit_event1(#NAME, topic, PA_F(__VA_ARGS__));        \
   }
 
-#define PLATON_EMIT_EVENT1(NAME, TOPIC_DATA, ...) \
-  NAME(TOPIC_DATA, __VA_ARGS__)
+#define PLATON_EMIT_EVENT1(NAME, TOPIC_DATA, ...) NAME(TOPIC_DATA, __VA_ARGS__)
 
-#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)           \
-  EVENT2 void NAME(const TOPIC_TYPE1 &topic1, \
-                                          const TOPIC_TYPE2 &topic2, \
-                                          VA_F(__VA_ARGS__)) {       \
-    platon::emit_event2(#NAME, topic1, topic2, PA_F(__VA_ARGS__));          \
+#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)               \
+  EVENT2 void NAME(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2, \
+                   VA_F(__VA_ARGS__)) {                                  \
+    platon::emit_event2(#NAME, topic1, topic2, PA_F(__VA_ARGS__));       \
   }
 
 #define PLATON_EMIT_EVENT2(NAME, TOPIC1_DATA, TOPIC2_DATA, ...) \
   NAME(TOPIC1_DATA, TOPIC2_DATA, __VA_ARGS__)
 
-#define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...) \
-  EVENT3 void NAME(                              \
-      const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,             \
-      const TOPIC_TYPE3 &topic3, VA_F(__VA_ARGS__)) {                   \
-    platon::emit_event3(#NAME, topic1, topic2, topic3, PA_F(__VA_ARGS__));     \
+#define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...)    \
+  EVENT3 void NAME(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,   \
+                   const TOPIC_TYPE3 &topic3, VA_F(__VA_ARGS__)) {         \
+    platon::emit_event3(#NAME, topic1, topic2, topic3, PA_F(__VA_ARGS__)); \
   }
 
 #define PLATON_EMIT_EVENT3(NAME, TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, ...) \
   NAME(TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, __VA_ARGS__)
-
 
 namespace platon {
 
 template <typename T, bool>
 struct event_type {
   using type = bytes;
-  static type event_data_convert(const T &data){
-      RLPStream stream;
-      stream << data;
+  static type event_data_convert(const T &data) {
+    RLPStream stream;
+    stream << data;
     container::vector<byte> result = stream.out();
     container::vector<byte> hash;
-      hash.resize(32);
-      ::platon_sha3(result.data(), result.size(), hash.data(), hash.size());
-      return hash;
+    hash.resize(32);
+    ::platon_sha3(result.data(), result.size(), hash.data(), hash.size());
+    return hash;
   }
 };
 
 template <typename T>
 struct event_type<T, true> {
   using type = T;
-  static type event_data_convert(const T &data){
-    return data;
-}
+  static type event_data_convert(const T &data) { return data; }
 };
 
 template <typename T,
-          bool is_number  = std::numeric_limits<std::decay_t<T>>::is_integer ||
-          std::numeric_limits<std::decay_t<T>>::is_iec559>
-typename event_type<T, is_number>::type event_data_convert(const T& data){
+          bool is_number = std::numeric_limits<std::decay_t<T>>::is_integer ||
+                           std::numeric_limits<std::decay_t<T>>::is_iec559>
+typename event_type<T, is_number>::type event_data_convert(const T &data) {
   return event_type<T, is_number>::event_data_convert(data);
 }
 
@@ -115,7 +108,7 @@ typename event_type<T, is_number>::type event_data_convert(const T& data){
  * @brief Gets rlp-encoded data for any number and type parameters
  *
  * @param args any number and type parameters
- *             
+ *
  * @return An array of bytes after RLP encodes data
  */
 template <typename... Args>
@@ -124,13 +117,13 @@ inline bytes event_args(const Args &... args) {
   RLPStream stream;
   stream << tuple_args;
   return stream.out();
-} 
+}
 
 /**
  * @brief Send events that are unindexed and anonymous
  *
  * @param args Any number of event parameters of any type
- *             
+ *
  * @return void
  */
 template <typename... Args>
@@ -144,16 +137,17 @@ inline void emit_event(const Args &... args) {
  *
  * @param name The name of the event
  * @param args Any number of event parameters of any type
- *          
+ *
  * @return void
  */
 template <typename... Args>
-inline void emit_event0(const std::string &name, const Args &... args) {
+inline void emit_event0(const container::string &name, const Args &... args) {
   RLPStream stream(1);
   stream << event_data_convert(name);
   bytes topic_data = stream.out();
   bytes args_data = event_args(args...);
-  ::platon_event(topic_data.data(), topic_data.size(), args_data.data(), args_data.size());
+  ::platon_event(topic_data.data(), topic_data.size(), args_data.data(),
+                 args_data.size());
 }
 
 /**
@@ -162,11 +156,12 @@ inline void emit_event0(const std::string &name, const Args &... args) {
  * @param name The name of the event
  * @param topic Event index value
  * @param args Any number of event parameters of any type
- *             
+ *
  * @return void
  */
 template <class Topic, typename... Args>
-inline void emit_event1(const std::string &name, const Topic &topic, const Args &... args) {
+inline void emit_event1(const container::string &name, const Topic &topic,
+                        const Args &... args) {
   RLPStream stream(2);
   stream << event_data_convert(name) << event_data_convert(topic);
   bytes topic_data = stream.out();
@@ -182,14 +177,15 @@ inline void emit_event1(const std::string &name, const Topic &topic, const Args 
  * @param topic1 The first index value of the event
  * @param topic2 The second index value of the event
  * @param args Any number of event parameters of any type
- *             
+ *
  * @return void
  */
 template <class Topic1, class Topic2, typename... Args>
-inline void emit_event2(const std::string &name, const Topic1 &topic1, const Topic2 &topic2,
-                        const Args &... args) {
+inline void emit_event2(const container::string &name, const Topic1 &topic1,
+                        const Topic2 &topic2, const Args &... args) {
   RLPStream stream(3);
-  stream << event_data_convert(name) << event_data_convert(topic1) << event_data_convert(topic2);
+  stream << event_data_convert(name) << event_data_convert(topic1)
+         << event_data_convert(topic2);
   bytes topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
@@ -204,15 +200,16 @@ inline void emit_event2(const std::string &name, const Topic1 &topic1, const Top
  * @param topic2 The second index value of the event
  * @param topic3 The third index value of the event
  * @param args Any number of event parameters of any type
- *             
+ *
  * @return void
  */
 template <class Topic1, class Topic2, class Topic3, typename... Args>
-inline void emit_event3(const std::string &name, const Topic1 &topic1, const Topic2 &topic2,
-                        const Topic3 &topic3, const Args &... args) {
+inline void emit_event3(const container::string &name, const Topic1 &topic1,
+                        const Topic2 &topic2, const Topic3 &topic3,
+                        const Args &... args) {
   RLPStream stream(4);
-  stream << event_data_convert(name) << event_data_convert(topic1) << 
-    event_data_convert(topic2) << event_data_convert(topic3);
+  stream << event_data_convert(name) << event_data_convert(topic1)
+         << event_data_convert(topic2) << event_data_convert(topic3);
   bytes topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),

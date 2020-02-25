@@ -2,9 +2,9 @@
 
 #include <array>
 #include <initializer_list>
-#include <string>
-#include "container/vector.h"
+
 #include "common.h"
+#include "container/vector.h"
 
 namespace platon {
 
@@ -45,10 +45,10 @@ class FixedHash {
     std::copy(b.begin(), b.end(), m_data.begin());
   }
 
-  explicit FixedHash(const std::string& s, bool isHex = true)
+  explicit FixedHash(const container::string& s, bool isHex = true)
       : FixedHash(isHex ? fromHex(s) : asBytes(s)) {}
 
-  std::string toString() const { return "0x" + toHex(m_data); }
+  container::string toString() const { return "0x" + toHex(m_data); }
   byte const* data() const { return m_data.data(); }
   byte* data() { return m_data.data(); }
   bytesRef ref() { return bytesRef(m_data.data(), N); }
