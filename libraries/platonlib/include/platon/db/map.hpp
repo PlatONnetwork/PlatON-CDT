@@ -31,8 +31,7 @@ class Map {
      * @param name first name
      * @param key key
      */
-    KeyWrapper(const std::string &name, const Key &key)
-        : name_(name), key_(key) {}
+    KeyWrapper(uint64_t name, const Key &key) : name_(name), key_(key) {}
     /**
      * @brief Construct a new platon serialize object
      *
@@ -40,7 +39,7 @@ class Map {
      */
     PLATON_SERIALIZE(KeyWrapper, (name_)(key_))
    private:
-    const std::string &name_;
+    const uint64_t name_;
     const Key &key_;
   };
 
@@ -267,7 +266,7 @@ class Map {
 
   std::map<Key, Value> map_;
   std::set<Key> modify_;
-  const std::string keyPrefix_ = kType + std::to_string(uint64_t(TableName));
+  const uint64_t keyPrefix_ = uint64_t(TableName);
   //    const std::string sizePrefix = kType + string("s_") + Name;
   //    size_t size_ = 0;
 
