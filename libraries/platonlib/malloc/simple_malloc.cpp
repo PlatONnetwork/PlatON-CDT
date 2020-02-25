@@ -4,6 +4,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern unsigned char __heap_base;
+
+#ifdef __cplusplus
+}
+#endif
+
 namespace platon {
 struct dsmalloc {
   inline char *align(char *ptr, uint8_t align_amt) {
@@ -17,12 +27,11 @@ struct dsmalloc {
   static constexpr uint32_t wasm_page_size = 64 * 1024;
 
   dsmalloc() {
-    __builtin_wasm_memory_grow(0, 1);
-    size_t current_page = __builtin_wasm_memory_size(0);
-    volatile uint32_t heap_base = (current_page - 1) * wasm_page_size;
+    volatile uint32_t heap_base = uint32_t(&__heap_base);
     heap = align((char *)heap_base, 8);
     last_ptr = heap;
-    next_page = current_page;
+
+    next_page = __builtin_wasm_memory_size(0);
   }
 
   char *operator()(size_t sz, uint8_t align_amt = 8) {
