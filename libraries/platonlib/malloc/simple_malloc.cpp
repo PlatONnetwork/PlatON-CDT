@@ -17,11 +17,12 @@ struct dsmalloc {
   static constexpr uint32_t wasm_page_size = 64 * 1024;
 
   dsmalloc() {
-    volatile uint32_t heap_base = 0; // linker places this at address 0
-    heap = align(*(char **)heap_base, 8);
+    __builtin_wasm_memory_grow(0, 1);
+    size_t current_page = __builtin_wasm_memory_size(0);
+    volatile uint32_t heap_base = (current_page - 1) * wasm_page_size;
+    heap = align((char *)heap_base, 8);
     last_ptr = heap;
-
-    next_page = __builtin_wasm_memory_size(0);
+    next_page = current_page;
   }
 
   char *operator()(size_t sz, uint8_t align_amt = 8) {
@@ -29,7 +30,8 @@ struct dsmalloc {
       return 0;
 
     size_t length_size = sizeof(size_t);
-    size_t real_size = sz + length_size;
+    size_t align_size = align(length_size, align_amt);
+    size_t real_size = sz + align_size;
 
     char *ret = last_ptr;
     last_ptr = align(last_ptr + real_size, align_amt);
@@ -49,7 +51,7 @@ struct dsmalloc {
     // set size
     memcpy(ret, &sz, length_size);
 
-    return ret + length_size;
+    return ret + align_size;
   }
 
   char *heap;
@@ -83,9 +85,10 @@ void *realloc(void *ptr, size_t size) {
   char *old_alloc = static_cast<char *>(ptr);
   char *new_alloc = nullptr;
   size_t length_size = sizeof(size_t);
+  size_t align_size = 8;
   size_t copy_size = 0;
 
-  memcpy(&copy_size, old_alloc - length_size, length_size);
+  memcpy(&copy_size, old_alloc - align_size, length_size);
   if (size <= copy_size) {
     new_alloc = old_alloc;
   } else {
