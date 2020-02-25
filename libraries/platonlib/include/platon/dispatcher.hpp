@@ -10,14 +10,14 @@
 #include <tuple>
 #include <type_traits>
 #include "RLP.h"
-#include "rlp_extend.hpp"
 #include "chain.hpp"
 #include "panic.hpp"
+#include "rlp_extend.hpp"
 
 namespace platon {
 
-inline std::vector<byte> get_input(void) {
-  std::vector<byte> result;
+inline bytes get_input(void) {
+  bytes result;
   size_t len = ::platon_get_input_length();
   result.resize(len);
   ::platon_get_input(result.data());
@@ -108,23 +108,23 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
  * @endcode
  */
 
-#define PLATON_DISPATCH(TYPE, MEMBERS)     \
-  extern "C" {                             \
-  void __wasm_call_ctors();                \
-  void invoke(void) {                      \
-    __wasm_call_ctors();                    \
-    std::string method;                    \
-    auto input = get_input();              \
-    RLP rlp(input);                        \
-    fetch(rlp[0], method);                 \
-    if (method.empty()) {                  \
+#define PLATON_DISPATCH(TYPE, MEMBERS)               \
+  extern "C" {                                       \
+  void __wasm_call_ctors();                          \
+  void invoke(void) {                                \
+    __wasm_call_ctors();                             \
+    std::string method;                              \
+    auto input = get_input();                        \
+    RLP rlp(input);                                  \
+    fetch(rlp[0], method);                           \
+    if (method.empty()) {                            \
       internal::platon_throw("valid method\n");      \
-    }                                      \
-    PLATON_DISPATCH_HELPER(TYPE, MEMBERS)  \
-    else {                                 \
+    }                                                \
+    PLATON_DISPATCH_HELPER(TYPE, MEMBERS)            \
+    else {                                           \
       internal::platon_throw("no method to call\n"); \
-    }                                      \
-  }                                        \
+    }                                                \
+  }                                                  \
   }
 
 }  // namespace platon
