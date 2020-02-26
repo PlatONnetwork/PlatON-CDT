@@ -228,6 +228,28 @@ TEST_CASE(rlp, double) {
   platon::println(double_data);
 }
 
+TEST_CASE(rlp, u256) {
+  u256 u256_data = 0; 
+  u256_data.value()[0] = 0x01;
+  u256_data.value()[1] = 0x02;
+  u256_data.value()[2] = 0x03;
+  u256_data.value()[3] = 0x04;
+  u256_data.value()[4] = 0x05;
+  u256_data.value()[5] = 0x06;
+  u256_data.value()[6] = 0x07;
+  u256_data.value()[7] = 0x08;
+  u256_data.value()[8] = 0x09;
+  u256_data.value()[9] = 0x0a;
+  u256_data.value()[10] = 0x0b;
+  RLPStream stream;
+  stream << u256_data;
+  std::vector<byte> result = stream.out();
+  print_rlp_code("u256", u256_data, result);
+  u256 fetch_data = 0;
+  fetch(RLP(result), fetch_data);
+  ASSERT_EQ(u256_data, fetch_data);
+}
+
 TEST_CASE(rlp, string) {
   std::string string_data = "abc"; 
   RLPStream stream;
@@ -338,6 +360,7 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, uint64_t)
   RUN_TEST(rlp, float)
   RUN_TEST(rlp, double)
+  RUN_TEST(rlp, u256)
   RUN_TEST(rlp, string)
   RUN_TEST(rlp, address)
   RUN_TEST(rlp, array)

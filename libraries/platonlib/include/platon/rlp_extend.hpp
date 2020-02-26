@@ -92,7 +92,7 @@ inline RLPStream& RLPStream::operator<<(const std::tuple<Args...>& t) {
 // get data from the RLP instance
 template <class T>
 inline void fetch(const RLP& rlp, T& value) {
-  value = T(rlp);
+  value = rlp.operator T();
 }
 
 inline void fetch(const RLP& rlp, bool& value) { value = rlp.toBool(); }
