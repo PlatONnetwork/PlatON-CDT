@@ -16,11 +16,10 @@
 
 namespace platon {
 
-inline std::vector<byte> get_input(void) {
-  std::vector<byte> result;
-  size_t len = ::platon_get_input_length();
-  result.resize(len);
-  ::platon_get_input(result.data());
+inline byte* get_input(size_t &len) {
+  len = ::platon_get_input_length();
+  byte * result = (byte *)malloc(len * sizeof(byte));
+  ::platon_get_input(result);
   return result;
 }
 
@@ -41,8 +40,6 @@ void platon_return(const T& t) {
   ::platon_return(result.data(), result.size());
 }
 
-template <typename T>
-void platon_return(const T& t);
 /**
  * Unpack the received action and execute the correponding action handler
  *
@@ -113,9 +110,10 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
   void __wasm_call_ctors();                \
   void invoke(void) {                      \
     __wasm_call_ctors();                    \
+    size_t len = 0;                         \
+    auto input = get_input(len);            \
+    RLP rlp(input, len);                    \
     std::string method;                    \
-    auto input = get_input();              \
-    RLP rlp(input);                        \
     fetch(rlp[0], method);                 \
     if (method.empty()) {                  \
       internal::platon_throw("valid method\n");      \

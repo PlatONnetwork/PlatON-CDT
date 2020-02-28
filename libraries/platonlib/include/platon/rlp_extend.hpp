@@ -106,7 +106,7 @@ inline void fetch(const RLP& rlp, std::vector<T>& ret) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
-      ret.push_back(one);
+      ret.push_back(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
@@ -119,7 +119,7 @@ inline void fetch(const RLP& rlp, std::list<T>& ret) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
-      ret.push_back(one);
+      ret.push_back(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
@@ -132,7 +132,7 @@ inline void fetch(const RLP& rlp, std::set<T>& ret) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
-      ret.insert(one);
+      ret.insert(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
@@ -145,7 +145,7 @@ inline void fetch(const RLP& rlp, std::unordered_set<T>& ret) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
-      ret.insert(one);
+      ret.insert(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
@@ -159,10 +159,10 @@ inline void fetch(const RLP& rlp, std::pair<T, U>& ret) {
   }
   T one;
   fetch(rlp[0], one);
-  ret.first = one;
+  ret.first = std::move(one);
   U two;
   fetch(rlp[1], two);
-  ret.second = two;
+  ret.second = std::move(two);
 }
 
 template <class T, size_t N>
@@ -173,7 +173,7 @@ inline void fetch(const RLP& rlp, std::array<T, N>& ret) {
   for (size_t i = 0; i < N; ++i) {
     T one;
     fetch(rlp[i], one);
-    ret[i] = one;
+    ret[i] = std::move(one);
   }
 }
 
@@ -183,7 +183,7 @@ inline void fetch(const RLP& rlp, std::map<T, U>& ret) {
     for (auto const& i : rlp) {
       std::pair<T, U> one;
       fetch(i, one);
-      ret.insert(one);
+      ret.insert(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
