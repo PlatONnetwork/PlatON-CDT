@@ -9,6 +9,7 @@
 #include "chain.hpp"
 #include "common.h"
 #include "rlp_extend.hpp"
+#include "rlp_size.hpp"
 
 const uint8_t value_prefix = 0xfe;
 
@@ -24,13 +25,17 @@ namespace platon {
 template <typename KEY, typename VALUE>
 inline void set_state(const KEY &key, const VALUE &value) {
   RLPStream state_stream;
+  auto key_size = pack_size(key);
+  state_stream.reserve(key_size);
 
   state_stream << key;
-  std::vector<byte> vect_key = state_stream.out();
+  const std::vector<byte>& vect_key = state_stream.out();
 
   RLPStream value_stream;
+  auto value_size = pack_size(value);
   std::vector<byte> vect_value(sizeof(value_prefix), value_prefix);
   value_stream.swapOut(vect_value);
+  value_stream.reserve(vect_value.size() + value_size);
   value_stream << value;
   ::platon_set_state(vect_key.data(), vect_key.size(),
                      value_stream.out().data(), value_stream.out().size());
