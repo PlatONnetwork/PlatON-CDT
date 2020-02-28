@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "RLP.h"
-#include "bigint.hpp"
 #include "common.h"
 
 namespace platon {
@@ -110,10 +109,6 @@ class RLPSize {
   RLPSize& append(uint32_t s) { return append(bigint(s)); }
 
   RLPSize& append(uint64_t s) { return append(bigint(s)); }
-
-  RLPSize& append(u160 s) { return append(bigint(s)); }
-
-  RLPSize& append(u256 s) { return append(bigint(s)); }
 
   RLPSize& append(bigint s) {
     size_t size = 0;
@@ -286,6 +281,20 @@ class RLPSize {
   RLPSize& append(const std::pair<T, U>& s) {
     *this << RLPSize::list_start() << s.first << s.second
           << RLPSize::list_end();
+    return *this;
+  }
+
+  template <class T, class U>
+  RLPSize& append(const std::map<T, U>& s) {
+    if (s.empty()) {
+      return AppendEmptyList();
+    }
+
+    *this << RLPSize::list_start();
+    for (const auto& i : s) {
+      *this << i;
+    }
+    *this << RLPSize::list_end();
     return *this;
   }
 

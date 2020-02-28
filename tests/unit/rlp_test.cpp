@@ -1,19 +1,12 @@
 #include "platon/RLP.h"
-<<<<<<< HEAD
-#include <stdio.h>
-=======
 
 #include <stdio.h>
 
->>>>>>> calculate size before serializing
 #include "platon/fixedhash.hpp"
 #include "platon/print.hpp"
 #include "platon/rlp_extend.hpp"
 #include "platon/rlp_serialize.hpp"
-<<<<<<< HEAD
-=======
 #include "platon/rlp_size.hpp"
->>>>>>> calculate size before serializing
 #include "unit_test.hpp"
 
 using namespace platon;
@@ -38,13 +31,12 @@ class WhtType {
   friend RLPStream& operator<<(RLPStream& rlp, const WhtType& one) {
     return rlp.appendList(3) << one.m_name_ << one.m_age_ << one.m_weight_;
   }
-<<<<<<< HEAD
-=======
+
   friend RLPSize& operator<<(RLPSize& rlps, const WhtType& one) {
     return rlps << RLPSize::list_start() << one.m_name_ << one.m_age_
                 << one.m_weight_ << RLPSize::list_end();
   }
->>>>>>> calculate size before serializing
+
   friend void fetch(RLP rlp, WhtType& one) {
     fetch(rlp[0], one.m_name_);
     fetch(rlp[1], one.m_age_);
@@ -70,13 +62,12 @@ class WhtGroup {
     return rlp.appendList(3)
            << group.m_info_ << group.m_number_ << group.m_member_;
   }
-<<<<<<< HEAD
-=======
+
   friend RLPSize& operator<<(RLPSize& rlps, const WhtGroup& group) {
     return rlps << RLPSize::list_start() << group.m_info_ << group.m_number_
                 << group.m_member_ << RLPSize::list_end();
   }
->>>>>>> calculate size before serializing
+
   friend void fetch(RLP rlp, WhtGroup& group) {
     fetch(rlp[0], group.m_info_);
     fetch(rlp[1], group.m_number_);
@@ -525,10 +516,32 @@ TEST_CASE(rlp, double_reserve) {
 }
 
 TEST_CASE(rlp, u128) {
+  const char* fn = "u128";
   u128 u128_data = 123456789012345678;
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  auto size = pack_size(u128_data);
   RLPStream stream;
   stream << u128_data;
   std::vector<byte> result = stream.out();
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  ASSERT_EQ(size, result.size());
+  print_rlp_code("u128", u128_data, result);
+  u128 fetch_data = 0;
+  fetch(RLP(result), fetch_data);
+  ASSERT_EQ(u128_data, fetch_data);
+}
+
+TEST_CASE(rlp, u128_reserve) {
+  const char* fn = "u128_reserve";
+  u128 u128_data = 123456789012345678;
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  auto size = pack_size(u128_data);
+  RLPStream stream;
+  stream.reserve(size);
+  stream << u128_data;
+  std::vector<byte> result = stream.out();
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  ASSERT_EQ(size, result.size());
   print_rlp_code("u128", u128_data, result);
   u128 fetch_data = 0;
   fetch(RLP(result), fetch_data);
@@ -681,6 +694,45 @@ TEST_CASE(rlp, append) {
   ASSERT_EQ(vect_result, vect_fetch);
 }
 
+TEST_CASE(rlp, map) {
+  const char* fn = "map";
+  std::map<std::string, std::string> m = {
+      {"abc", "abc"}, {"abc1", "abc1"}, {"abc2", "abc2"}};
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  auto size = pack_size(m);
+  RLPStream stream;
+  stream << m;
+  auto result = stream.out();
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  ASSERT_EQ(size, result.size());
+  std::map<std::string, std::string> m1;
+  fetch(RLP(result), m1);
+  ASSERT_EQ(m.size(), m1.size());
+  ASSERT_EQ(m["abc"], m1["abc"]);
+  ASSERT_EQ(m["abc1"], m1["abc1"]);
+  ASSERT_EQ(m["abc2"], m1["abc2"]);
+}
+
+TEST_CASE(rlp, map_reserve) {
+  const char* fn = "map_reserve";
+  std::map<std::string, std::string> m = {
+      {"abc", "abc"}, {"abc1", "abc1"}, {"abc2", "abc2"}};
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  auto size = pack_size(m);
+  RLPStream stream;
+  stream.reserve(size);
+  stream << m;
+  auto result = stream.out();
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  ASSERT_EQ(size, result.size());
+  std::map<std::string, std::string> m1;
+  fetch(RLP(result), m1);
+  ASSERT_EQ(m.size(), m1.size());
+  ASSERT_EQ(m["abc"], m1["abc"]);
+  ASSERT_EQ(m["abc1"], m1["abc1"]);
+  ASSERT_EQ(m["abc2"], m1["abc2"]);
+}
+
 TEST_CASE(rlp, struct) {
   const char* fn = "struct";
   WhtType one("jatel", 30, 160);
@@ -810,6 +862,7 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, double);
   RUN_TEST(rlp, double_reserve);
   RUN_TEST(rlp, u128);
+  RUN_TEST(rlp, u128_reserve);
   RUN_TEST(rlp, string);
   RUN_TEST(rlp, string_reserve);
   RUN_TEST(rlp, address);
@@ -818,6 +871,8 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, array_reserve);
   RUN_TEST(rlp, list);
   RUN_TEST(rlp, list_reserve);
+  RUN_TEST(rlp, map);
+  RUN_TEST(rlp, map_reserve);
   RUN_TEST(rlp, append);
   RUN_TEST(rlp, struct);
   RUN_TEST(rlp, struct_reserve);
