@@ -1,4 +1,5 @@
 #include "platon/print.hpp"
+#include "platon/common.h"
 #include "unit_test.hpp"
 
 TEST_CASE(print, char) {
@@ -31,10 +32,16 @@ TEST_CASE(print, string) {
   DEBUG(test_string)
 }
 
+TEST_CASE(print, u128) {
+  u128 i = 9999999;
+  platon::println(i);
+  DEBUG(i)
+}
 UNITTEST_MAIN() {
   RUN_TEST(print, char);
   RUN_TEST(print, int);
   RUN_TEST(print, float);
   RUN_TEST(print, double);
   RUN_TEST(print, string);
+  RUN_TEST(print, u128);
 }

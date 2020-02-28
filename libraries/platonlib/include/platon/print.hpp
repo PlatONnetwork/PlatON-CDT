@@ -2,8 +2,21 @@
 
 #include <stdio.h>
 #include <string>
-#include "bigint.hpp"
 
+namespace std {
+string to_string(uint128_t value) {
+  const char* charmap = "0123456789";
+  string result;
+  result.reserve(40);  // max. 40 digits possible ( uint64_t has 20)
+  uint128_t helper = value;
+  do {
+    result += charmap[helper % 10];
+    helper /= 10;
+  } while (helper);
+  reverse(result.begin(), result.end());
+  return result;
+}
+}  // namespace std
 namespace platon {
 
 std::string all_info;
@@ -26,7 +39,7 @@ inline void print(const T num) {
     char temp_info[100] = {};
     sprintf(temp_info, "%lf", double_data);
     all_info += std::string(temp_info);
-  }else{
+  } else {
     all_info += std::to_string(num);
   }
 }

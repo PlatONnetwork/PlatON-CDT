@@ -359,11 +359,5 @@ struct hash<wide_integer<Bits, Signed>>;
 
 }  // namespace std
 
-namespace platon {
-using u128 = std::uint128_t;
-using u160 = std::uint160_t;
-using u256 = std::uint256_t;
-using u512 = std::uint512_t;
-using bigint = u512;
-}  // namespace platon
+
 #include "bigint_impl.hpp"
