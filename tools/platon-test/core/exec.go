@@ -2,12 +2,13 @@ package core
 
 import (
 	"fmt"
-	wasmExec "github.com/PlatONnetwork/wagon/exec"
-	"github.com/PlatONnetwork/wagon/wasm"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
 	"path"
+
+	wasmExec "github.com/PlatONnetwork/wagon/exec"
+	"github.com/PlatONnetwork/wagon/wasm"
+	"github.com/urfave/cli"
 )
 
 var ExecCmd = cli.Command{
@@ -47,7 +48,7 @@ func ExecDir(dir string) error {
 		return fmt.Errorf("%s is not directory", dir)
 	}
 
-	files , err := ioutil.ReadDir(dir)
+	files, err := ioutil.ReadDir(dir)
 	var success []string
 	var failed []string
 	for _, f := range files {
@@ -67,14 +68,14 @@ func ExecDir(dir string) error {
 	}
 	if len(success) != 0 {
 		fmt.Println("success test case file:")
-		for _, name := range success{
+		for _, name := range success {
 			fmt.Printf("\t%s\n", name)
 		}
 	}
 
 	if len(failed) != 0 {
 		fmt.Println("failed test case file:")
-		for _, name := range failed{
+		for _, name := range failed {
 			fmt.Printf("\t%s\n", name)
 		}
 	}
@@ -99,54 +100,69 @@ func ExecFile(filePath string) error {
 	}
 
 	if wasmModule.Export == nil {
-		fmt.Fprintf(os.Stderr,"module %s has no export section\n", file)
+		fmt.Fprintf(os.Stderr, "module %s has no export section\n", file)
 		return err
 	}
 
 	// create vm
 	vm, err := wasmExec.NewVM(wasmModule)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"could not create VM: %v\n", err)
+		fmt.Fprintf(os.Stderr, "could not create VM: %v\n", err)
 		return err
 	}
 
-	// invoke
-	exportInvoke := wasmModule.Export.Entries["invoke"]
-	index := int64(exportInvoke.Index)
-	fidx := wasmModule.Function.Types[int(index)]
-	ftype := wasmModule.Types.Entries[int(fidx)]
-
+	// set gas
 	gasCost := uint64(0)
 	opCodes := uint64(0)
 	vm.SetUseGas(func(b byte) {
 		gasCost += WasmGasCostTable[b]
 		opCodes++
 	})
+
+	// set context
+	ctx := &VMContext{
+		Input:   nil,
+		CallOut: nil,
+		Output:  nil,
+		Gas:     &gasCost,
+		OpCode:  &opCodes,
+		Db:      NewDB(),
+	}
+
+	vm.SetHostCtx(ctx)
+
+	// invoke
+	exportInvoke := wasmModule.Export.Entries["invoke"]
+	index := int64(exportInvoke.Index)
+	fidx := wasmModule.Function.Types[int(index)]
+	ftype := wasmModule.Types.Entries[int(fidx)]
 	result, err := vm.ExecCode(index)
-	fmt.Fprintf(os.Stdin,"gas cost:%d, opcodes:%d\n", gasCost, opCodes)
+
+	// gas result
+	fmt.Fprintf(os.Stdin, "gas cost:%d, opcodes:%d\n", gasCost, opCodes)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"execute code failed!!! err=%v\n", err)
+		fmt.Fprintf(os.Stderr, "execute code failed!!! err=%v\n", err)
 		return err
 	}
 
 	// result
 	if len(ftype.ReturnTypes) == 0 {
-		fmt.Fprintf(os.Stderr,"%s invoke do not have return value\n", file)
+		fmt.Fprintf(os.Stderr, "%s invoke do not have return value\n", file)
 		return err
 	}
 
 	returnCode, ok := result.(uint32)
 	if !ok {
-		fmt.Fprintf(os.Stderr,"%s the return value is not uint32\n", file)
+		fmt.Fprintf(os.Stderr, "%s the return value is not uint32\n", file)
 		return err
 	}
 
 	if 0 != returnCode {
-		fmt.Fprintf(os.Stderr,"%s the return value is not 0, test failed!!!\n", file)
+		fmt.Fprintf(os.Stderr, "%s the return value is not 0, test failed!!!\n", file)
 
 		return fmt.Errorf("%s the return value is not 0, test failed!!!\n", file)
 	} else {
-		fmt.Fprintf(os.Stdin,"%s test success!!!\n", file)
+		fmt.Fprintf(os.Stdin, "%s test success!!!\n", file)
 		return nil
 	}
 }

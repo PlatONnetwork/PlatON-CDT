@@ -8,6 +8,16 @@
 
 using namespace platon;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void platon_debug_gas(uint32_t line, const char *dst, size_t len);
+
+#ifdef __cplusplus
+}
+#endif
+
 CONTRACT TestResult : public platon::Contract {
   public:
     ACTION void init(){}
