@@ -33,3 +33,4 @@ platon_caller
 platon_address
 platon_destroy
 platon_migrate
+platon_debug_gas
