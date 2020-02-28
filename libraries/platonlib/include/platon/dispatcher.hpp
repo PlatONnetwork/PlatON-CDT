@@ -40,8 +40,6 @@ void platon_return(const T& t) {
   ::platon_return(result.data(), result.size());
 }
 
-template <typename T>
-void platon_return(const T& t);
 /**
  * Unpack the received action and execute the correponding action handler
  *
