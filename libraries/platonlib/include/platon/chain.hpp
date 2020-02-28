@@ -11,7 +11,7 @@ extern "C" {
  * @param gas_price The big-endian represents the gas price
  * @return the length of gas price
  */
-uint8_t platon_gas_price(uint8_t gas_price[32]);
+uint8_t platon_gas_price(uint8_t gas_price[16]);
 
 /**
  * @brief Get the height of the current block
@@ -74,10 +74,10 @@ void platon_coinbase(uint8_t addr[20]);
  * @brief Get the balance based on the address
  *
  * @param addr address
- * @param balance The big end represents the balance of 256
+ * @param balance The big end represents the balance of 128
  * @return the length of balance
  */
-uint8_t platon_balance(const uint8_t addr[20], uint8_t balance[32]);
+uint8_t platon_balance(const uint8_t addr[20], uint8_t balance[16]);
 
 /**
  * @brief Transfer the amount to the address
@@ -95,10 +95,10 @@ int32_t platon_transfer(const uint8_t to[20], const uint8_t *amount,
 /**
  * @brief Get The value of the current transaction value field
  *
- * @param val The big end represents the value of 256
+ * @param val The big end represents the value of 128
  * @return The length of value
  */
-uint8_t platon_call_value(uint8_t val[32]);
+uint8_t platon_call_value(uint8_t val[16]);
 
 /**
  * @brief Sh3 algorithm

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "bigint.hpp"
 #include "chain.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
@@ -28,11 +27,11 @@ enum EnergonUnit {
  *   void test() {
  *     // New a Energon
  *     Energon e(10);
- *     u256 von = 10;
- *     Energon o(u256);
+ *     u128 von = 10;
+ *     Energon o(u128);
  *
  *     // Gets value
- *     u256 val = e.Get();
+ *     u128 val = e.Get();
  *
  *     // Serialize to big-ending bytes
  *     bytes bs = e.Bytes();
@@ -44,26 +43,20 @@ enum EnergonUnit {
  */
 class Energon {
  public:
+  
   /**
    * @brief Construct a new Energon
    *
    * @param n amount of Von
    */
-  Energon(uint64_t n) : value_(n) {}
-
-  /**
-   * @brief Construct a new Energon
-   *
-   * @param n amount of Von
-   */
-  Energon(u256 n) : value_(n) {}
+  Energon(u128 n) : value_(n) {}
 
   /**
    * @brief Get amount of Von
    *
    * @return The amount of Von
    */
-  const u256 Get() const { return value_; }
+  const u128 Get() const { return value_; }
 
   /**
    * @brief Get the bytes of value, the bytes use big-end representations
@@ -83,7 +76,7 @@ class Energon {
    * @param v Amount of Von
    * @return The reference of Energon
    */
-  Energon& Add(const u256& v) {
+  Energon& Add(const u128& v) {
     value_ += v;
     return *this;
   }
@@ -111,7 +104,7 @@ class Energon {
   }
 
  private:
-  u256 value_;
+  u128 value_;
 };
 
 /**
@@ -136,7 +129,7 @@ Energon operator""_VON(uint64_t von) { return Energon(von); }
  *
  * Energon e = 10_kVON;
  */
-Energon operator""_kVON(uint64_t kvon) { return Energon(kvon * u256(kVON)); }
+Energon operator""_kVON(uint64_t kvon) { return Energon(kvon * u128(kVON)); }
 
 /**
  * @brief 1_mVON representing 1e6 VON
@@ -146,7 +139,7 @@ Energon operator""_kVON(uint64_t kvon) { return Energon(kvon * u256(kVON)); }
  *
  * Energon e = 5_mVON;
  */
-Energon operator""_mVON(uint64_t mvon) { return Energon(mvon * u256(mVON)); }
+Energon operator""_mVON(uint64_t mvon) { return Energon(mvon * u128(mVON)); }
 
 /**
  * string-literal operator
@@ -158,7 +151,7 @@ Energon operator""_mVON(uint64_t mvon) { return Energon(mvon * u256(mVON)); }
  *
  * Energon e = 2.1111_gVON;
  */
-Energon operator""_gVON(uint64_t gvon) { return Energon(gvon * u256(gVON)); }
+Energon operator""_gVON(uint64_t gvon) { return Energon(gvon * u128(gVON)); }
 
 /**
  * string-literal operator
@@ -169,7 +162,7 @@ Energon operator""_gVON(uint64_t gvon) { return Energon(gvon * u256(gVON)); }
  *
  * Energon e = 1_uLAT;
  */
-Energon operator""_uLAT(uint64_t ulat) { return Energon(ulat * u256(uLAT)); }
+Energon operator""_uLAT(uint64_t ulat) { return Energon(ulat * u128(uLAT)); }
 
 /**
  * string-literal operator
@@ -180,7 +173,7 @@ Energon operator""_uLAT(uint64_t ulat) { return Energon(ulat * u256(uLAT)); }
  *
  * Energon e = 6_mLAT;
  */
-Energon operator""_mLAT(uint64_t mlat) { return Energon(mlat * u256(mLAT)); }
+Energon operator""_mLAT(uint64_t mlat) { return Energon(mlat * u128(mLAT)); }
 
 /**
  * string-literal operator
@@ -191,7 +184,7 @@ Energon operator""_mLAT(uint64_t mlat) { return Energon(mlat * u256(mLAT)); }
  *
  * Energon e = 33_LAT;
  */
-Energon operator""_LAT(uint64_t lat) { return Energon(lat * u256(LAT)); }
+Energon operator""_LAT(uint64_t lat) { return Energon(lat * u128(LAT)); }
 
 /**
  * @brief Compare two optional objects lhs and rhs is equal

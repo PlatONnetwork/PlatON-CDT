@@ -1,101 +1,108 @@
-#include "unit_test.hpp"
 #include "platon/RLP.h"
-#include "platon/rlp_extend.hpp"
-#include "platon/rlp_serialize.hpp"
+#include <stdio.h>
 #include "platon/fixedhash.hpp"
 #include "platon/print.hpp"
-#include <stdio.h>
+#include "platon/rlp_extend.hpp"
+#include "platon/rlp_serialize.hpp"
+#include "unit_test.hpp"
 
 using namespace platon;
 
-template<typename T>
-void print_rlp_code(const std::string &prefix, const T &data, const std::vector<byte> &result){
+template <typename T>
+void print_rlp_code(const std::string& prefix, const T& data,
+                    const std::vector<byte>& result) {
   std::string info;
   char temp_info[100] = {};
-  for(auto i : result){
+  for (auto i : result) {
     sprintf(temp_info, "%d ", int(i));
     info += temp_info;
   }
   platon::println(prefix, data, info);
 }
 
-class WhtType 
-{
-    public:
-        WhtType(){}
-        WhtType(std::string name, uint16_t age, uint16_t weight): m_name_(name), m_age_(age), m_weight_(weight) {}
-        friend RLPStream& operator << ( RLPStream& rlp, const WhtType& one ){
-            return rlp.appendList(3) << one.m_name_ << one.m_age_ << one.m_weight_;
-        }
-        friend void fetch(RLP rlp, WhtType& one){
-            fetch(rlp[0], one.m_name_);
-            fetch(rlp[1], one.m_age_);
-            fetch(rlp[2], one.m_weight_);
-        }
-        friend bool operator == ( const WhtType& lhs, const WhtType& rhs ){
-            return lhs.m_age_ == rhs.m_age_ && lhs.m_name_ == rhs.m_name_ && lhs.m_weight_ == rhs.m_weight_;
-        }
-    public:
-	    std::string m_name_;
-	    uint16_t m_age_;  
-	    uint16_t m_weight_;
+class WhtType {
+ public:
+  WhtType() {}
+  WhtType(std::string name, uint16_t age, uint16_t weight)
+      : m_name_(name), m_age_(age), m_weight_(weight) {}
+  friend RLPStream& operator<<(RLPStream& rlp, const WhtType& one) {
+    return rlp.appendList(3) << one.m_name_ << one.m_age_ << one.m_weight_;
+  }
+  friend void fetch(RLP rlp, WhtType& one) {
+    fetch(rlp[0], one.m_name_);
+    fetch(rlp[1], one.m_age_);
+    fetch(rlp[2], one.m_weight_);
+  }
+  friend bool operator==(const WhtType& lhs, const WhtType& rhs) {
+    return lhs.m_age_ == rhs.m_age_ && lhs.m_name_ == rhs.m_name_ &&
+           lhs.m_weight_ == rhs.m_weight_;
+  }
+
+ public:
+  std::string m_name_;
+  uint16_t m_age_;
+  uint16_t m_weight_;
 };
 
-class WhtGroup
-{
-    public:
-        WhtGroup(){}
-        WhtGroup(std::string info, uint16_t number,WhtType member): m_info_(info), m_number_(number), m_member_(member) {}
-        friend RLPStream& operator << ( RLPStream& rlp, const WhtGroup& group ){
-            return rlp.appendList(3) << group.m_info_ << group.m_number_ << group.m_member_;
-        }
-        friend void fetch(RLP rlp, WhtGroup& group){
-            fetch(rlp[0], group.m_info_);
-            fetch(rlp[1], group.m_number_);
-            fetch(rlp[2], group.m_member_);
-        }
-        friend bool operator == ( const WhtGroup& lhs, const WhtGroup& rhs ){
-            return lhs.m_info_ == rhs.m_info_ && lhs.m_number_ == rhs.m_number_ 
-            && lhs.m_member_ == rhs.m_member_;
-        }
-    public:
-	    std::string m_info_;
-	    uint16_t m_number_;
-	    WhtType m_member_;
+class WhtGroup {
+ public:
+  WhtGroup() {}
+  WhtGroup(std::string info, uint16_t number, WhtType member)
+      : m_info_(info), m_number_(number), m_member_(member) {}
+  friend RLPStream& operator<<(RLPStream& rlp, const WhtGroup& group) {
+    return rlp.appendList(3)
+           << group.m_info_ << group.m_number_ << group.m_member_;
+  }
+  friend void fetch(RLP rlp, WhtGroup& group) {
+    fetch(rlp[0], group.m_info_);
+    fetch(rlp[1], group.m_number_);
+    fetch(rlp[2], group.m_member_);
+  }
+  friend bool operator==(const WhtGroup& lhs, const WhtGroup& rhs) {
+    return lhs.m_info_ == rhs.m_info_ && lhs.m_number_ == rhs.m_number_ &&
+           lhs.m_member_ == rhs.m_member_;
+  }
+
+ public:
+  std::string m_info_;
+  uint16_t m_number_;
+  WhtType m_member_;
 };
 
-class Parent 
-{   
-    public:
-        Parent(){}
-        Parent(std::string info, uint16_t number, WhtType member): m_info_(info), m_number_(number), m_member_(member) {}
-        PLATON_SERIALIZE(Parent, (m_info_)(m_number_)(m_member_))
-        friend bool operator == ( const Parent& lhs, const Parent& rhs ){
-            return lhs.m_info_ == rhs.m_info_ && lhs.m_number_ == rhs.m_number_ 
-            && lhs.m_member_ == rhs.m_member_;
-        }
-    public:
-	    std::string m_info_;
-	    uint16_t m_number_;
-	    WhtType m_member_;
+class Parent {
+ public:
+  Parent() {}
+  Parent(std::string info, uint16_t number, WhtType member)
+      : m_info_(info), m_number_(number), m_member_(member) {}
+  PLATON_SERIALIZE(Parent, (m_info_)(m_number_)(m_member_))
+  friend bool operator==(const Parent& lhs, const Parent& rhs) {
+    return lhs.m_info_ == rhs.m_info_ && lhs.m_number_ == rhs.m_number_ &&
+           lhs.m_member_ == rhs.m_member_;
+  }
+
+ public:
+  std::string m_info_;
+  uint16_t m_number_;
+  WhtType m_member_;
 };
 
-class Derived : public Parent 
-{
-    public:
-        Derived(){}
-        Derived(std::string info, uint16_t number, WhtType member, std::string other): Parent(info, number, member), m_other_(other){}
-        PLATON_SERIALIZE_DERIVED(Derived, Parent, (m_other_))
-        friend bool operator == ( const Derived& lhs, const Derived& rhs ){
-            return lhs.m_other_ == rhs.m_other_ && 
-            dynamic_cast<const Parent &>(lhs) == dynamic_cast<const Parent&>(rhs);
-        }
-    public:
-	    std::string m_other_;  
+class Derived : public Parent {
+ public:
+  Derived() {}
+  Derived(std::string info, uint16_t number, WhtType member, std::string other)
+      : Parent(info, number, member), m_other_(other) {}
+  PLATON_SERIALIZE_DERIVED(Derived, Parent, (m_other_))
+  friend bool operator==(const Derived& lhs, const Derived& rhs) {
+    return lhs.m_other_ == rhs.m_other_ &&
+           dynamic_cast<const Parent&>(lhs) == dynamic_cast<const Parent&>(rhs);
+  }
+
+ public:
+  std::string m_other_;
 };
 
 TEST_CASE(rlp, int8_t) {
-  int8_t int8_t_data = -2; 
+  int8_t int8_t_data = -2;
   RLPStream stream;
   stream << int8_t_data;
   std::vector<byte> result = stream.out();
@@ -106,7 +113,7 @@ TEST_CASE(rlp, int8_t) {
 }
 
 TEST_CASE(rlp, int16_t) {
-  int16_t int16_t_data = -3; 
+  int16_t int16_t_data = -3;
   RLPStream stream;
   stream << int16_t_data;
   std::vector<byte> result = stream.out();
@@ -117,7 +124,7 @@ TEST_CASE(rlp, int16_t) {
 }
 
 TEST_CASE(rlp, int) {
-  int int_data = -4; 
+  int int_data = -4;
   RLPStream stream;
   stream << int_data;
   std::vector<byte> result = stream.out();
@@ -128,7 +135,7 @@ TEST_CASE(rlp, int) {
 }
 
 TEST_CASE(rlp, int32_t) {
-  int32_t int32_t_data = -5; 
+  int32_t int32_t_data = -5;
   RLPStream stream;
   stream << int32_t_data;
   std::vector<byte> result = stream.out();
@@ -139,7 +146,7 @@ TEST_CASE(rlp, int32_t) {
 }
 
 TEST_CASE(rlp, int64_t) {
-  int64_t int64_t_data = 0x7fffffffffffffff; 
+  int64_t int64_t_data = 0x7fffffffffffffff;
   RLPStream stream;
   stream << int64_t_data;
   std::vector<byte> result = stream.out();
@@ -151,7 +158,7 @@ TEST_CASE(rlp, int64_t) {
 }
 
 TEST_CASE(rlp, bool) {
-  bool bool_data = true; 
+  bool bool_data = true;
   RLPStream stream;
   stream << bool_data;
   std::vector<byte> result = stream.out();
@@ -162,7 +169,7 @@ TEST_CASE(rlp, bool) {
 }
 
 TEST_CASE(rlp, uint8_t) {
-  uint8_t uint8_t_data = 1; 
+  uint8_t uint8_t_data = 1;
   RLPStream stream;
   stream << uint8_t_data;
   std::vector<byte> result = stream.out();
@@ -173,7 +180,7 @@ TEST_CASE(rlp, uint8_t) {
 }
 
 TEST_CASE(rlp, uint16_t) {
-  uint16_t uint16_t_data = 2; 
+  uint16_t uint16_t_data = 2;
   RLPStream stream;
   stream << uint16_t_data;
   std::vector<byte> result = stream.out();
@@ -184,7 +191,7 @@ TEST_CASE(rlp, uint16_t) {
 }
 
 TEST_CASE(rlp, uint32_t) {
-  uint32_t uint32_t_data = 3; 
+  uint32_t uint32_t_data = 3;
   RLPStream stream;
   stream << uint32_t_data;
   std::vector<byte> result = stream.out();
@@ -195,7 +202,7 @@ TEST_CASE(rlp, uint32_t) {
 }
 
 TEST_CASE(rlp, uint64_t) {
-  uint64_t uint64_t_data = 4; 
+  uint64_t uint64_t_data = 4;
   RLPStream stream;
   stream << uint64_t_data;
   std::vector<byte> result = stream.out();
@@ -206,7 +213,7 @@ TEST_CASE(rlp, uint64_t) {
 }
 
 TEST_CASE(rlp, float) {
-  float float_data = 1.23; 
+  float float_data = 1.23;
   RLPStream stream;
   stream << float_data;
   std::vector<byte> result = stream.out();
@@ -216,9 +223,8 @@ TEST_CASE(rlp, float) {
   platon::println(float_data);
 }
 
-
 TEST_CASE(rlp, double) {
-  double double_data = 4.56; 
+  double double_data = 4.56;
   RLPStream stream;
   stream << double_data;
   std::vector<byte> result = stream.out();
@@ -228,30 +234,19 @@ TEST_CASE(rlp, double) {
   platon::println(double_data);
 }
 
-TEST_CASE(rlp, u256) {
-  u256 u256_data = 0; 
-  u256_data.value()[0] = 0x01;
-  u256_data.value()[1] = 0x02;
-  u256_data.value()[2] = 0x03;
-  u256_data.value()[3] = 0x04;
-  u256_data.value()[4] = 0x05;
-  u256_data.value()[5] = 0x06;
-  u256_data.value()[6] = 0x07;
-  u256_data.value()[7] = 0x08;
-  u256_data.value()[8] = 0x09;
-  u256_data.value()[9] = 0x0a;
-  u256_data.value()[10] = 0x0b;
+TEST_CASE(rlp, u128) {
+  u128 u128_data = 123456789012345678;
   RLPStream stream;
-  stream << u256_data;
+  stream << u128_data;
   std::vector<byte> result = stream.out();
-  print_rlp_code("u256", u256_data, result);
-  u256 fetch_data = 0;
+  print_rlp_code("u128", u128_data, result);
+  u128 fetch_data = 0;
   fetch(RLP(result), fetch_data);
-  ASSERT_EQ(u256_data, fetch_data);
+  ASSERT_EQ(u128_data, fetch_data);
 }
 
 TEST_CASE(rlp, string) {
-  std::string string_data = "abc"; 
+  std::string string_data = "abc";
   RLPStream stream;
   stream << string_data;
   std::vector<byte> result = stream.out();
@@ -290,19 +285,19 @@ TEST_CASE(rlp, list) {
   ASSERT_EQ(fetch_data, list_data);
 }
 
-TEST_CASE(rlp, append){
+TEST_CASE(rlp, append) {
   std::vector<uint32_t> vect_result;
   RLPStream stream(4);
-  uint32_t data_32= 1*256*256*256 + 2*256*256 + 3*256 + 4;
+  uint32_t data_32 = 1 * 256 * 256 * 256 + 2 * 256 * 256 + 3 * 256 + 4;
   stream << data_32;
   vect_result.push_back(data_32);
-  data_32= 5*256*256*256 + 6*256*256 + 7*256 + 8;
+  data_32 = 5 * 256 * 256 * 256 + 6 * 256 * 256 + 7 * 256 + 8;
   stream << data_32;
   vect_result.push_back(data_32);
-  data_32= 9*256*256*256 + 10*256*256 + 11*256 + 12;
+  data_32 = 9 * 256 * 256 * 256 + 10 * 256 * 256 + 11 * 256 + 12;
   stream << data_32;
   vect_result.push_back(data_32);
-  data_32= 13*256*256 + 14*256 + 15;
+  data_32 = 13 * 256 * 256 + 14 * 256 + 15;
   stream << data_32;
   vect_result.push_back(data_32);
   std::vector<byte> result = stream.out();
@@ -360,7 +355,7 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, uint64_t)
   RUN_TEST(rlp, float)
   RUN_TEST(rlp, double)
-  RUN_TEST(rlp, u256)
+  RUN_TEST(rlp, u128)
   RUN_TEST(rlp, string)
   RUN_TEST(rlp, address)
   RUN_TEST(rlp, array)

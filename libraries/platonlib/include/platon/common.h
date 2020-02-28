@@ -10,6 +10,8 @@
 #include "vector_ref.h"
 
 namespace platon {
+using u128 = __uint128_t;
+using bigint = u128;
 
 typedef uint8_t byte;
 

@@ -55,7 +55,7 @@ TEST_CASE(multi_index, unique) {
 
 TEST_CASE(multi_index, normal) {
   MultiIndex<
-      "table_normal"_n, Member,
+      "tablenormal"_n, Member,
       IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
                                           IndexType::UniqueIndex>>,
       IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
@@ -89,7 +89,7 @@ TEST_CASE(multi_index, normal) {
 }
 TEST_CASE(multi_index, find) {
   MultiIndex<
-      "table_find"_n, Member,
+      "tablefind"_n, Member,
       IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
                                           IndexType::UniqueIndex>>,
       IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RLP.h"
-#include "bigint.hpp"
 #include "chain.hpp"
 #include "exchange.hpp"
 #include "fixedhash.hpp"
@@ -14,10 +13,10 @@ namespace platon {
  *
  * @return The value of gas price
  */
-u256 platon_gas_price() {
-  byte gas_price[32];
-  ::platon_gas_price(gas_price);
-  return fromBigEndian<u256>(gas_price);
+u128 platon_gas_price() {
+  byte gas_price[16];
+  size_t len = ::platon_gas_price(gas_price);
+  return fromBigEndian<u128>(bytesRef(gas_price, len));
 }
 
 /**
@@ -57,9 +56,9 @@ Address platon_coinbase() {
  * @return The balance of the address
  */
 Energon platon_balance(const Address& addr) {
-  byte balance[32];
-  ::platon_balance(addr.data(), balance);
-  return Energon(fromBigEndian<u256>(balance));
+  byte balance[16];
+  size_t len = ::platon_balance(addr.data(), balance);
+  return Energon(fromBigEndian<u128>(bytesRef(balance, len)));
 }
 
 /**
@@ -76,10 +75,10 @@ bool platon_transfer(const Address& addr, const Energon& amount);
  *
  * @return The value of the current transaction value field
  */
-u256 platon_call_value() {
-  byte val[32];
+u128 platon_call_value() {
+  byte val[16];
   ::platon_call_value(val);
-  return fromBigEndian<u256>(val);
+  return fromBigEndian<u128>(val);
 }
 
 /**
