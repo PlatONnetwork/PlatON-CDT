@@ -19,6 +19,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+
 #include "common.h"
 #include "fixedhash.hpp"
 #include "panic.hpp"
@@ -746,6 +747,12 @@ class RLPStream {
   void swapOut(bytes& _dest) {
     if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
     swap(m_out, _dest);
+  }
+
+  void reserve(size_t size) {
+    if (m_out.capacity() < size) {
+      m_out.reserve(size);
+    }
   }
 
  private:

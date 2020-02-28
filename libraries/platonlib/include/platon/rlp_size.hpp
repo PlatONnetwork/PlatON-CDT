@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <boost/fusion/include/for_each.hpp>
 #include <iomanip>
 #include <iosfwd>
 #include <list>
@@ -9,8 +10,6 @@
 #include <stack>
 #include <unordered_set>
 #include <vector>
-
-#include <boost/fusion/include/for_each.hpp>
 
 #include "RLP.h"
 #include "bigint.hpp"
@@ -119,7 +118,7 @@ class RLPSize {
   RLPSize& append(bigint s) {
     size_t size = 0;
     if (s == 0 || s < c_rlpDataImmLenStart) {
-      size = 0;
+      size = 1;
     } else {
       size_t br = bytesRequired(s);
       if (br < c_rlpDataImmLenCount) {
@@ -208,7 +207,7 @@ class RLPSize {
     return *this;
   }
 
-  template <size_t N>
+  template <unsigned N>
   RLPSize& append(FixedHash<N> s) {
     size_t size = 0;
     if (!s) {
@@ -238,6 +237,7 @@ class RLPSize {
       *this << i;
     }
     *this << RLPSize::list_end();
+    return *this;
   }
 
   template <class T, size_t N>
@@ -293,6 +293,19 @@ class RLPSize {
   RLPSize& append(const std::tuple<Args...>& s) {
     *this << RLPSize::list_start();
     boost::fusion::for_each(s, [&](const auto& i) { *this << i; });
+    *this << RLPSize::list_end();
+    return *this;
+  }
+
+  template <class T>
+  RLPSize& append(const std::list<T>& s) {
+    if (s.empty()) {
+      return AppendEmptyList();
+    }
+    *this << RLPSize::list_start();
+    for (const auto& i : s) {
+      *this << i;
+    }
     *this << RLPSize::list_end();
     return *this;
   }
