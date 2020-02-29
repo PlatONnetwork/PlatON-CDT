@@ -174,11 +174,11 @@ template <class Topic, typename... Args>
 inline void emit_event1(const std::string &name, const Topic &topic, const Args &... args) {
   RLPStream stream(2);
   auto event_sign = event_data_convert(name);
-  auto topic_data = event_data_convert(topic);
+  auto topic1_data = event_data_convert(topic);
   RLPSize rlps;
-  rlps << event_sign << topic_data;
+  rlps << event_sign << topic1_data;
   stream.reserve(rlps.size());
-  stream << event_sign << topic_data;
+  stream << event_sign << topic1_data;
   const bytes &topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
