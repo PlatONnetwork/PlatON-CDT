@@ -5,6 +5,7 @@
 #include "common.h"
 #include "contract.hpp"
 #include "rlp_extend.hpp"
+#include "rlp_size.hpp"
 
 #define ARG_COUNT_P1_(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
 
@@ -87,8 +88,9 @@ struct event_type {
   using type = bytes;
   static type event_data_convert(const T &data){
       RLPStream stream;
+      stream.reserve(pack_size(data));
       stream << data;
-      std::vector<byte> result = stream.out();
+      const std::vector<byte> &result = stream.out();
       std::vector<byte> hash;
       hash.resize(32);
       ::platon_sha3(result.data(), result.size(), hash.data(), hash.size());
@@ -98,7 +100,7 @@ struct event_type {
 
 template <typename T>
 struct event_type<T, true> {
-  using type = T;
+  using type = const T&;
   static type event_data_convert(const T &data){
     return data;
 }
@@ -122,6 +124,7 @@ template <typename... Args>
 inline bytes event_args(const Args &... args) {
   std::tuple<Args...> tuple_args = std::make_tuple(args...);
   RLPStream stream;
+  stream.reserve(pack_size(tuple_args));
   stream << tuple_args;
   return stream.out();
 } 
@@ -150,8 +153,10 @@ inline void emit_event(const Args &... args) {
 template <typename... Args>
 inline void emit_event0(const std::string &name, const Args &... args) {
   RLPStream stream(1);
-  stream << event_data_convert(name);
-  bytes topic_data = stream.out();
+  auto event_sign = event_data_convert(name);
+  stream.reserve(pack_size(event_sign));
+  stream << event_sign;
+  const bytes &topic_data = stream.out();
   bytes args_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), args_data.data(), args_data.size());
 }
@@ -168,8 +173,13 @@ inline void emit_event0(const std::string &name, const Args &... args) {
 template <class Topic, typename... Args>
 inline void emit_event1(const std::string &name, const Topic &topic, const Args &... args) {
   RLPStream stream(2);
-  stream << event_data_convert(name) << event_data_convert(topic);
-  bytes topic_data = stream.out();
+  auto event_sign = event_data_convert(name);
+  auto topic_data = event_data_convert(topic);
+  RLPSize rlps;
+  rlps << event_sign << topic_data;
+  stream.reserve(rlps.size());
+  stream << event_sign << topic_data;
+  const bytes &topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
@@ -189,8 +199,14 @@ template <class Topic1, class Topic2, typename... Args>
 inline void emit_event2(const std::string &name, const Topic1 &topic1, const Topic2 &topic2,
                         const Args &... args) {
   RLPStream stream(3);
-  stream << event_data_convert(name) << event_data_convert(topic1) << event_data_convert(topic2);
-  bytes topic_data = stream.out();
+  auto event_sign = event_data_convert(name);
+  auto topic1_data = event_data_convert(topic1);
+  auto topic2_data = event_data_convert(topic2);
+  RLPSize rlps;
+  rlps << event_sign << topic1_data << topic2_data;
+  stream.reserve(rlps.size());
+  stream << event_sign << topic1_data << topic2_data;
+  const bytes &topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
@@ -211,9 +227,15 @@ template <class Topic1, class Topic2, class Topic3, typename... Args>
 inline void emit_event3(const std::string &name, const Topic1 &topic1, const Topic2 &topic2,
                         const Topic3 &topic3, const Args &... args) {
   RLPStream stream(4);
-  stream << event_data_convert(name) << event_data_convert(topic1) << 
-    event_data_convert(topic2) << event_data_convert(topic3);
-  bytes topic_data = stream.out();
+  auto event_sign = event_data_convert(name);
+  auto topic1_data = event_data_convert(topic1);
+  auto topic2_data = event_data_convert(topic2);
+  auto topic3_data = event_data_convert(topic3);
+  RLPSize rlps;
+  rlps << event_sign << topic1_data << topic2_data << topic3_data;
+  stream.reserve(rlps.size());
+  stream << event_sign << topic1_data << topic2_data << topic3_data;
+  const bytes &topic_data = stream.out();
   bytes rlp_data = event_args(args...);
   ::platon_event(topic_data.data(), topic_data.size(), rlp_data.data(),
                  rlp_data.size());
