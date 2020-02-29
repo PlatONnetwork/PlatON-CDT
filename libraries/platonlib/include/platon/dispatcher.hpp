@@ -13,6 +13,7 @@
 #include "rlp_extend.hpp"
 #include "chain.hpp"
 #include "panic.hpp"
+#include "name.hpp"
 
 namespace platon {
 
@@ -81,7 +82,7 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
 
 // Helper macro for EOSIO_DISPATCH_INTERNAL
 #define PLATON_DISPATCH_INTERNAL(r, OP, elem)    \
-  else if (method == BOOST_PP_STRINGIZE(elem)) { \
+  else if (method == name_value(BOOST_PP_STRINGIZE(elem))) { \
     platon::execute_action(rlp, &OP::elem);      \
   }
 
@@ -113,9 +114,9 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
     size_t len = 0;                         \
     auto input = get_input(len);            \
     RLP rlp(input, len);                    \
-    std::string method;                    \
+    uint64_t method = 0;                    \
     fetch(rlp[0], method);                 \
-    if (method.empty()) {                  \
+    if (0 == method) {                  \
       internal::platon_throw("valid method\n");      \
     }                                      \
     PLATON_DISPATCH_HELPER(TYPE, MEMBERS)  \
