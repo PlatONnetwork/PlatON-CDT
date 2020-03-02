@@ -29,12 +29,15 @@
  * defined
  *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
  */
-#define PLATON_SERIALIZE(TYPE, MEMBERS)                                      \
-  friend RLPStream& operator<<(RLPStream& rlp, const TYPE& t) {              \
-    size_t items_number = 0;                                                 \
-    BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS)         \
-    return rlp.appendList(items_number)                                      \
-        BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS);  \
+#define PLATON_SERIALIZE(TYPE, MEMBERS)                                             \
+  friend RLPStream& operator<<(RLPStream& rlp, const TYPE& t) {                     \
+    size_t items_number = 0;                                                        \
+    BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS)                \
+    rlp.appendList(items_number);                                                   \
+    RLPSize rlps;                                                                   \
+    rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS);        \
+    rlp.reserve(rlps.size());                                                       \
+    return rlp BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS);  \
   }                                                                          \
   friend void fetch(const RLP& rlp, TYPE& t) {                               \
     size_t vect_index = 0;                                                   \
@@ -62,7 +65,12 @@
   friend RLPStream& operator<<(RLPStream& rlp, const TYPE& t) {              \
     size_t items_number = 1;                                                 \
     BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS)         \
-    rlp.appendList(items_number) << static_cast<const BASE&>(t);             \
+    rlp.appendList(items_number);                                            \
+    RLPSize rlps;                                                            \
+    rlps << static_cast<const BASE&>(t);                                     \
+    rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS); \
+    rlp.reserve(rlps.size());                                                \
+    rlp << static_cast<const BASE&>(t);                                      \
     return rlp BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<,     \
                                      MEMBERS);                               \
   }                                                                          \
