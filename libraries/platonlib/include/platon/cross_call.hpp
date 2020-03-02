@@ -12,6 +12,7 @@
 #include "common.h"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
+#include "name.hpp"
 
 namespace platon {
 
