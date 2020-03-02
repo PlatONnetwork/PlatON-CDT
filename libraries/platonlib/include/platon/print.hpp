@@ -60,7 +60,7 @@ void println(Arg&& a, Args&&... args) {
 
 #ifdef NDEBUG
 
-  #define DEBUG(...) ((void)0)
+  #define DEBUG(...) ((void)0);
 
 #else
 
