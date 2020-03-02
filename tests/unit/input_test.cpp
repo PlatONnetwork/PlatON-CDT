@@ -8,13 +8,13 @@
 
 using namespace platon;
 
+std::vector<byte> get_input_bytes();
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-std::vector<byte> input_result = {234, 132, 105, 110, 105, 116, 5, 227, 10, 30, 11, 138, 105, 
-    110, 112, 117, 116, 95, 116, 101, 115, 116, 212, 137, 99, 104, 105, 108, 
-    100, 114, 101, 110, 49, 137, 99, 104, 105, 108, 100, 114, 101, 110, 50};
+std::vector<byte> input_result = get_input_bytes();
 
 size_t platon_get_input_length(void){
     return input_result.size();
@@ -44,6 +44,21 @@ class Info {
             && lhs.desc_ == rhs.desc_ && lhs.children_ == rhs.children_;
         }
 };
+
+std::vector<byte> get_input_bytes(){
+    std::string str_method = "init";
+    uint64_t t_method = Name(str_method).value;
+    uint64_t serial = 5;
+    Info info;
+    info.number_ = 10;
+    info.age_ = 30;
+    info.married_ = 11;
+    info.desc_ = "input_test";
+    info.children_ = std::vector<std::string>{"children1", "children2"};
+    RLPStream stream(3);
+    stream << t_method << serial << info ;
+    return stream.out();
+}
 
 uint64_t g_serial;
 Info g_args;

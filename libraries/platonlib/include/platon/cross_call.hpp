@@ -21,6 +21,10 @@ inline bytes cross_call_args(const std::string &method, const Args &... args) {
   std::tuple<Args...> tuple_args = std::make_tuple(args...);
   size_t num = sizeof...(Args);
   stream.appendList(num + 1);
+  RLPSize rlps;
+  rlps << method;
+  boost::fusion::for_each(tuple_args, [&](const auto &i) { rlps << i; });
+  stream.reserve(rlps.size());
   stream << method;
   boost::fusion::for_each(tuple_args, [&](const auto &i) { stream << i; });
   return stream.out();

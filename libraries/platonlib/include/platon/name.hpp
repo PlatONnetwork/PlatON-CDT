@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
-#include "platon/rlp_serialize.hpp"
 #include "platon/panic.hpp"
+#include "platon/rlp_serialize.hpp"
+#include "print.hpp"
 
 namespace platon {
 namespace detail {
@@ -10,7 +11,8 @@ struct to_const_char_arr {
   static constexpr const char value[] = {Str...};
 };
 }  // namespace detail
-
+constexpr uint64_t kOffset64 = 14695981039346656037U;
+constexpr uint64_t kPrime64 = 1099511628211U;
 /**
  * @defgroup name
  * @ingroup core
@@ -63,108 +65,13 @@ struct Name {
    *
    */
   constexpr explicit Name(std::string_view str) : value(0) {
-    if (str.size() > 13) {
-      internal::platon_throw("string is too long to be a valid name");
+    size_t n = str.length();
+    uint64_t hash = kOffset64;
+    for (size_t i = 0; i < n; i++) {
+      hash *= kPrime64;
+      hash ^= (uint64_t)str[i];
     }
-    if (str.empty()) {
-      return;
-    }
-
-    auto n = std::min((uint32_t)str.size(), (uint32_t)12u);
-    for (decltype(n) i = 0; i < n; ++i) {
-      value <<= 5;
-      value |= char_to_value(str[i]);
-    }
-    value <<= (4 + 5 * (12 - n));
-    if (str.size() == 13) {
-      uint64_t v = char_to_value(str[12]);
-      if (v > 0x0Full) {
-        internal::platon_throw(
-                               "thirteenth character in name cannot be a letter"
-                               "that comes after j");
-      }
-      value |= v;
-    }
-  }
-
-  /**
-   *  Converts a %name Base32 symbol into its corresponding value
-   *
-   *  @param c - Character to be converted
-   *  @return constexpr char - Converted value
-   */
-  static constexpr uint8_t char_to_value(char c) {
-    if (c == '.')
-      return 0;
-    else if (c >= '1' && c <= '5')
-      return (c - '1') + 1;
-    else if (c >= 'a' && c <= 'z')
-      return (c - 'a') + 6;
-    else
-      internal::platon_throw("character is not in allowed character set for names");
-
-    return 0;  // control flow will never reach here; just added to suppress
-               // warning
-  }
-
-  /**
-   *  Returns the length of the %name
-   */
-  constexpr uint8_t length() const {
-    constexpr uint64_t mask = 0xF800000000000000ull;
-
-    if (value == 0) return 0;
-
-    uint8_t l = 0;
-    uint8_t i = 0;
-    for (auto v = value; i < 13; ++i, v <<= 5) {
-      if ((v & mask) > 0) {
-        l = i;
-      }
-    }
-
-    return l + 1;
-  }
-
-  /**
-   *  Returns the suffix of the %name
-   */
-  constexpr Name suffix() const {
-    uint32_t remaining_bits_after_last_actual_dot = 0;
-    uint32_t tmp = 0;
-    for (int32_t remaining_bits = 59; remaining_bits >= 4;
-         remaining_bits -=
-         5) {  // Note: remaining_bits must remain signed integer
-      // Get characters one-by-one in name in order from left to right (not
-      // including the 13th character)
-      auto c = (value >> remaining_bits) & 0x1Full;
-      if (!c) {  // if this character is a dot
-        tmp = static_cast<uint32_t>(remaining_bits);
-      } else {  // if this character is not a dot
-        remaining_bits_after_last_actual_dot = tmp;
-      }
-    }
-
-    uint64_t thirteenth_character = value & 0x0Full;
-    if (thirteenth_character) {  // if 13th character is not a dot
-      remaining_bits_after_last_actual_dot = tmp;
-    }
-
-    if (remaining_bits_after_last_actual_dot ==
-        0)  // there is no actual dot in the %name other than potentially
-            // leading dots
-      return Name{value};
-
-    // At this point remaining_bits_after_last_actual_dot has to be within the
-    // range of 4 to 59 (and restricted to increments of 5).
-
-    // Mask for remaining bits corresponding to characters after last actual
-    // dot, except for 4 least significant bits (corresponds to 13th character).
-    uint64_t mask = (1ull << remaining_bits_after_last_actual_dot) - 16;
-    uint32_t shift = 64 - remaining_bits_after_last_actual_dot;
-
-    return Name{((value & mask) << shift) +
-                (thirteenth_character << (shift - 1))};
+    value = hash;
   }
 
   /**
@@ -181,56 +88,6 @@ struct Name {
    * true.
    */
   constexpr explicit operator bool() const { return value != 0; }
-
-  /**
-   *  Writes the %name as a string to the provided char buffer
-   *
-   *  @pre The range [begin, end) must be a valid range of memory to write to.
-   *  @param begin - The start of the char buffer
-   *  @param end - Just past the end of the char buffer
-   *  @param dry_run - If true, do not actually write anything into the range.
-   *  @return char* - Just past the end of the last character that would be
-   * written assuming dry_run == false and end was large enough to provide
-   * sufficient space. (Meaning only applies if returned pointer >= begin.)
-   *  @post If the output string fits within the range [begin, end) and dry_run
-   * == false, the range [begin, returned pointer) contains the string
-   * representation of the %name. Nothing is written if dry_run == true or
-   * returned pointer > end (insufficient space) or if returned pointer < begin
-   * (overflow in calculating desired end).
-   */
-  char* write_as_string(char* begin, char* end, bool dry_run = false) const {
-    static const char* charmap = ".12345abcdefghijklmnopqrstuvwxyz";
-    constexpr uint64_t mask = 0xF800000000000000ull;
-
-    if (dry_run || (begin + 13 < begin) || (begin + 13 > end)) {
-      char* actual_end = begin + length();
-      if (dry_run || (actual_end < begin) || (actual_end > end))
-        return actual_end;
-    }
-
-    auto v = value;
-    for (auto i = 0; i < 13; ++i, v <<= 5) {
-      if (v == 0) return begin;
-
-      auto indx = (v & mask) >> (i == 12 ? 60 : 59);
-      *begin = charmap[indx];
-      ++begin;
-    }
-
-    return begin;
-  }
-
-  /**
-   *  Returns the name as a string.
-   *
-   *  @brief Returns the name value as a string by calling write_as_string() and
-   * returning the buffer produced by write_as_string()
-   */
-  std::string to_string() const {
-    char buffer[13];
-    auto end = write_as_string(buffer, buffer + sizeof(buffer));
-    return {buffer, end};
-  }
 
   /// @cond INTERNAL
 
@@ -267,6 +124,11 @@ struct Name {
 
   PLATON_SERIALIZE(Name, (value))
 };
+inline constexpr uint64_t name_value(char const* str,
+                                     uint64_t last_value = kOffset64) {
+  return *str ? name_value(str + 1, (kPrime64 * last_value) ^ *str)
+              : last_value;
+}
 }  // namespace platon
 
 /**
@@ -283,5 +145,7 @@ inline constexpr platon::Name operator""_n() {
       platon::detail::to_const_char_arr<Str...>::value, sizeof...(Str)}};
   return x;
 }
+
+
 
 #pragma clang diagnostic pop
