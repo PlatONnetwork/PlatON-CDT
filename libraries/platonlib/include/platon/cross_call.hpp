@@ -12,20 +12,22 @@
 #include "common.h"
 #include "fixedhash.hpp"
 #include "rlp_extend.hpp"
+#include "name.hpp"
 
 namespace platon {
 
 template <typename... Args>
 inline bytes cross_call_args(const std::string &method, const Args &... args) {
+  uint64_t t_method = Name(method).value;
   RLPStream stream;
   std::tuple<Args...> tuple_args = std::make_tuple(args...);
   size_t num = sizeof...(Args);
   stream.appendList(num + 1);
   RLPSize rlps;
-  rlps << method;
+  rlps << t_method;
   boost::fusion::for_each(tuple_args, [&](const auto &i) { rlps << i; });
   stream.reserve(rlps.size());
-  stream << method;
+  stream << t_method;
   boost::fusion::for_each(tuple_args, [&](const auto &i) { stream << i; });
   return stream.out();
 }

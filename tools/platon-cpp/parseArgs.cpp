@@ -102,7 +102,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
   clangArgs.push_back("-std=c++17");
   clangArgs.push_back("-g");
   clangArgs.push_back("-DNDEBUG");
-  clangArgs.push_back("-O0");
+  clangArgs.push_back("-Oz");
 
   if(!NoStdlib){
     string includedir = bindir + "/../platon.cdt/include/";
