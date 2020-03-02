@@ -58,8 +58,16 @@ void println(Arg&& a, Args&&... args) {
   printf("%s\t\n", all_info.c_str());
 }
 
-#define DEBUG(...)                                                      \
-  platon::println("line", __LINE__, "file", __FILE__, "func", __func__, \
-                  ##__VA_ARGS__);
+#ifdef NDEBUG
+
+  #define DEBUG(...) ((void)0)
+
+#else
+
+  #define DEBUG(...)                                                      \
+    platon::println("line", __LINE__, "file", __FILE__, "func", __func__, \
+                    ##__VA_ARGS__);
+
+#endif
 
 }  // namespace platon
