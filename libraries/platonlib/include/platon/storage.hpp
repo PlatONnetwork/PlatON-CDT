@@ -53,7 +53,7 @@ template <typename KEY, typename VALUE>
 inline size_t get_state(const KEY &key, VALUE &value) {
   RLPStream state_stream;
   state_stream << key;
-  std::vector<byte> vect_key = state_stream.out();
+  const std::vector<byte> &vect_key = state_stream.out();
   size_t len = ::platon_get_state_length(vect_key.data(), vect_key.size());
   if (len == 0) {
     return 0;
@@ -78,7 +78,7 @@ template <typename KEY>
 inline void del_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
-  std::vector<byte> vect_key = state_stream.out();
+  const std::vector<byte> &vect_key = state_stream.out();
   byte del = 0;
   ::platon_set_state(vect_key.data(), vect_key.size(), (const byte *)&del, 0);
 }
@@ -94,7 +94,7 @@ template <typename KEY>
 inline bool has_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
-  std::vector<byte> vect_key = state_stream.out();
+  const std::vector<byte> &vect_key = state_stream.out();
   size_t len = ::platon_get_state_length(vect_key.data(), vect_key.size());
   return len != 0;
 }
