@@ -92,9 +92,8 @@ bool is_owner(const std::string &addr = std::string()) {
  *
  * @tparam Name Whitelist name, in the same contract, the name should be unique
  */
-template <Name::Raw TableName>
-class WhiteList {
- public:
+template <Name::Raw TableName> class WhiteList {
+public:
   /**
    * @brief Construct a new whitlist.
    */
@@ -146,7 +145,7 @@ class WhiteList {
     return whitelist_.self().find(addr) != whitelist_.self().end();
   }
 
- private:
+private:
   Set<TableName, Address> whitelist_;
 };
 
@@ -155,4 +154,4 @@ class WhiteList {
  */
 using SysWhitelist = WhiteList<"pwhitelist"_n>;
 
-}  // namespace platon
+} // namespace platon
