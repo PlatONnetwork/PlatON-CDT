@@ -168,7 +168,7 @@ TEST_CASE(convert, bool) {
   RLPStream stream;
   auto info = event_data_convert(b_data);
   stream << info;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   b_data = false;
   fetch(RLP(result), b_data);
   ASSERT_EQ(b_data, true);
@@ -179,7 +179,7 @@ TEST_CASE(convert, int) {
   RLPStream stream;
   auto info = event_data_convert(int_data);
   stream << info;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   int_data = 0;
   fetch(RLP(result), int_data);
   ASSERT_EQ(int_data, -2);
@@ -189,7 +189,7 @@ TEST_CASE(convert, u128) {
   u128 u128_data = 256;
   RLPStream stream;
   stream << event_data_convert(u128_data);
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   u128_data = 0;
   fetch(RLP(result), u128_data);
   ASSERT_EQ(u128_data, 256);
@@ -200,7 +200,7 @@ TEST_CASE(convert, string) {
   RLPStream stream;
   auto info = event_data_convert(str_data);
   stream << info;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   bytes fetch_data;
   fetch(RLP(result), fetch_data);
   ASSERT_EQ(info, fetch_data);
@@ -211,7 +211,7 @@ TEST_CASE(convert, vector) {
   RLPStream stream;
   auto info = event_data_convert(vect_data);
   stream << info;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   bytes fetch_data;
   fetch(RLP(result), fetch_data);
   ASSERT_EQ(info, fetch_data);

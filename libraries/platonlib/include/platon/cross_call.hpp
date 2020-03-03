@@ -11,8 +11,8 @@
 #include "chain.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
-#include "rlp_extend.hpp"
 #include "name.hpp"
+#include "rlp_extend.hpp"
 
 namespace platon {
 
@@ -29,7 +29,7 @@ inline bytes cross_call_args(const std::string &method, const Args &... args) {
   stream.reserve(rlps.size());
   stream << t_method;
   boost::fusion::for_each(tuple_args, [&](const auto &i) { stream << i; });
-  return stream.out();
+  return bytes(stream.out().begin(), stream.out().end());
 }
 
 template <typename T>
@@ -70,7 +70,7 @@ inline bool platon_delegate_call(const Address &addr, const bytes &paras,
 // }
 
 template <typename T>
-inline void get_call_output(T& t) {
+inline void get_call_output(T &t) {
   bytes result;
   size_t len = ::platon_get_call_output_length();
   result.resize(len);

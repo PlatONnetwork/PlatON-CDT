@@ -3,8 +3,8 @@ using namespace std;
 
 namespace platon {
 
-bytes RLPNull = rlp("");
-bytes RLPEmptyList = rlpList();
+//bytes RLPNull = rlp("");
+//bytes RLPEmptyList = rlpList();
 
 RLP::RLP(bytesConstRef _d, Strictness _s) : m_data(_d) {
   if ((_s & FailIfTooBig) && actualSize() < _d.size()) {
@@ -148,7 +148,7 @@ size_t RLP::items() const {
 }
 
 RLPStream& RLPStream::appendRaw(bytesConstRef _s, size_t _itemCount) {
-  m_out.insert(m_out.end(), _s.begin(), _s.end());
+  m_out.append(_s.begin(), _s.end());
   noteAppended(_itemCount);
   return *this;
 }
