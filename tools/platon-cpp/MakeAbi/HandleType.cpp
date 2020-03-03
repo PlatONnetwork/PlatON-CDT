@@ -85,6 +85,7 @@ json::Value MakeAbi::handleElem(DINode* Node, DIType* DT){
 
 StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
   unsigned size = BT->getSizeInBits();
+  string str;
   switch(BT->getEncoding()){
 
     case llvm::dwarf::DW_ATE_boolean:
@@ -92,25 +93,15 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
 
     case llvm::dwarf::DW_ATE_unsigned_char:
     case llvm::dwarf::DW_ATE_unsigned:
-      if(size==8)return "uint8";
-      else if(size==16)return "uint16";
-      else if(size==32)return "uint32";
-      else if(size==64)return "uint64";
-      else {
-        report_error(Node);
-        report_fatal_error("unknown base type");
-      }
+      str = "uint";
+      str += to_string(size);
+      return SSaver.save(str);
 
     case llvm::dwarf::DW_ATE_signed_char:
     case llvm::dwarf::DW_ATE_signed:
-      if(size==8)return "int8";
-      else if(size==16)return "int16";
-      else if(size==32)return "int32";
-      else if(size==64)return "int64";
-      else {
-        report_error(Node);
-        report_fatal_error("unknown base type");
-      }
+      str = "int";
+      str += to_string(size);
+      return SSaver.save(str);
 
     case llvm::dwarf::DW_ATE_float:
       if(size==32)return "float";
