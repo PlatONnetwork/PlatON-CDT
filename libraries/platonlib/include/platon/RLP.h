@@ -800,15 +800,16 @@ bytes rlp(_T _t) {
 }
 
 /// Export a list of items in RLP format, returning a byte array.
-inline bytes rlpList() {
-  bytesRef ref = RLPStream(0).out();
-  return bytes(ref.begin(), ref.end());
-}
+// inline bytes rlpList() {
+//  bytesRef ref = RLPStream(0).out();
+//  return bytes(ref.begin(), ref.end());
+//}
 // template <class... _Ts>
 // bytes rlpList(_Ts... _ts) {
 //  RLPStream out(sizeof...(_Ts));
 //  rlpListAux(out, _ts...);
-//  return out.out();
+//  bytesRef ref = out.out();
+//  return bytes(ref.begin(), ref.end());
 //}
 
 /// The empty string in RLP format.
