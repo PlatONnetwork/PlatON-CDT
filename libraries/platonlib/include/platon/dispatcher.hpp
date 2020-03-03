@@ -81,9 +81,9 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
 }
 
 // Helper macro for EOSIO_DISPATCH_INTERNAL
-#define PLATON_DISPATCH_INTERNAL(r, OP, elem)                \
-  else if (method == name_value(BOOST_PP_STRINGIZE(elem))) { \
-    platon::execute_action(rlp, &OP::elem);                  \
+#define PLATON_DISPATCH_INTERNAL(r, OP, elem)                        \
+  else if (method == platon::name_value(BOOST_PP_STRINGIZE(elem))) { \
+    platon::execute_action(rlp, &OP::elem);                          \
   }
 
 // Helper macro for PLATON_DISPATCH
@@ -112,8 +112,8 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
   void invoke(void) {                                        \
     __wasm_call_ctors();                                     \
     size_t len = 0;                                          \
-    auto input = get_input(len);                             \
-    RLP rlp(input, len);                                     \
+    auto input = platon::get_input(len);                     \
+    platon::RLP rlp(input, len);                             \
     uint64_t method = 0;                                     \
     fetch(rlp[0], method);                                   \
     if (0 == method) {                                       \
