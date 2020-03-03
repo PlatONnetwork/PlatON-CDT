@@ -1,11 +1,12 @@
 #pragma once
+#include "boost/fusion/algorithm/iteration/for_each.hpp"
+#include "boost/preprocessor/seq/for_each.hpp"
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/std_tuple.hpp>
 #include <boost/mp11/tuple.hpp>
+#include <map>
 #include <tuple>
-#include "boost/fusion/algorithm/iteration/for_each.hpp"
-#include "boost/preprocessor/seq/for_each.hpp"
 
 #include "RLP.h"
 #include "chain.hpp"
@@ -16,6 +17,14 @@
 
 namespace platon {
 
+/**
+ * @brief Construct the parameters of the call across contracts
+ *
+ * @param method The method name of the invoked contract
+ * @param args The parameters corresponding to the contract method
+ *
+ * @return Parameter byte array
+ */
 template <typename... Args>
 inline bytes cross_call_args(const std::string &method, const Args &... args) {
   uint64_t t_method = Name(method).value;
@@ -32,16 +41,34 @@ inline bytes cross_call_args(const std::string &method, const Args &... args) {
   return bytes(stream.out().begin(), stream.out().end());
 }
 
-template <typename T>
-inline bytes value_to_bytes(T value) {
+/**
+ * @brief Converts the data to a big-end representation byte array
+ *
+ * @param value Data values to be converted
+ *
+ * @return A byte array of data
+ */
+template <typename T> inline bytes value_to_bytes(T value) {
   unsigned byte_count = bytesRequired(value);
   bytes result;
   result.resize(byte_count);
   byte *b = &result.back();
-  for (; value; value >>= 8) *(b--) = (byte)value;
+  for (; value; value >>= 8)
+    *(b--) = (byte)value;
   return result;
 }
 
+/**
+ * @brief Normal cross-contract invocation
+ *
+ * @param addr The contract address to be invoked
+ * @param paras A contract parameter constructed using the function
+ * cross_call_args
+ * @param gas The called contract method estimates the gas consumed
+ * @param value The amount transferred to the contract
+ *
+ * @return The call succeeds or fails
+ */
 template <typename value_type, typename gas_type>
 inline bool platon_call(const Address &addr, const bytes &paras,
                         const value_type &value, const gas_type &gas) {
@@ -52,6 +79,16 @@ inline bool platon_call(const Address &addr, const bytes &paras,
                        gas_bytes.size()) == 0;
 }
 
+/**
+ * @brief The proxy is invoked across contracts
+ *
+ * @param addr The contract address to be invoked
+ * @param paras A contract parameter constructed using the function
+ * cross_call_args
+ * @param gas The called contract method estimates the gas consumed
+ *
+ * @return The call succeeds or fails
+ */
 template <typename gas_type>
 inline bool platon_delegate_call(const Address &addr, const bytes &paras,
                                  const gas_type &gas) {
@@ -69,8 +106,14 @@ inline bool platon_delegate_call(const Address &addr, const bytes &paras,
 //     paras.size(), gas_bytes.data(), gas_bytes.size());
 // }
 
-template <typename T>
-inline void get_call_output(T &t) {
+/**
+ * @brief Gets the return value of calling contract methods across contracts
+ *
+ * @param t The value returned by the contract method
+ *
+ * @return void
+ */
+template <typename T> inline void get_call_output(T &t) {
   bytes result;
   size_t len = ::platon_get_call_output_length();
   result.resize(len);
@@ -78,4 +121,90 @@ inline void get_call_output(T &t) {
   fetch(RLP(result), t);
 }
 
-}  // namespace platon
+/**
+ * @brief Normal cross-contract invocation
+ *
+ * @param addr The contract address to be invoked
+ * @param value The amount transferred to the contract
+ * @param gas The called contract method estimates the gas consumed
+ * @param method The method name of the invoked contract
+ * @param args The parameters corresponding to the contract method
+ *
+ * @return The contract method returns the value and whether the execution was
+ * successful
+ *
+ * Example:
+ *
+ * @code
+ *
+  auto result =
+ platon_call<int>(Address("0xEC081ab45BE978A4A630eB8cbcBffA50E747971B"),
+  uint32_t(100), uint32_t(100), "add", 1,2,3);
+  if(!result.secod){
+    platon_throw("cross call fail");
+  }
+ * @endcode
+ */
+template <typename return_type, typename value_type, typename gas_type,
+          typename... Args>
+inline decltype(auto)
+platon_call(const Address &addr, const value_type &value, const gas_type &gas,
+            const std::string &method, const Args &... args) {
+  bytes paras = cross_call_args(method, args...);
+  bytes value_bytes = value_to_bytes(value);
+  bytes gas_bytes = value_to_bytes(gas);
+  int32_t result =
+      ::platon_call(addr.data(), paras.data(), paras.size(), value_bytes.data(),
+                    value_bytes.size(), gas_bytes.data(), gas_bytes.size());
+  if (0 != result) {
+    return std::pair<return_type, bool>(return_type(), false);
+  }
+
+  return_type return_value;
+  get_call_output(return_value);
+  return std::pair<return_type, bool>(return_value, true);
+}
+
+/**
+ * @brief The proxy is invoked across contracts
+ *
+ * @param addr The contract address to be invoked
+ * @param gas The called contract method estimates the gas consumed
+ * @param method The method name of the invoked contract
+ * @param args The parameters corresponding to the contract method
+ *
+ * @return The contract method returns the value and whether the execution was
+ * successful
+ *
+ * Example:
+ *
+ * @code
+ *
+  auto result =
+ platon_delegate_call<int>(Address("0xEC081ab45BE978A4A630eB8cbcBffA50E747971B"),
+  uint32_t(100), "add", 1,2,3);
+  if(!result.secod){
+    platon_throw("cross call fail");
+  }
+
+ * @endcode
+ */
+template <typename return_type, typename gas_type, typename... Args>
+inline decltype(auto)
+platon_delegate_call(const Address &addr, const gas_type &gas,
+                     const std::string &method, const Args &... args) {
+  bytes paras = cross_call_args(method, args...);
+  bytes gas_bytes = value_to_bytes(gas);
+  int32_t result =
+      ::platon_delegate_call(addr.data(), paras.data(), paras.size(),
+                             gas_bytes.data(), gas_bytes.size());
+  if (0 != result) {
+    return std::pair<return_type, bool>(return_type(), false);
+  }
+
+  return_type return_value;
+  get_call_output(return_value);
+  return std::pair<return_type, bool>(return_value, true);
+}
+
+} // namespace platon

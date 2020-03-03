@@ -15,10 +15,9 @@ static const char sys_owner_name[] = "platonowner";
  * @return The address of the transaction initiator
  */
 Address platon_caller() {
-  bytes address_bytes;
-  address_bytes.resize(address_len);
-  ::platon_caller(address_bytes.data());
-  return Address(address_bytes);
+  Address result;
+  ::platon_caller(result.data());
+  return result;
 }
 
 /**
@@ -28,10 +27,9 @@ Address platon_caller() {
  */
 
 Address platon_origin() {
-  bytes address_bytes;
-  address_bytes.resize(address_len);
-  ::platon_origin(address_bytes.data());
-  return Address(address_bytes);
+  Address result;
+  ::platon_origin(result.data());
+  return result;
 }
 
 /**
@@ -41,10 +39,9 @@ Address platon_origin() {
  */
 
 Address platon_address() {
-  bytes address_bytes;
-  address_bytes.resize(address_len);
-  ::platon_address(address_bytes.data());
-  return Address(address_bytes);
+  Address result;
+  ::platon_address(result.data());
+  return result;
 }
 
 /**
@@ -95,9 +92,8 @@ bool is_owner(const std::string &addr = std::string()) {
  *
  * @tparam Name Whitelist name, in the same contract, the name should be unique
  */
-template <Name::Raw TableName>
-class WhiteList {
- public:
+template <Name::Raw TableName> class WhiteList {
+public:
   /**
    * @brief Construct a new whitlist.
    */
@@ -149,7 +145,7 @@ class WhiteList {
     return whitelist_.self().find(addr) != whitelist_.self().end();
   }
 
- private:
+private:
   Set<TableName, Address> whitelist_;
 };
 
@@ -158,4 +154,4 @@ class WhiteList {
  */
 using SysWhitelist = WhiteList<"pwhitelist"_n>;
 
-}  // namespace platon
+} // namespace platon
