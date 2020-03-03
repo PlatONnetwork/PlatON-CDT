@@ -132,13 +132,24 @@ template <typename T> inline void get_call_output(T &t) {
  *
  * @return The contract method returns the value and whether the execution was
  * successful
+ *
+ * Example:
+ *
+ * @code
+ *
+  auto result =
+ platon_call<int>(Address("0xEC081ab45BE978A4A630eB8cbcBffA50E747971B"),
+  uint32_t(100), uint32_t(100), "add", 1,2,3);
+  if(!result.secod){
+    platon_throw("cross call fail");
+  }
+ * @endcode
  */
 template <typename return_type, typename value_type, typename gas_type,
           typename... Args>
 inline decltype(auto)
-platon_call_unify(const Address &addr, const value_type &value,
-                  const gas_type &gas, const std::string &method,
-                  const Args &... args) {
+platon_call(const Address &addr, const value_type &value, const gas_type &gas,
+            const std::string &method, const Args &... args) {
   bytes paras = cross_call_args(method, args...);
   bytes value_bytes = value_to_bytes(value);
   bytes gas_bytes = value_to_bytes(gas);
@@ -151,7 +162,7 @@ platon_call_unify(const Address &addr, const value_type &value,
 
   return_type return_value;
   get_call_output(return_value);
-  return std::pair<return_type, bool>(return_value, false);
+  return std::pair<return_type, bool>(return_value, true);
 }
 
 /**
@@ -164,11 +175,24 @@ platon_call_unify(const Address &addr, const value_type &value,
  *
  * @return The contract method returns the value and whether the execution was
  * successful
+ *
+ * Example:
+ *
+ * @code
+ *
+  auto result =
+ platon_delegate_call<int>(Address("0xEC081ab45BE978A4A630eB8cbcBffA50E747971B"),
+  uint32_t(100), "add", 1,2,3);
+  if(!result.secod){
+    platon_throw("cross call fail");
+  }
+
+ * @endcode
  */
 template <typename return_type, typename gas_type, typename... Args>
 inline decltype(auto)
-platon_delegate_call_unify(const Address &addr, const gas_type &gas,
-                           const std::string &method, const Args &... args) {
+platon_delegate_call(const Address &addr, const gas_type &gas,
+                     const std::string &method, const Args &... args) {
   bytes paras = cross_call_args(method, args...);
   bytes gas_bytes = value_to_bytes(gas);
   int32_t result =
@@ -180,7 +204,7 @@ platon_delegate_call_unify(const Address &addr, const gas_type &gas,
 
   return_type return_value;
   get_call_output(return_value);
-  return std::pair<return_type, bool>(return_value, false);
+  return std::pair<return_type, bool>(return_value, true);
 }
 
 } // namespace platon
