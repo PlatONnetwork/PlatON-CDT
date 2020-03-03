@@ -10,16 +10,16 @@
 #include <tuple>
 #include <type_traits>
 #include "RLP.h"
-#include "rlp_extend.hpp"
 #include "chain.hpp"
-#include "panic.hpp"
 #include "name.hpp"
+#include "panic.hpp"
+#include "rlp_extend.hpp"
 
 namespace platon {
 
-inline byte* get_input(size_t &len) {
+inline byte* get_input(size_t& len) {
   len = ::platon_get_input_length();
-  byte * result = (byte *)malloc(len * sizeof(byte));
+  byte* result = (byte*)malloc(len * sizeof(byte));
   ::platon_get_input(result);
   return result;
 }
@@ -37,7 +37,7 @@ template <typename T>
 void platon_return(const T& t) {
   RLPStream rlp_stream;
   rlp_stream << t;
-  const std::vector<byte> &result = rlp_stream.out();
+  const bytesRef result = rlp_stream.out();
   ::platon_return(result.data(), result.size());
 }
 
@@ -81,9 +81,9 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
 }
 
 // Helper macro for EOSIO_DISPATCH_INTERNAL
-#define PLATON_DISPATCH_INTERNAL(r, OP, elem)    \
+#define PLATON_DISPATCH_INTERNAL(r, OP, elem)                \
   else if (method == name_value(BOOST_PP_STRINGIZE(elem))) { \
-    platon::execute_action(rlp, &OP::elem);      \
+    platon::execute_action(rlp, &OP::elem);                  \
   }
 
 // Helper macro for PLATON_DISPATCH
@@ -106,24 +106,24 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
  * @endcode
  */
 
-#define PLATON_DISPATCH(TYPE, MEMBERS)     \
-  extern "C" {                             \
-  void __wasm_call_ctors();                \
-  void invoke(void) {                      \
-    __wasm_call_ctors();                    \
-    size_t len = 0;                         \
-    auto input = get_input(len);            \
-    RLP rlp(input, len);                    \
-    uint64_t method = 0;                    \
-    fetch(rlp[0], method);                 \
-    if (0 == method) {                  \
-      internal::platon_throw("valid method\n");      \
-    }                                      \
-    PLATON_DISPATCH_HELPER(TYPE, MEMBERS)  \
-    else {                                 \
-      internal::platon_throw("no method to call\n"); \
-    }                                      \
-  }                                        \
+#define PLATON_DISPATCH(TYPE, MEMBERS)                       \
+  extern "C" {                                               \
+  void __wasm_call_ctors();                                  \
+  void invoke(void) {                                        \
+    __wasm_call_ctors();                                     \
+    size_t len = 0;                                          \
+    auto input = get_input(len);                             \
+    RLP rlp(input, len);                                     \
+    uint64_t method = 0;                                     \
+    fetch(rlp[0], method);                                   \
+    if (0 == method) {                                       \
+      platon::internal::platon_throw("valid method\n");      \
+    }                                                        \
+    PLATON_DISPATCH_HELPER(TYPE, MEMBERS)                    \
+    else {                                                   \
+      platon::internal::platon_throw("no method to call\n"); \
+    }                                                        \
+  }                                                          \
   }
 
 }  // namespace platon

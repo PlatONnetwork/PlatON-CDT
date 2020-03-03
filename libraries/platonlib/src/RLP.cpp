@@ -148,7 +148,7 @@ size_t RLP::items() const {
 }
 
 RLPStream& RLPStream::appendRaw(bytesConstRef _s, size_t _itemCount) {
-  m_out.insert(m_out.end(), _s.begin(), _s.end());
+  m_out.append(_s.begin(), _s.end());
   noteAppended(_itemCount);
   return *this;
 }

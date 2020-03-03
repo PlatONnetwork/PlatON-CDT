@@ -8,9 +8,9 @@
 #include "RLP.h"
 #include "chain.hpp"
 #include "common.h"
+#include "print.hpp"
 #include "rlp_extend.hpp"
 #include "rlp_size.hpp"
-
 const uint8_t value_prefix = 0xfe;
 
 namespace platon {
@@ -29,12 +29,12 @@ inline void set_state(const KEY &key, const VALUE &value) {
   state_stream.reserve(key_size);
 
   state_stream << key;
-  const std::vector<byte>& vect_key = state_stream.out();
+  const bytesRef vect_key = state_stream.out();
 
   RLPStream value_stream;
   auto value_size = pack_size(value);
   std::vector<byte> vect_value(sizeof(value_prefix), value_prefix);
-  value_stream.swapOut(vect_value);
+  value_stream.appendPrefix(vect_value);
   value_stream.reserve(vect_value.size() + value_size);
   value_stream << value;
   ::platon_set_state(vect_key.data(), vect_key.size(),
@@ -53,7 +53,7 @@ template <typename KEY, typename VALUE>
 inline size_t get_state(const KEY &key, VALUE &value) {
   RLPStream state_stream;
   state_stream << key;
-  const std::vector<byte> &vect_key = state_stream.out();
+  const bytesRef vect_key = state_stream.out();
   size_t len = ::platon_get_state_length(vect_key.data(), vect_key.size());
   if (len == 0) {
     return 0;
@@ -62,6 +62,7 @@ inline size_t get_state(const KEY &key, VALUE &value) {
   result.resize(len);
   ::platon_get_state(vect_key.data(), vect_key.size(), result.data(),
                      result.size());
+
   fetch(RLP(result.data() + sizeof(value_prefix),
             result.size() - sizeof(value_prefix)),
         value);
@@ -78,7 +79,7 @@ template <typename KEY>
 inline void del_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
-  const std::vector<byte> &vect_key = state_stream.out();
+  const bytesRef vect_key = state_stream.out();
   byte del = 0;
   ::platon_set_state(vect_key.data(), vect_key.size(), (const byte *)&del, 0);
 }
@@ -94,7 +95,7 @@ template <typename KEY>
 inline bool has_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
-  const std::vector<byte> &vect_key = state_stream.out();
+  const bytesRef vect_key = state_stream.out();
   size_t len = ::platon_get_state_length(vect_key.data(), vect_key.size());
   return len != 0;
 }

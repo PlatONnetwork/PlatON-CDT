@@ -13,7 +13,7 @@ using namespace platon;
 
 template <typename T>
 void print_rlp_code(const std::string& prefix, const T& data,
-                    const std::vector<byte>& result) {
+                    const bytesRef& result) {
   std::string info;
   char temp_info[100] = {};
   for (auto i : result) {
@@ -124,7 +124,7 @@ TEST_CASE(rlp, int8_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << int8_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size(), size, result.size());
   print_rlp_code("int8_t", int(int8_t_data), result);
@@ -141,7 +141,7 @@ TEST_CASE(rlp, int8_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << int8_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int8_t", int(int8_t_data), result);
@@ -157,7 +157,7 @@ TEST_CASE(rlp, int16_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << int16_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int16_t", int16_t_data, result);
@@ -174,7 +174,7 @@ TEST_CASE(rlp, int16_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << int16_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int16_t", int16_t_data, result);
@@ -190,7 +190,7 @@ TEST_CASE(rlp, int) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << int_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int", int_data, result);
@@ -207,7 +207,7 @@ TEST_CASE(rlp, int_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << int_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int", int_data, result);
@@ -223,7 +223,7 @@ TEST_CASE(rlp, int32_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << int32_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, __func__, strlen(__func__));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int32_t", int32_t_data, result);
@@ -240,7 +240,7 @@ TEST_CASE(rlp, int32_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << int32_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int32_t", int32_t_data, result);
@@ -256,7 +256,7 @@ TEST_CASE(rlp, int64_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << int64_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int64_t", int64_t_data, result);
@@ -274,7 +274,7 @@ TEST_CASE(rlp, int64_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << int64_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("int64_t", int64_t_data, result);
@@ -291,7 +291,7 @@ TEST_CASE(rlp, bool) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << bool_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("bool", bool_data, result);
@@ -308,7 +308,7 @@ TEST_CASE(rlp, bool_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << bool_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("bool", bool_data, result);
@@ -324,7 +324,7 @@ TEST_CASE(rlp, uint8_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << uint8_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint8_t", uint8_t_data, result);
@@ -341,7 +341,7 @@ TEST_CASE(rlp, uint8_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << uint8_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint8_t", uint8_t_data, result);
@@ -357,7 +357,7 @@ TEST_CASE(rlp, uint16_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << uint16_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint16_t", uint16_t_data, result);
@@ -374,7 +374,7 @@ TEST_CASE(rlp, uint16_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << uint16_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint16_t", uint16_t_data, result);
@@ -390,7 +390,7 @@ TEST_CASE(rlp, uint32_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << uint32_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint32_t", uint32_t_data, result);
@@ -407,7 +407,7 @@ TEST_CASE(rlp, uint32_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << uint32_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint32_t", uint32_t_data, result);
@@ -423,7 +423,7 @@ TEST_CASE(rlp, uint64_t) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << uint64_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint64_t", uint64_t_data, result);
@@ -440,7 +440,7 @@ TEST_CASE(rlp, uint64_t_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << uint64_t_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("uint64_t", uint64_t_data, result);
@@ -456,7 +456,7 @@ TEST_CASE(rlp, float) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << float_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("float", float_data, result);
@@ -473,7 +473,7 @@ TEST_CASE(rlp, float_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << float_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("float", float_data, result);
@@ -489,7 +489,7 @@ TEST_CASE(rlp, double) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << double_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("double", double_data, result);
@@ -506,7 +506,7 @@ TEST_CASE(rlp, double_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << double_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("double", double_data, result);
@@ -522,7 +522,7 @@ TEST_CASE(rlp, u128) {
   auto size = pack_size(u128_data);
   RLPStream stream;
   stream << u128_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("u128", u128_data, result);
@@ -539,7 +539,7 @@ TEST_CASE(rlp, u128_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << u128_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("u128", u128_data, result);
@@ -555,7 +555,7 @@ TEST_CASE(rlp, string) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << string_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("string", string_data, result);
@@ -572,7 +572,7 @@ TEST_CASE(rlp, string_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << string_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("string", string_data, result);
@@ -644,7 +644,7 @@ TEST_CASE(rlp, list) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << list_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("list", "list_data", result);
@@ -661,7 +661,7 @@ TEST_CASE(rlp, list_reserve) {
   RLPStream stream;
   stream.reserve(size);
   stream << list_data;
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("list", "list_data", result);
@@ -686,7 +686,7 @@ TEST_CASE(rlp, append) {
   stream << data_32;
   vect_result.push_back(data_32);
   auto size = pack_size(vect_result);
-  std::vector<byte> result = stream.out();
+  bytesRef result = stream.out();
   ASSERT_EQ(size, result.size());
   print_rlp_code("append", "test", result);
   std::vector<uint32_t> vect_fetch;
@@ -740,7 +740,7 @@ TEST_CASE(rlp, struct) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream wht_stream;
   wht_stream << one;
-  std::vector<byte> result = wht_stream.out();
+  bytesRef result = wht_stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("struct", "test", result);
@@ -757,7 +757,7 @@ TEST_CASE(rlp, struct_reserve) {
   RLPStream wht_stream;
   wht_stream.reserve(size);
   wht_stream << one;
-  std::vector<byte> result = wht_stream.out();
+  bytesRef result = wht_stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("struct", "test", result);
@@ -774,7 +774,7 @@ TEST_CASE(rlp, group) {
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream wht_stream;
   wht_stream << group;
-  std::vector<byte> result = wht_stream.out();
+  bytesRef result = wht_stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size(), size, result.size());
   print_rlp_code("group", "test", result);
@@ -792,7 +792,7 @@ TEST_CASE(rlp, group_reserve) {
   RLPStream wht_stream;
   wht_stream.reserve(size);
   wht_stream << group;
-  std::vector<byte> result = wht_stream.out();
+  bytesRef result = wht_stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size(), size, result.size());
   print_rlp_code("group", "test", result);
@@ -809,7 +809,7 @@ TEST_CASE(rlp, Derived) {
   auto size = pack_size(test_derived);
   RLPStream wht_stream;
   wht_stream << test_derived;
-  std::vector<byte> result = wht_stream.out();
+  bytesRef result = wht_stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("Derived", "test", result);
@@ -827,7 +827,7 @@ TEST_CASE(rlp, Derived_reserve) {
   RLPStream wht_stream;
   wht_stream.reserve(size);
   wht_stream << test_derived;
-  std::vector<byte> result = wht_stream.out();
+  bytesRef result = wht_stream.out();
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("Derived", "test", result);

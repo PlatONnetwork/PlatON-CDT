@@ -19,7 +19,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
-
+#include "bytes_buffer.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
 #include "panic.hpp"
@@ -685,7 +685,8 @@ class RLPStream {
   RLPStream& appendList(size_t _items);
   RLPStream& appendList(bytesConstRef _rlp);
   RLPStream& appendList(bytes const& _rlp) { return appendList(&_rlp); }
-  RLPStream& appendList(RLPStream const& _s) { return appendList(&_s.out()); }
+  //  RLPStream& appendList(RLPStream const& _s) { return appendList(&_s.out());
+  //  }
 
   /// Appends raw (pre-serialised) RLP data. Use with caution.
   RLPStream& appendRaw(bytesConstRef _s, size_t _itemCount = 1);
@@ -732,21 +733,25 @@ class RLPStream {
   }
 
   /// Read the byte stream.
-  bytes const& out() const {
+  bytesRef out() const {
     if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
-    return m_out;
+    return m_out.out();
   }
 
   /// Invalidate the object and steal the output byte stream.
-  bytes&& invalidate() {
+  BytesBuffer&& invalidate() {
     if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
     return std::move(m_out);
   }
 
-  /// Swap the contents of the output stream out for some other byte array.
-  void swapOut(bytes& _dest) {
+  void appendPrefix(BytesBuffer& _dest) {
     if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
-    swap(m_out, _dest);
+    m_out.append(_dest.data(), _dest.data() + _dest.size());
+  }
+
+  void appendPrefix(bytes& _dest) {
+    if (!m_listStack.empty()) internal::platon_throw("listStack is not empty");
+    m_out.append(_dest.data(), _dest.data() + _dest.size());
   }
 
   void reserve(size_t size) {
@@ -773,7 +778,7 @@ class RLPStream {
   }
 
   /// Our output byte stream.
-  bytes m_out;
+  BytesBuffer m_out;
 
   std::vector<std::pair<size_t, size_t>> m_listStack;
 };
@@ -790,17 +795,21 @@ void rlpListAux(RLPStream& _out, _T _t, _Ts... _ts) {
 /// Export a single item in RLP format, returning a byte array.
 template <class _T>
 bytes rlp(_T _t) {
-  return (RLPStream() << _t).out();
+  bytesRef ref = (RLPStream() << _t).out();
+  return bytes(ref.begin(), ref.end());
 }
 
 /// Export a list of items in RLP format, returning a byte array.
-inline bytes rlpList() { return RLPStream(0).out(); }
-template <class... _Ts>
-bytes rlpList(_Ts... _ts) {
-  RLPStream out(sizeof...(_Ts));
-  rlpListAux(out, _ts...);
-  return out.out();
+inline bytes rlpList() {
+  bytesRef ref = RLPStream(0).out();
+  return bytes(ref.begin(), ref.end());
 }
+// template <class... _Ts>
+// bytes rlpList(_Ts... _ts) {
+//  RLPStream out(sizeof...(_Ts));
+//  rlpListAux(out, _ts...);
+//  return out.out();
+//}
 
 /// The empty string in RLP format.
 // extern bytes RLPNull;
