@@ -21,6 +21,7 @@ add_executable(platon-cpp
   Backend.cpp
   PCCPass.cpp
   RemoveAttrs.cpp
+  DisableFloat.cpp
   )
 
 install(TARGETS platon-cpp RUNTIME DESTINATION bin)

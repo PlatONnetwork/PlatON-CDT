@@ -33,11 +33,9 @@ static void AddOptimizationPasses(legacy::PassManagerBase &MPM,
 }
 
 FunctionPass* createRemoveAttrsPass ();
-ModulePass* createVerifyPCCPass ();
+FunctionPass* createDisableFloatsPass ();
 
 void PCCPass(llvm::Module &M){
-
-  StripDebugInfo(M);
 
   // Initialize passes
   PassRegistry &Registry = *PassRegistry::getPassRegistry();
@@ -71,9 +69,10 @@ void PCCPass(llvm::Module &M){
     FPasses.run(F);
   FPasses.doFinalization();
 
-  Passes.add(createVerifierPass());
-//  Passes.add(createVerifyPCCPass());
+  Passes.add(createDisableFloatsPass());
 
+  Passes.add(createVerifierPass());
   Passes.run(M);
 
+  StripDebugInfo(M);
 }
