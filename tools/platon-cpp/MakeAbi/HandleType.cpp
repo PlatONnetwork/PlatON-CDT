@@ -103,12 +103,8 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
       return SSaver.save(str);
 
     case llvm::dwarf::DW_ATE_float:
-      if(size==32)return "float";
-      else if(size==64)return "double";
-      else {
-        report_error(Node);
-        report_fatal_error("unknown base type");
-      }
+      report_error(Node);
+      report_fatal_error("can not use float type\n");
 
     default:
       report_error(Node);
