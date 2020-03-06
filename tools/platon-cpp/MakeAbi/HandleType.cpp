@@ -29,7 +29,6 @@ bool isMap(DICompositeType*);
 bool isPair(DICompositeType*);
 
 bool isFixedHash(DICompositeType*);
-bool isWideInteger(DICompositeType*);
 
 StringRef getName(DINode* Node){
   if(DILocalVariable* LV = dyn_cast<DILocalVariable>(Node)){ 
@@ -104,12 +103,8 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
       return SSaver.save(str);
 
     case llvm::dwarf::DW_ATE_float:
-      if(size==32)return "float";
-      else if(size==64)return "double";
-      else {
-        report_error(Node);
-        report_fatal_error("unknown base type");
-      }
+      report_error(Node);
+      report_fatal_error("can not use float type\n");
 
     default:
       report_error(Node);
@@ -189,9 +184,6 @@ StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
   } else if(isFixedHash(CT)){
     return handleFixedHash(Node, CT);
-
-  } else if(isWideInteger(CT)){
-    return handleWideInteger(Node, CT);
 
   } else if(CT->getElements().get() == nullptr){
     report_error(Node);
