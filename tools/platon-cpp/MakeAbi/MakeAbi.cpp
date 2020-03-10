@@ -77,6 +77,17 @@ void collectParams(Function* DbgDecl, SubprogramMap &SPMap, ParamsMap &PMap){
   }
 }
 
+void collectRetainedNodes(SubprogramMap &SPMap, ParamsMap &PMap){
+  for(auto iter : SPMap){
+    DISubprogram* SP = iter.first; 
+    for(DINode* Node : SP->getRetainedNodes()){
+      DILocalVariable* LV = cast<DILocalVariable>(Node);
+      if(LV->isParameter() && LV->getArg()>1)
+        PMap.insert(make_pair(SP, LV));
+    }
+  }
+}
+
 Attr DedupKind(Attr attr0, Attr attr1){
   AttrKind Kind0 = attr0.first;
   AttrKind Kind1 = attr1.first;
@@ -136,6 +147,7 @@ void makeAbi(Module* M, MakeAbi &MABI){
   if(SPMap.size()==0)
     report_fatal_error("have not define Action or Event function");
 
+  collectRetainedNodes(SPMap, PMap);
   collectParams(M->getFunction("llvm.dbg.declare"), SPMap, PMap);
   collectParams(M->getFunction("llvm.dbg.value"), SPMap, PMap);
 
