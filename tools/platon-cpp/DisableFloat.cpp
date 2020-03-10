@@ -18,7 +18,7 @@ void assertFloat(Type* T, StringRef file, unsigned line ){
     if(!file.empty())
       llvm::outs() << file << ":" << line << ": ";
 
-    report_fatal_error("can not use float type\n");
+    report_fatal_error("can not use float or double type\n");
   }
 }
 

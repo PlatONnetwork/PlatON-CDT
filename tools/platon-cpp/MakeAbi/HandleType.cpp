@@ -104,7 +104,7 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
 
     case llvm::dwarf::DW_ATE_float:
       report_error(Node);
-      report_fatal_error("can not use float type\n");
+      report_fatal_error("can not use float or double type\n");
 
     default:
       report_error(Node);
@@ -136,6 +136,11 @@ StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT){
 StringRef MakeAbi::handleStructType(DINode* Node, DICompositeType* CT){
   json::Value Elems = {};
   json::Value BaseClass = {};
+
+  if(CT->getElements().get() == nullptr){
+    report_error(Node);
+    report_fatal_error("StructType have define but never used");
+  }
 
   for(DINode* DN : CT->getElements()){
     if(DIDerivedType* Elem = dyn_cast<DIDerivedType>(DN)){
@@ -184,10 +189,6 @@ StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT){
 
   } else if(isFixedHash(CT)){
     return handleFixedHash(Node, CT);
-
-  } else if(CT->getElements().get() == nullptr){
-    report_error(Node);
-    report_fatal_error("StructType have define but never used");
 
   } else if(CT->getTag() == dwarf::DW_TAG_structure_type || CT->getTag() == dwarf::DW_TAG_class_type){
     return handleStructType(Node, CT);

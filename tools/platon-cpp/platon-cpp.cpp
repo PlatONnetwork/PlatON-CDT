@@ -104,14 +104,14 @@ int main(int argc, char **argv) {
 
   std::unique_ptr<llvm::Module> M = std::move(Builder.Mod);
 
+  if(Option.OutputIR){
+    return OutputIRFile(M.get(), Option.Output);
+  }
+    
   if(!Option.NoABI)
     GenerateABI(Option.Output, M.get());
 
   PCCPass(*M);
 
-  if(Option.OutputIR){
-    return OutputIRFile(M.get(), Option.Output);
-  }
-    
   return GenerateWASM(Option, M.get());
 }
