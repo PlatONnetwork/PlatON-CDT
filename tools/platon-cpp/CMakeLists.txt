@@ -223,3 +223,7 @@ else()
     pthread
     m)
 endif()
+
+if(ABITest)
+  add_subdirectory(unittest)
+endif()
