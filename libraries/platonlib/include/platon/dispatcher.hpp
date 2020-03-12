@@ -36,6 +36,7 @@ void get_para(RLP& rlp, std::tuple<Args...>& t) {
 template <typename T>
 void platon_return(const T& t) {
   RLPStream rlp_stream;
+  rlp_stream.reserve(pack_size(t));
   rlp_stream << t;
   const bytesRef result = rlp_stream.out();
   ::platon_return(result.data(), result.size());
