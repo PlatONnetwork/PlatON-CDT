@@ -77,8 +77,8 @@ bool platon_transfer(const Address& addr, const Energon& amount);
  */
 u128 platon_call_value() {
   byte val[16];
-  ::platon_call_value(val);
-  return fromBigEndian<u128>(val);
+  size_t len  = ::platon_call_value(val);
+  return fromBigEndian<u128>(bytesRef(val, len));
 }
 
 /**

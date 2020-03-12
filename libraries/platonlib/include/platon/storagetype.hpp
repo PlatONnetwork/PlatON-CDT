@@ -204,8 +204,8 @@ using Array = class StorageType<name, std::array<T, N>>;
 template <Name::Raw name, typename... Types>
 using Tuple = class StorageType<name, std::tuple<Types...>>;
 
-template <Name::Raw name, typename T>
-using Deque = class StorageType<name, std::deque<T>>;
+// template <Name::Raw name, typename T>
+// using Deque = class StorageType<name, std::deque<T>>;
 
 //    template <Name::Raw name,  typename T>
 //    using Queue = class StorageType<name, std::queue<T>>;

@@ -16,3 +16,6 @@
 #include "platon/assert.hpp"
 #include "platon/chain_impl.hpp"
 #include "platon/exchange.hpp"
+#include "platon/db/array.hpp"
+#include "platon/db/map.hpp"
+#include "platon/db/multi_index.hpp"

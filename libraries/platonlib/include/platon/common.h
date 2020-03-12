@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <vector>
 #include "vector_ref.h"
+#include "panic.hpp"
 
 namespace platon {
 using u128 = __uint128_t;
@@ -153,3 +154,41 @@ inline T fromBigEndian(_In const& _bytes) {
   return ret;
 }
 }  // namespace platon
+
+
+/**
+ * @brief Converts a string to an integer of type u128.
+ * @param str_value The value string starts with a pointer.
+ * @param len Value string length.
+ * @return an integer of type u128.
+ */
+inline platon::u128 operator "" _u128 (const char *str_value, size_t len){
+  bool is_hex = false;
+  if(len > 2 && '0' == str_value[0] && 'x' == str_value[1] ){
+    is_hex = true;
+  } else {
+    for(int i = 0; i < len; ++i){
+      int temp = platon::fromHexChar(str_value[i]);
+      if(-1 == temp){
+        platon::internal::platon_throw("Not a valid numeric character");
+      }
+      if(temp > 9){
+        is_hex = true;
+        break;
+      }
+    }
+  }
+
+  platon::u128 result = 0;
+  if(is_hex) {
+    platon::bytes hex_bytes = platon::fromHex(str_value);
+    result = platon::fromBigEndian<platon::u128>(hex_bytes);
+  }else {
+    for(int i = 0; i < len; ++i){
+      int temp = platon::fromHexChar(str_value[i]);
+      result = result * 10 + temp;
+    }
+  }
+
+  return result;
+}
