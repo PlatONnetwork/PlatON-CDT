@@ -52,9 +52,11 @@ struct dsmalloc {
     }
 
     // allocate memeory
-    size_t alloc_result = __builtin_wasm_memory_grow(0, pages_to_alloc);
-    if (0 == alloc_result) {
-      internal::platon_throw("failed to allocate pages");
+    if(pages_to_alloc > 0){
+      size_t alloc_result = __builtin_wasm_memory_grow(0, pages_to_alloc);
+      if (0 == alloc_result) {
+        internal::platon_throw("failed to allocate pages");
+      }
     }
 
     // set size
