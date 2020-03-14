@@ -7,42 +7,105 @@
 #include "rlp_extend.hpp"
 #include "rlp_size.hpp"
 
-#define ARG_COUNT_P1_(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
+#define ARG_COUNT_P1_(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
 
-#define ARG_COUNT_P2_ 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+#define ARG_COUNT_P2_ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
 
 #define ARG_COUNT_(...) ARG_COUNT_P1_(__VA_ARGS__)
 
 #define ARG_COUNT(...) ARG_COUNT_(_, ##__VA_ARGS__, ARG_COUNT_P2_)
 
+#define ARG_POS_P1_10(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
+#define ARG_POS_P2_10 2, 3, 4, 5, 6, 7, 8, 9, 10
+#define ARG_POS_P1_9(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
+#define ARG_POS_P2_9 2, 3, 4, 5, 6, 7, 8, 9
+#define ARG_POS_P1_8(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
+#define ARG_POS_P2_8 2, 3, 4, 5, 6, 7, 8
+#define ARG_POS_P1_7(_1, _2, _3, _4, _5, _6, _7, N, ...) N
+#define ARG_POS_P2_7 2, 3, 4, 5, 6, 7
+#define ARG_POS_P1_6(_1, _2, _3, _4, _5, _6, N, ...) N
+#define ARG_POS_P2_6 2, 3, 4, 5, 6
+#define ARG_POS_P1_5(_1, _2, _3, _4, _5, N, ...) N
+#define ARG_POS_P2_5 2, 3, 4, 5
+#define ARG_POS_P1_4(_1, _2, _3, _4, N, ...) N
+#define ARG_POS_P2_4 2, 3, 4
+#define ARG_POS_P1_3(_1, _2, _3, N, ...) N
+#define ARG_POS_P2_3 2, 3
+#define ARG_POS_P1_2(_1, _2, N, ...) N
+#define ARG_POS_P2_2 2
+#define ARG_POS_P1_1(...) 1
+#define ARG_POS_P2_1 1
+#define ARG_POS10_(...) ARG_POS_P1_10(__VA_ARGS__)
+#define ARG_POS10(...) ARG_POS10_(_, ##__VA_ARGS__, ARG_POS_P2_10)
+#define ARG_POS9_(...) ARG_POS_P1_9(__VA_ARGS__)
+#define ARG_POS9(...) ARG_POS9_(_, ##__VA_ARGS__, ARG_POS_P2_9)
+#define ARG_POS8_(...) ARG_POS_P1_8(__VA_ARGS__)
+#define ARG_POS8(...) ARG_POS8_(_, ##__VA_ARGS__, ARG_POS_P2_8)
+#define ARG_POS7_(...) ARG_POS_P1_7(__VA_ARGS__)
+#define ARG_POS7(...) ARG_POS7_(_, ##__VA_ARGS__, ARG_POS_P2_7)
+#define ARG_POS6_(...) ARG_POS_P1_6(__VA_ARGS__)
+#define ARG_POS6(...) ARG_POS6_(_, ##__VA_ARGS__, ARG_POS_P2_6)
+#define ARG_POS5_(...) ARG_POS_P1_5(__VA_ARGS__)
+#define ARG_POS5(...) ARG_POS5_(_, ##__VA_ARGS__, ARG_POS_P2_5)
+#define ARG_POS4_(...) ARG_POS_P1_4(__VA_ARGS__)
+#define ARG_POS4(...) ARG_POS4_(_, ##__VA_ARGS__, ARG_POS_P2_4)
+#define ARG_POS3_(...) ARG_POS_P1_3(__VA_ARGS__)
+#define ARG_POS3(...) ARG_POS3_(_, ##__VA_ARGS__, ARG_POS_P2_3)
+#define ARG_POS2_(...) ARG_POS_P1_2(__VA_ARGS__)
+#define ARG_POS2(...) ARG_POS2_(_, ##__VA_ARGS__, ARG_POS_P2_2)
+#define ARG_POS1_(...) ARG_POS_P1_1(__VA_ARGS__)
+#define ARG_POS1(...) ARG_POS1_(_, ##__VA_ARGS__, ARG_POS_P2_1)
+
 #define M_CAT(a, b) M_CAT_(a, b)
 #define M_CAT_(a, b) a##b
 
-#define VA_F(...) M_CAT(func, ARG_COUNT(__VA_ARGS__))(__VA_ARGS__)
+#define VA_F(...)                     \
+  M_CAT(func, ARG_COUNT(__VA_ARGS__)) \
+  (1, ARG_COUNT(__VA_ARGS__), __VA_ARGS__)
 
-#define PA_F(...) M_CAT(params, ARG_COUNT(__VA_ARGS__))(__VA_ARGS__)
+#define PA_F(...)                       \
+  M_CAT(params, ARG_COUNT(__VA_ARGS__)) \
+  (1, ARG_COUNT(__VA_ARGS__), __VA_ARGS__)
 
-#define params1(a) arg1
-#define params2(a, ...) arg2, params1(__VA_ARGS__)
-#define params3(a, ...) arg3, params2(__VA_ARGS__)
-#define params4(a, ...) arg4, params3(__VA_ARGS__)
-#define params5(a, ...) arg5, params4(__VA_ARGS__)
-#define params6(a, ...) arg6, params5(__VA_ARGS__)
-#define params7(a, ...) arg7, params6(__VA_ARGS__)
-#define params8(a, ...) arg8, params7(__VA_ARGS__)
-#define params9(a, ...) arg9, params8(__VA_ARGS__)
-#define params10(a, ...) arg10, params9(__VA_ARGS__)
+#define params1(N, total, a) M_CAT(arg, N)
+#define params2(N, total, a, ...) \
+  M_CAT(arg, N), params1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params3(N, total, a, ...) \
+  M_CAT(arg, N), params2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params4(N, total, a, ...) \
+  M_CAT(arg, N), params3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params5(N, total, a, ...) \
+  M_CAT(arg, N), params4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params6(N, total, a, ...) \
+  M_CAT(arg, N), params5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params7(N, total, a, ...) \
+  M_CAT(arg, N), params6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params8(N, total, a, ...) \
+  M_CAT(arg, N), params7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params9(N, total, a, ...) \
+  M_CAT(arg, N), params8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define params10(N, total, a, ...) \
+  M_CAT(arg, N), params9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 
-#define func1(a) a arg1
-#define func2(a, ...) a arg2, func1(__VA_ARGS__)
-#define func3(a, ...) a arg3, func2(__VA_ARGS__)
-#define func4(a, ...) a arg4, func3(__VA_ARGS__)
-#define func5(a, ...) a arg5, func4(__VA_ARGS__)
-#define func6(a, ...) a arg6, func5(__VA_ARGS__)
-#define func7(a, ...) a arg7, func6(__VA_ARGS__)
-#define func8(a, ...) a arg8, func7(__VA_ARGS__)
-#define func9(a, ...) a arg9, func8(__VA_ARGS__)
-#define func10(a, ...) a arg10, func9(__VA_ARGS__)
+#define func1(N, total, a) a M_CAT(arg, N)
+#define func2(N, total, a, ...) \
+  a M_CAT(arg, N), func1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func3(N, total, a, ...) \
+  a M_CAT(arg, N), func2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func4(N, total, a, ...) \
+  a M_CAT(arg, N), func3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func5(N, total, a, ...) \
+  a M_CAT(arg, N), func4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func6(N, total, a, ...) \
+  a M_CAT(arg, N), func5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func7(N, total, a, ...) \
+  a M_CAT(arg, N), func6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func8(N, total, a, ...) \
+  a M_CAT(arg, N), func7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func9(N, total, a, ...) \
+  a M_CAT(arg, N), func8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define func10(N, total, a, ...) \
+  a M_CAT(arg, N), func9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 
 #define PLATON_EVENT0(NAME, ...)                   \
   EVENT void NAME(VA_F(__VA_ARGS__)) {             \
