@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"math"
 	"reflect"
 
 	"github.com/PlatONnetwork/wagon/exec"
@@ -72,16 +71,16 @@ func GetStateLength(proc *exec.Process, key uint32, keyLen uint32) uint32 {
 	return uint32(len(db.Get(string(keyBuf))))
 }
 
-func GetState(proc *exec.Process, key uint32, keyLen uint32, val uint32, valLen uint32) uint32 {
+func GetState(proc *exec.Process, key uint32, keyLen uint32, val uint32, valLen uint32) int32 {
 	db := proc.HostCtx().(*VMContext).Db
 	keyBuf := make([]byte, keyLen)
 	proc.ReadAt(keyBuf, int64(key))
 	valBuf := db.Get(string(keyBuf))
 	if uint32(len(valBuf)) > valLen {
-		return math.MaxUint32
+		return -1
 	}
 	proc.WriteAt(valBuf, int64(val))
-	return 0
+	return int32(len(valBuf))
 }
 
 func ReturnContract(proc *exec.Process, dst uint32, len uint32) {
