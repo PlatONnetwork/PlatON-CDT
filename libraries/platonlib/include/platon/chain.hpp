@@ -274,9 +274,9 @@ size_t platon_get_state_length(const uint8_t *key, size_t klen);
  * @param klen The length of Key
  * @param value Value
  * @param vlen The length of value
- * @return The length of value
+ * @return return the actual length on success and -1 on failure.
  */
-size_t platon_get_state(const uint8_t *key, size_t klen, uint8_t *value,
+int32_t platon_get_state(const uint8_t *key, size_t klen, uint8_t *value,
                         size_t vlen);
 
 #ifdef __cplusplus
