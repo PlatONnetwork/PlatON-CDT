@@ -56,7 +56,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       for(unsigned i=0; i<A->getNumValues(); i++) {
         if(strcmp(A->getValue(i), "-no-abi") == 0)
           NoABI = true;
-        else 
+        else
           ldArgs.push_back(A->getValue(i));
       }
     } else {
@@ -103,6 +103,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
   clangArgs.push_back("-g");
   clangArgs.push_back("-DNDEBUG");
   clangArgs.push_back("-Oz");
+  clangArgs.push_back("-I.");
 
   if(!NoStdlib){
     string includedir = bindir + "/../platon.cdt/include/";
@@ -118,7 +119,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
 void PCCOption::AdjustLLDArgs(bool NoStdlib){
   string libdir = bindir + "/../platon.cdt/lib/";
   string ExternSymbolFile = libdir + "extern_symbol";
-  
+
   if(!NoStdlib) {
     ldArgs.push_back("-L");
     ldArgs.push_back(libdir);
