@@ -113,6 +113,39 @@ void platon_sha3(const uint8_t *src, size_t srcLen, uint8_t *dest,
                  size_t destLen);
 
 /**
+ * @brief It returns the address from the given signature by calculating a
+ * recovery function of ECDSA
+ *
+ * @param hash The hash value after sha3 hash of the raw data
+ * @param sig The start pointer to the signature data
+ * @param sig_len Length of signature data
+ * @param addr Signed address
+ * @return Getting the signature address returns 0 on success and -1 on failure
+ */
+int32_t platon_ecrecover(const uint8_t hash[32], const uint8_t *sig,
+                         const uint8_t sig_len, uint8_t addr[20]);
+
+/**
+ * @brief ripemd160 algorithm
+ *
+ * @param src Hash input pointer to the byte array
+ * @param srcLen Hash input the length of the byte array
+ * @param hash Hash output pointer to byte array
+ * @return void
+ */
+void platon_ripemd160(const uint8_t *src, size_t srcLen, uint8_t hash[20]);
+
+/**
+ * @brief sha256 algorithm
+ *
+ * @param src Hash input pointer to the byte array
+ * @param srcLen Hash input the length of the byte array
+ * @param hash Hash output pointer to byte array
+ * @return void
+ */
+void platon_sha256(const uint8_t *src, size_t srcLen, uint8_t hash[32]);
+
+/**
  * @brief Set the return value
  *
  * @param value The point to the data
@@ -277,7 +310,7 @@ size_t platon_get_state_length(const uint8_t *key, size_t klen);
  * @return return the actual length on success and -1 on failure.
  */
 int32_t platon_get_state(const uint8_t *key, size_t klen, uint8_t *value,
-                        size_t vlen);
+                         size_t vlen);
 
 #ifdef __cplusplus
 }

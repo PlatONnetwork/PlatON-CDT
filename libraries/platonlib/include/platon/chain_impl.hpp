@@ -55,7 +55,7 @@ Address platon_coinbase() {
  * @param addr address
  * @return The balance of the address
  */
-Energon platon_balance(const Address& addr) {
+Energon platon_balance(const Address &addr) {
   byte balance[16];
   size_t len = ::platon_balance(addr.data(), balance);
   return Energon(fromBigEndian<u128>(bytesRef(balance, len)));
@@ -68,7 +68,7 @@ Energon platon_balance(const Address& addr) {
  * @param amount The amount of Energon
  * @return true if transfer success, false otherwise
  */
-bool platon_transfer(const Address& addr, const Energon& amount);
+bool platon_transfer(const Address &addr, const Energon &amount);
 
 /**
  * @brief Get the value of the current transaction value field
@@ -77,7 +77,7 @@ bool platon_transfer(const Address& addr, const Energon& amount);
  */
 u128 platon_call_value() {
   byte val[16];
-  size_t len  = ::platon_call_value(val);
+  size_t len = ::platon_call_value(val);
   return fromBigEndian<u128>(bytesRef(val, len));
 }
 
@@ -87,10 +87,50 @@ u128 platon_call_value() {
  * @param data Binary data
  * @return The Hash of the data
  */
-h256 platon_sha3(const bytes& data) {
+h256 platon_sha3(const bytes &data) {
   byte hash[32];
   ::platon_sha3(data.data(), data.size(), hash, sizeof(hash));
   return h256(hash, sizeof(hash));
+}
+
+/**
+ * @brief It returns the address from the given signature by calculating a
+ * recovery function of ECDSA
+ *
+ * @param hash The hash value after sha3 hash of the raw data
+ * @param signature signature data
+ * @param result the signature address
+ * @return Getting the signature address returns 0 on success and -1 on failure
+ */
+int32_t platon_ecrecover(const h256 &hash, const bytes &signature,
+                         Address &result) {
+  int32_t ret = ::platon_ecrecover(hash.data(), signature.data(),
+                                   signature.size(), result.data());
+  return ret;
+}
+
+/**
+ * @brief ripemd160 algorithm
+ *
+ * @param data Binary data
+ * @return The Hash of the data
+ */
+h160 platon_ripemd160(const bytes &data) {
+  h160 result;
+  ::platon_ripemd160(data.data(), data.size(), result.data());
+  return result;
+}
+
+/**
+ * @brief sha256 algorithm
+ *
+ * @param data Binary data
+ * @return The Hash of the data
+ */
+h256 platon_sha256(const bytes &data) {
+  h256 result;
+  ::platon_sha256(data.data(), data.size(), result.data());
+  return result;
 }
 
 /**
@@ -98,8 +138,7 @@ h256 platon_sha3(const bytes& data) {
  *
  * @tparam T Value type
  */
-template <typename T>
-void platon_return(const T& t);
+template <typename T> void platon_return(const T &t);
 
 /**
  * @brief Get the input value
@@ -113,8 +152,8 @@ bytes get_input();
  *
  * @param data The debug info
  */
-void platon_debug(const std::string& data) {
-  ::platon_debug(reinterpret_cast<const uint8_t*>(data.c_str()), data.size());
+void platon_debug(const std::string &data) {
+  ::platon_debug(reinterpret_cast<const uint8_t *>(data.c_str()), data.size());
 }
 
 /**
@@ -123,7 +162,7 @@ void platon_debug(const std::string& data) {
  * @param addr Address of the contract
  * @return true if destroy successfully, false otherwise
  */
-bool platon_destroy(const Address& addr) {
+bool platon_destroy(const Address &addr) {
   return ::platon_destroy(addr.data()) == 0;
 }
 
@@ -139,7 +178,7 @@ bool platon_destroy(const Address& addr) {
  * @return true if migration successfully, false otherwise
  */
 template <typename value_type, typename gas_type>
-bool platon_migrate_contract(Address& addr, const bytes& init_args,
+bool platon_migrate_contract(Address &addr, const bytes &init_args,
                              value_type value, gas_type gas);
 
 /**
@@ -154,8 +193,8 @@ bool platon_migrate_contract(Address& addr, const bytes& init_args,
  * @return true if call successfully, false otherwise
  */
 template <typename value_type, typename gas_type>
-bool platon_call(const Address& addr, const bytes& paras,
-                 const value_type& value, const gas_type& gas);
+bool platon_call(const Address &addr, const bytes &paras,
+                 const value_type &value, const gas_type &gas);
 
 /**
  * @brief Cross contract delegation call
@@ -167,8 +206,8 @@ bool platon_call(const Address& addr, const bytes& paras,
  * @return 0 if call successfully
  */
 template <typename gas_type>
-bool platon_delegate_call(const Address& addr, const bytes& paras,
-                          const gas_type& gas);
+bool platon_delegate_call(const Address &addr, const bytes &paras,
+                          const gas_type &gas);
 
 /**
  * @brief Get the value of call output
@@ -176,8 +215,7 @@ bool platon_delegate_call(const Address& addr, const bytes& paras,
  * @tparam T The output value type
  * @return The value of call output
  */
-template <typename T>
-void get_call_output(T& t);
+template <typename T> void get_call_output(T &t);
 
 /**
  * @brief Get the address of original caller
@@ -209,7 +247,7 @@ Address platon_address();
  * @param value Value
  */
 template <typename KEY, typename VALUE>
-void set_state(const KEY& key, const VALUE& value);
+void set_state(const KEY &key, const VALUE &value);
 
 /**
  * @brief Get the State object
@@ -221,5 +259,5 @@ void set_state(const KEY& key, const VALUE& value);
  * @return size_t Get the length of the data
  */
 template <typename KEY, typename VALUE>
-size_t get_state(const KEY& key, VALUE& value);
-}  // namespace platon
+size_t get_state(const KEY &key, VALUE &value);
+} // namespace platon
