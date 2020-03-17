@@ -63,81 +63,123 @@
   M_CAT(func, ARG_COUNT(__VA_ARGS__)) \
   (1, ARG_COUNT(__VA_ARGS__), __VA_ARGS__)
 
+#define _VA_F(...)                     \
+  M_CAT(_func, ARG_COUNT(__VA_ARGS__)) \
+  (1, ARG_COUNT(__VA_ARGS__), __VA_ARGS__)
+
 #define PA_F(...)                       \
   M_CAT(params, ARG_COUNT(__VA_ARGS__)) \
   (1, ARG_COUNT(__VA_ARGS__), __VA_ARGS__)
 
-#define params1(N, total, a) M_CAT(arg, N)
+#define params0(N, total, a)
+#define params1(N, total, a) , M_CAT(arg, N)
 #define params2(N, total, a, ...) \
-  M_CAT(arg, N), params1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params3(N, total, a, ...) \
-  M_CAT(arg, N), params2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params4(N, total, a, ...) \
-  M_CAT(arg, N), params3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params5(N, total, a, ...) \
-  M_CAT(arg, N), params4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params6(N, total, a, ...) \
-  M_CAT(arg, N), params5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params7(N, total, a, ...) \
-  M_CAT(arg, N), params6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params8(N, total, a, ...) \
-  M_CAT(arg, N), params7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params9(N, total, a, ...) \
-  M_CAT(arg, N), params8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                 \
+        params8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define params10(N, total, a, ...) \
-  M_CAT(arg, N), params9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  , M_CAT(arg, N)                  \
+        params9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 
+#define func0(N, total, a)
+#define _func0(N, total, a)
 #define func1(N, total, a) a M_CAT(arg, N)
+#define _func1(N, total, a) , a M_CAT(arg, N)
 #define func2(N, total, a, ...) \
-  a M_CAT(arg, N), func1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func2(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func1(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func3(N, total, a, ...) \
-  a M_CAT(arg, N), func2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func3(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func2(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func4(N, total, a, ...) \
-  a M_CAT(arg, N), func3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func4(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func3(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func5(N, total, a, ...) \
-  a M_CAT(arg, N), func4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func5(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func4(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func6(N, total, a, ...) \
-  a M_CAT(arg, N), func5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func6(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func5(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func7(N, total, a, ...) \
-  a M_CAT(arg, N), func6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func7(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func6(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func8(N, total, a, ...) \
-  a M_CAT(arg, N), func7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func8(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func7(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func9(N, total, a, ...) \
-  a M_CAT(arg, N), func8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func9(N, total, a, ...) \
+  , a M_CAT(arg, N)              \
+        _func8(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 #define func10(N, total, a, ...) \
-  a M_CAT(arg, N), func9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+  a M_CAT(arg, N) _func9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
+#define _func10(N, total, a, ...) \
+  , a M_CAT(arg, N)               \
+        _func9(M_CAT(ARG_POS, total)(__VA_ARGS__), total, __VA_ARGS__)
 
-#define PLATON_EVENT0(NAME, ...)                   \
-  EVENT void NAME(VA_F(__VA_ARGS__)) {             \
-    platon::emit_event0(#NAME, PA_F(__VA_ARGS__)); \
+#define PLATON_EVENT0(NAME, ...)                  \
+  EVENT void NAME(VA_F(__VA_ARGS__)) {            \
+    platon::emit_event0(#NAME PA_F(__VA_ARGS__)); \
   }
 
 #define PLATON_EMIT_EVENT0(NAME, ...) NAME(__VA_ARGS__)
 
 #define PLATON_EVENT1(NAME, TOPIC_TYPE, ...)                     \
-  EVENT1 void NAME(const TOPIC_TYPE &topic, VA_F(__VA_ARGS__)) { \
-    platon::emit_event1(#NAME, topic, PA_F(__VA_ARGS__));        \
+  EVENT1 void NAME(const TOPIC_TYPE &topic _VA_F(__VA_ARGS__)) { \
+    platon::emit_event1(#NAME, topic PA_F(__VA_ARGS__));         \
   }
 
-#define PLATON_EMIT_EVENT1(NAME, TOPIC_DATA, ...) NAME(TOPIC_DATA, __VA_ARGS__)
+#define PLATON_EMIT_EVENT1(NAME, ...) NAME(__VA_ARGS__)
 
-#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)               \
-  EVENT2 void NAME(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2, \
-                   VA_F(__VA_ARGS__)) {                                  \
-    platon::emit_event2(#NAME, topic1, topic2, PA_F(__VA_ARGS__));       \
+#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)         \
+  EVENT2 void NAME(const TOPIC_TYPE1 &topic1,                      \
+                   const TOPIC_TYPE2 &topic2 _VA_F(__VA_ARGS__)) { \
+    platon::emit_event2(#NAME, topic1, topic2 PA_F(__VA_ARGS__));  \
   }
 
-#define PLATON_EMIT_EVENT2(NAME, TOPIC1_DATA, TOPIC2_DATA, ...) \
-  NAME(TOPIC1_DATA, TOPIC2_DATA, __VA_ARGS__)
+#define PLATON_EMIT_EVENT2(NAME, ...) NAME(__VA_ARGS__)
 
-#define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...)    \
-  EVENT3 void NAME(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,   \
-                   const TOPIC_TYPE3 &topic3, VA_F(__VA_ARGS__)) {         \
-    platon::emit_event3(#NAME, topic1, topic2, topic3, PA_F(__VA_ARGS__)); \
+#define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...)   \
+  EVENT3 void NAME(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,  \
+                   const TOPIC_TYPE3 &topic3 _VA_F(__VA_ARGS__)) {        \
+    platon::emit_event3(#NAME, topic1, topic2, topic3 PA_F(__VA_ARGS__)); \
   }
 
-#define PLATON_EMIT_EVENT3(NAME, TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, ...) \
-  NAME(TOPIC1_DATA, TOPIC2_DATA, TOPIC3_DATA, __VA_ARGS__)
+#define PLATON_EMIT_EVENT3(NAME, ...) NAME(__VA_ARGS__)
 
 namespace platon {
 
