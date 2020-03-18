@@ -34,3 +34,6 @@ platon_address
 platon_destroy
 platon_migrate
 platon_debug_gas
+platon_ecrecover
+platon_ripemd160
+platon_sha256
