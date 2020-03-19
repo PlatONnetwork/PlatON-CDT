@@ -1,6 +1,7 @@
 #undef NDEBUG
-#include "platon/print.hpp"
 #include "platon/common.h"
+#include "platon/fixedhash.hpp"
+#include "platon/print.hpp"
 #include "unit_test.hpp"
 
 TEST_CASE(print, char) {
