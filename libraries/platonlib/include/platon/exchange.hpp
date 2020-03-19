@@ -229,7 +229,7 @@ Energon operator""_mLAT(uint64_t mlat) {
 /**
  * string-literal operator
  *
- * @brief 1_gLAT representing 1e24 VON
+ * @brief 1_gLAT representing 1e27 VON
  * @param glat Aomount of gLAT
  * @return Energon
  *
