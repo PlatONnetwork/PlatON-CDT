@@ -32,14 +32,16 @@ public:
     }
   }
 
-  explicit FixedHash(unsigned _u) { toBigEndian(_u, m_data); }
+  explicit FixedHash(u128 _u) { toBigEndian(_u, m_data); }
 
   explicit FixedHash(const byte *h, size_t len) {
+    m_data.fill(0);
     size_t real_len = len < N ? len : N;
     memcpy(m_data.data(), h, real_len);
   }
 
   explicit FixedHash(const bytes &&b) {
+    m_data.fill(0);
     unsigned i = 0;
     for (auto it = b.begin(); it != b.end() && i < N; ++it, ++i) {
       m_data[i] = *it;
@@ -47,6 +49,7 @@ public:
   }
 
   explicit FixedHash(const bytes &b) {
+    m_data.fill(0);
     unsigned i = 0;
     for (auto it = b.begin(); it != b.end() && i < N; ++it, ++i) {
       m_data[i] = *it;
