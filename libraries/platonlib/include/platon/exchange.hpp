@@ -10,14 +10,17 @@ namespace platon {
 /**
  * @brief The unit of Energon
  */
-enum EnergonUnit {
+enum class EnergonUnit : u128 {
   VON = 1,
   kVON = 1000,
   mVON = 1000000,
   gVON = 1000000000,
-  uLAT = 1000000000000,
-  mLAT = 1000000000000000,
-  LAT = 1000000000000000000
+  microLAT = 1000000000000,
+  milliLAT = 1000000000000000,
+  LAT = 1000000000000000000,
+  kLAT = LAT * 1000,
+  mLAT = kLAT * 1000,
+  gLAT = mLAT * 1000,
 };
 
 /**
@@ -43,7 +46,6 @@ enum EnergonUnit {
  */
 class Energon {
  public:
-  
   /**
    * @brief Construct a new Energon
    *
@@ -129,7 +131,9 @@ Energon operator""_VON(uint64_t von) { return Energon(von); }
  *
  * Energon e = 10_kVON;
  */
-Energon operator""_kVON(uint64_t kvon) { return Energon(kvon * u128(kVON)); }
+Energon operator""_kVON(uint64_t kvon) {
+  return Energon(u128(kvon) * u128(EnergonUnit::kVON));
+}
 
 /**
  * @brief 1_mVON representing 1e6 VON
@@ -139,7 +143,9 @@ Energon operator""_kVON(uint64_t kvon) { return Energon(kvon * u128(kVON)); }
  *
  * Energon e = 5_mVON;
  */
-Energon operator""_mVON(uint64_t mvon) { return Energon(mvon * u128(mVON)); }
+Energon operator""_mVON(uint64_t mvon) {
+  return Energon(u128(mvon) * u128(EnergonUnit::mVON));
+}
 
 /**
  * string-literal operator
@@ -151,40 +157,87 @@ Energon operator""_mVON(uint64_t mvon) { return Energon(mvon * u128(mVON)); }
  *
  * Energon e = 2.1111_gVON;
  */
-Energon operator""_gVON(uint64_t gvon) { return Energon(gvon * u128(gVON)); }
+Energon operator""_gVON(uint64_t gvon) {
+  return Energon(u128(gvon) * u128(EnergonUnit::gVON));
+}
 
 /**
  * string-literal operator
  *
- * @brief 1_uLAT representing 1e12 VON
- * @param ulat Amount of uLAT
+ * @brief 1_microLAT representing 1e12 VON
+ * @param mircolat Amount of microLAT
  * @return Energon
  *
- * Energon e = 1_uLAT;
+ * Energon e = 1_microLAT;
  */
-Energon operator""_uLAT(uint64_t ulat) { return Energon(ulat * u128(uLAT)); }
+Energon operator""_microLAT(uint64_t microlat) {
+  return Energon(u128(microlat) * u128(EnergonUnit::microLAT));
+}
 
 /**
  * string-literal operator
  *
- * @brief 1_mLAT representing 1e15 VON
- * @param mlat Amount of mLAT
+ * @brief 1_milliLAT representing 1e15 VON
+ * @param milllat Amount of milliLAT
  * @return Energon
  *
- * Energon e = 6_mLAT;
+ * Energon e = 6_milliLAT;
  */
-Energon operator""_mLAT(uint64_t mlat) { return Energon(mlat * u128(mLAT)); }
+Energon operator""_milliLAT(uint64_t millilat) {
+  return Energon(u128(millilat) * u128(EnergonUnit::milliLAT));
+}
 
 /**
  * string-literal operator
  *
- * @brief 1_LAT representing 1e18Von
+ * @brief 1_LAT representing 1e18 Von
  * @param lat Amount of LAT
  * @return Energon
  *
  * Energon e = 33_LAT;
  */
-Energon operator""_LAT(uint64_t lat) { return Energon(lat * u128(LAT)); }
+Energon operator""_LAT(uint64_t lat) {
+  return Energon(u128(lat) * u128(EnergonUnit::LAT));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_kLAT representing 1e21 VON
+ * @param klat Aomount of kLAT
+ * @return Energon
+ *
+ * Engergon e = 10_kLAT;
+ */
+Energon operator""_kLAT(uint64_t klat) {
+  return Energon(u128(klat) * u128(EnergonUnit::kLAT));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_mLAT representing 1e24 VON
+ * @param mlat Aomount of mLAT
+ * @return Energon
+ *
+ * Engergon e = 10_mLAT;
+ */
+Energon operator""_mLAT(uint64_t mlat) {
+  return Energon(u128(mlat) * u128(EnergonUnit::mLAT));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_gLAT representing 1e27 VON
+ * @param glat Aomount of gLAT
+ * @return Energon
+ *
+ * Engergon e = 10_gLAT;
+ */
+Energon operator""_gLAT(uint64_t glat) {
+  return Energon(u128(glat) * u128(EnergonUnit::gLAT));
+}
 
 /**
  * @brief Compare two optional objects lhs and rhs is equal
