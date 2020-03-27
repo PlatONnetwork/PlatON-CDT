@@ -3,14 +3,15 @@
 //
 #pragma once
 
-#include <string>
-#include <vector>
 #include "RLP.h"
 #include "chain.hpp"
 #include "common.h"
 #include "print.hpp"
 #include "rlp_extend.hpp"
 #include "rlp_size.hpp"
+#include <string>
+#include <vector>
+
 const uint8_t value_prefix = 0xfe;
 
 namespace platon {
@@ -60,8 +61,11 @@ inline size_t get_state(const KEY &key, VALUE &value) {
   }
   std::vector<byte> result;
   result.resize(len);
-  ::platon_get_state(vect_key.data(), vect_key.size(), result.data(),
-                     result.size());
+  int32_t ret = ::platon_get_state(vect_key.data(), vect_key.size(),
+                                   result.data(), result.size());
+  if (-1 == ret) {
+    return 0;
+  }
 
   fetch(RLP(result.data() + sizeof(value_prefix),
             result.size() - sizeof(value_prefix)),
@@ -75,8 +79,7 @@ inline size_t get_state(const KEY &key, VALUE &value) {
  * @tparam KEY Key type
  * @param key Key
  */
-template <typename KEY>
-inline void del_state(const KEY &key) {
+template <typename KEY> inline void del_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
   const bytesRef vect_key = state_stream.out();
@@ -91,8 +94,7 @@ inline void del_state(const KEY &key) {
  * @param key Key
  * @return true has state, false does not exist
  */
-template <typename KEY>
-inline bool has_state(const KEY &key) {
+template <typename KEY> inline bool has_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
   const bytesRef vect_key = state_stream.out();
@@ -100,4 +102,4 @@ inline bool has_state(const KEY &key) {
   return len != 0;
 }
 
-}  // namespace platon
+} // namespace platon

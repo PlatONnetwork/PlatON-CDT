@@ -24,9 +24,8 @@ namespace platon {
  * unique
  * @tparam T Element type
  */
-template <Name::Raw StorageName, typename T>
-class StorageType {
- public:
+template <Name::Raw StorageName, typename T> class StorageType {
+public:
   /**
    * @brief Construct a new Storage Type object
    *
@@ -50,58 +49,28 @@ class StorageType {
 
   T &operator=(const T &t) { t_ = t; }
 
-  template <typename P>
-  bool operator==(const P &t) const {
-    return t_ == t;
-  }
-  template <typename P>
-  bool operator!=(const P &t) const {
-    return t_ == t;
-  }
-  template <typename P>
-  bool operator<(const P &t) const {
-    return t_ < t;
-  }
-  template <typename P>
-  bool operator>=(const P &t) const {
-    return t_ >= t;
-  }
-  template <typename P>
-  bool operator<=(const P &t) const {
-    return t_ <= t;
-  }
-  template <typename P>
-  bool operator>(const P &t) const {
-    return t_ > t;
-  }
+  template <typename P> bool operator==(const P &t) const { return t_ == t; }
+  template <typename P> bool operator!=(const P &t) const { return t_ == t; }
+  template <typename P> bool operator<(const P &t) const { return t_ < t; }
+  template <typename P> bool operator>=(const P &t) const { return t_ >= t; }
+  template <typename P> bool operator<=(const P &t) const { return t_ <= t; }
+  template <typename P> bool operator>(const P &t) const { return t_ > t; }
 
-  template <typename P>
-  T &operator^=(const P &t) const {
+  template <typename P> T &operator^=(const P &t) const {
     t_ ^= t;
     return t_;
   }
-  template <typename P>
-  T operator^(const P &t) const {
-    return t_ ^ t;
-  }
-  template <typename P>
-  T &operator|=(const P &t) const {
+  template <typename P> T operator^(const P &t) const { return t_ ^ t; }
+  template <typename P> T &operator|=(const P &t) const {
     t_ |= t;
     return t_;
   }
-  template <typename P>
-  T operator|(const P &t) const {
-    return t_ | t;
-  }
-  template <typename P>
-  T &operator&=(const P &t) const {
+  template <typename P> T operator|(const P &t) const { return t_ | t; }
+  template <typename P> T &operator&=(const P &t) const {
     t_ &= t;
     return t_;
   }
-  template <typename P>
-  T operator&(const P &t) const {
-    return t_ & t;
-  }
+  template <typename P> T operator&(const P &t) const { return t_ & t; }
 
   T operator~() const { return ~t_; }
 
@@ -118,13 +87,11 @@ class StorageType {
   T operator++(int) { return ++t_; }
 
   T &operator[](int i) { return t_[i]; }
-  template <typename P>
-  T &operator+=(const P &p) {
+  template <typename P> T &operator+=(const P &p) {
     t_ += p;
     return t_;
   }
-  template <typename P>
-  T &operator-=(const P &p) {
+  template <typename P> T &operator-=(const P &p) {
     t_ -= p;
     return t_;
   }
@@ -136,7 +103,7 @@ class StorageType {
   T get() const { return t_; }
   T &self() { return t_; }
 
- private:
+private:
   /**
    * @brief Load from blockchain
    *
@@ -151,43 +118,32 @@ class StorageType {
    *
    */
   void Flush() { set_state(name_, t_); }
-  T default_;
+  T default_ = T();
   const uint64_t name_ = uint64_t(StorageName);
   T t_;
 };
 
-template <Name::Raw name>
-using Uint8 = class StorageType<name, uint8_t>;
+template <Name::Raw name> using Uint8 = class StorageType<name, uint8_t>;
 
-template <Name::Raw name>
-using Int8 = class StorageType<name, int8_t>;
+template <Name::Raw name> using Int8 = class StorageType<name, int8_t>;
 
-template <Name::Raw name>
-using Uint16 = class StorageType<name, uint16_t>;
+template <Name::Raw name> using Uint16 = class StorageType<name, uint16_t>;
 
-template <Name::Raw name>
-using Int16 = class StorageType<name, int16_t>;
+template <Name::Raw name> using Int16 = class StorageType<name, int16_t>;
 
-template <Name::Raw name>
-using Uint = class StorageType<name, uint32_t>;
+template <Name::Raw name> using Uint = class StorageType<name, uint32_t>;
 
-template <Name::Raw name>
-using Int = class StorageType<name, int32_t>;
+template <Name::Raw name> using Int = class StorageType<name, int32_t>;
 
-template <Name::Raw name>
-using Uint64 = class StorageType<name, uint64_t>;
+template <Name::Raw name> using Uint64 = class StorageType<name, uint64_t>;
 
-template <Name::Raw name>
-using Int64 = class StorageType<name, int64_t>;
+template <Name::Raw name> using Int64 = class StorageType<name, int64_t>;
 
-template <Name::Raw name>
-using Float = class StorageType<name, float>;
+template <Name::Raw name> using Float = class StorageType<name, float>;
 
-template <Name::Raw name>
-using Double = class StorageType<name, double>;
+template <Name::Raw name> using Double = class StorageType<name, double>;
 
-template <Name::Raw name>
-using String = class StorageType<name, std::string>;
+template <Name::Raw name> using String = class StorageType<name, std::string>;
 
 template <Name::Raw name, typename T>
 using Vector = class StorageType<name, std::vector<T>>;
@@ -223,7 +179,7 @@ using Tuple = class StorageType<name, std::tuple<Types...>>;
 //    template <Name::Raw name, typename T>
 //    using UnorderedSet = class StorageType<name, std::unordered_set<T>>;
 
-}  // namespace platon
+} // namespace platon
 //    example
 //    Double<name> dou;
 //    dou = 2.4;

@@ -1,40 +1,28 @@
 #pragma once
-#include <boost/hana.hpp>
-#include <set>
-#include <type_traits>
 #include "platon/name.hpp"
 #include "platon/print.hpp"
 #include "platon/storagetype.hpp"
+#include <boost/hana.hpp>
+#include <set>
+#include <type_traits>
 
 namespace platon {
 namespace db {
 
 namespace hana = boost::hana;
-const uint32_t kMaxSecondaryIndexKeys = 100;
-template <typename T>
-struct IndexKey {
+
+template <typename T> struct IndexKey {
   uint64_t table_name;
   uint64_t index_name;
   T value;
   PLATON_SERIALIZE(IndexKey<T>, (table_name)(index_name)(value))
 };
-template <typename T>
-struct SecondaryIndexKey {
-  uint64_t table_name;
-  uint64_t index_name;
-  T value;
-  uint32_t position;
-  PLATON_SERIALIZE(SecondaryIndexKey<T>,
-                   (table_name)(index_name)(value)(position))
-};
+
 struct NormalIndexValue {
   // set of sequence
   std::set<uint64_t> keys;
 
-  uint32_t pre_seq = 0;
-  uint32_t next_seq = 0;
-  std::set<uint64_t>::iterator iter;
-  PLATON_SERIALIZE(NormalIndexValue, (keys)(pre_seq)(next_seq));
+  PLATON_SERIALIZE(NormalIndexValue, (keys));
 };
 
 struct IndexType {
@@ -42,8 +30,7 @@ struct IndexType {
   struct NormalIndex {};
 };
 
-template <Name::Raw IndexSeq, typename Extractor>
-struct IndexedBy {
+template <Name::Raw IndexSeq, typename Extractor> struct IndexedBy {
   enum Constants { IndexName = static_cast<uint64_t>(IndexSeq) };
   //  static constexpr const char* IndexName() { return "Name"; }
   typedef Extractor SecondaryExtractorType;
@@ -55,18 +42,18 @@ struct IndexMemberFun {
   typedef typename std::remove_reference<Type>::type ResultType;
   typedef Index IndexType;
   template <typename ChainedPtr>
-  auto operator()(const ChainedPtr& x) const -> std::enable_if_t<
-      !std::is_convertible<const ChainedPtr&, const Class&>::value, Type> {
+  auto operator()(const ChainedPtr &x) const -> std::enable_if_t<
+      !std::is_convertible<const ChainedPtr &, const Class &>::value, Type> {
     return operator()(*x);
   }
 
-  Type operator()(const Class& x) const { return (x.*PtrToMemberFunction)(); }
+  Type operator()(const Class &x) const { return (x.*PtrToMemberFunction)(); }
 
-  Type operator()(const std::reference_wrapper<const Class>& x) const {
+  Type operator()(const std::reference_wrapper<const Class> &x) const {
     return operator()(x.get());
   }
 
-  Type operator()(const std::reference_wrapper<Class>& x) const {
+  Type operator()(const std::reference_wrapper<Class> &x) const {
     return operator()(x.get());
   }
 };
@@ -76,21 +63,24 @@ struct MultiDBKey {
   uint64_t seq;
   PLATON_SERIALIZE(MultiDBKey, (table_name)(seq))
 };
+
 template <typename T>
-void set_state_db(uint64_t table_name, uint64_t seq, const T& value) {
+void set_state_db(uint64_t table_name, uint64_t seq, const T &value) {
   MultiDBKey key = {.table_name = table_name, .seq = seq};
   set_state(key, value);
 }
 
 template <typename T>
-void get_state_db(uint64_t table_name, uint64_t seq, T& value) {
+void get_state_db(uint64_t table_name, uint64_t seq, T &value) {
   MultiDBKey key = {.table_name = table_name, .seq = seq};
   get_state(key, value);
 }
+
 bool has_state_db(uint64_t table_name, uint64_t seq) {
   MultiDBKey key = {.table_name = table_name, .seq = seq};
   return has_state(key);
 }
+
 void delete_state_db(uint64_t table_name, uint64_t seq) {
   MultiDBKey key = {.table_name = table_name, .seq = seq};
   del_state(key);
@@ -98,7 +88,7 @@ void delete_state_db(uint64_t table_name, uint64_t seq) {
 
 template <typename T>
 void set_index_db(uint64_t table_name, uint64_t index_name, uint64_t seq,
-                  const T& value, bool unique) {
+                  const T &value) {
   // todo find value form Extractor, create index sequence
   IndexKey<T> key = {
       .table_name = table_name, .index_name = index_name, .value = value};
@@ -106,16 +96,24 @@ void set_index_db(uint64_t table_name, uint64_t index_name, uint64_t seq,
   set_state(key, seq);
 }
 
+template <typename T>
+bool has_index_db(uint64_t table_name, uint64_t index_name, const T &value) {
+  IndexKey<T> key = {
+      .table_name = table_name, .index_name = index_name, .value = value};
+  return has_state(key);
+}
+
 template <typename T, typename R>
-R get_index_db(uint64_t table_name, uint64_t index_name, const T& value) {
+R get_index_db(uint64_t table_name, uint64_t index_name, const T &value) {
   R result;
   IndexKey<T> key = {
       .table_name = table_name, .index_name = index_name, .value = value};
   get_state(key, result);
   return result;
 }
+
 template <typename T>
-void delete_index_db(uint64_t table_name, uint64_t index_name, const T& value) {
+void delete_index_db(uint64_t table_name, uint64_t index_name, const T &value) {
   IndexKey<T> key = {
       .table_name = table_name, .index_name = index_name, .value = value};
   del_state(key);
@@ -123,7 +121,7 @@ void delete_index_db(uint64_t table_name, uint64_t index_name, const T& value) {
 
 template <typename T>
 void append_secondary_index_db(uint64_t table_name, uint64_t index_name,
-                               uint64_t seq, const T& value) {
+                               uint64_t seq, const T &value) {
   // todo find value form Extractor, create index sequence
   IndexKey<T> key = {
       .table_name = table_name, .index_name = index_name, .value = value};
@@ -142,7 +140,7 @@ void append_secondary_index_db(uint64_t table_name, uint64_t index_name,
 
 template <typename T>
 void delete_secondary_index_db(uint64_t table_name, uint64_t index_name,
-                               uint64_t seq, const T& value) {
+                               uint64_t seq, const T &value) {
   IndexKey<T> key = {
       .table_name = table_name, .index_name = index_name, .value = value};
 
@@ -160,8 +158,9 @@ void delete_secondary_index_db(uint64_t table_name, uint64_t index_name,
     }
   }
 }
+
 template <typename T>
-bool check_unique(uint64_t table_name, uint64_t index_name, const T& value) {
+bool check_unique(uint64_t table_name, uint64_t index_name, const T &value) {
   IndexKey<T> key = {
       .table_name = table_name, .index_name = index_name, .value = value};
   return has_state(key);
@@ -198,11 +197,14 @@ bool check_unique(uint64_t table_name, uint64_t index_name, const T& value) {
 
 template <Name::Raw TableName, typename T, typename... Indices>
 class MultiIndex {
- public:
+private:
+  static_assert(sizeof...(Indices) <= 16,
+                "multi_index only supports a maximum of 16 secondary indices");
+
   template <Name::Raw IndexName, typename Extractor, uint64_t Number,
             typename IndexTypeName>
   struct Index {
-   public:
+  public:
     typedef Extractor SecondaryExtractorType;
     typedef typename std::decay<decltype(Extractor()(nullptr))>::type
         SecondaryKeyType;
@@ -213,166 +215,142 @@ class MultiIndex {
       kIndexNumber = Number,
     };
 
-    static bool unique() {
+    static constexpr bool unique() {
       return std::is_same<IndexTypeName, IndexType::UniqueIndex>::value;
     }
-    static uint64_t index_name() { return kIndexName; }
-    static uint64_t table_name() { return kTableName; }
-    static uint64_t index_number() { return kIndexNumber; }
-    static auto extract_secondary_key(const T& obj) {
+
+    static constexpr uint64_t index_name() { return kIndexName; }
+    static constexpr uint64_t table_name() { return kTableName; }
+    static constexpr uint64_t index_number() { return kIndexNumber; }
+
+    static auto extract_secondary_key(const T &obj) {
       return SecondaryExtractorType()(obj);
     }
   };
+
+  // item
   struct Item : public T {
     template <typename Constructor>
-    Item(const MultiIndex* idx, Constructor&& c) : $idx(idx) {
+    Item(const MultiIndex *idx, Constructor &&c) : $idx(idx) {
       c(*this);
     }
 
-    const MultiIndex* $idx;
+    const MultiIndex *$idx;
     uint64_t $seq;
-    std::shared_ptr<NormalIndexValue> normal_index_value;
   };
+
+  std::map<uint64_t, std::shared_ptr<Item>> seq2item_;
 
   class const_iterator
       : public std::iterator<std::bidirectional_iterator_tag, const T> {
-   public:
-    friend bool operator==(const const_iterator& a, const const_iterator& b) {
-      if (a.multi_index_ != b.multi_index_) {
+  public:
+    friend bool operator==(const const_iterator &a, const const_iterator &b) {
+      if (a.multiIndex_ != b.multiIndex_) {
         return false;
       }
-      // secondary index
-      if (a.item_->normal_index_value != nullptr ||
-          b.item_->normal_index_value != nullptr) {
-        if (a.begin_ || b.begin_) {
-          bool equal_a = a.item_->normal_index_value != nullptr
-                             ? a.item_->normal_index_value->iter ==
-                                   a.item_->normal_index_value->keys.begin()
-                             : a.begin_;
-          bool equal_b = b.item_->normal_index_value != nullptr
-                             ? b.item_->normal_index_value->iter ==
-                                   b.item_->normal_index_value->keys.begin()
-                             : b.begin_;
-
-          return equal_a && equal_b;
-        }
-        if (a.end_ || b.end_) {
-          bool equal_a = a.item_->normal_index_value != nullptr
-                             ? a.item_->normal_index_value->iter ==
-                                   a.item_->normal_index_value->keys.end()
-                             : a.end_;
-          bool equal_b = b.item_->normal_index_value != nullptr
-                             ? b.item_->normal_index_value->iter ==
-                                   b.item_->normal_index_value->keys.end()
-                             : b.end_;
-
-          return equal_a && equal_b;
-        }
-      }
-
-      return a.item_ == b.item_;
-    }
-    friend bool operator!=(const const_iterator& a, const const_iterator& b) {
-      if (a.multi_index_ != b.multi_index_) {
-        return true;
-      }
-      // secondary index
-      if (a.item_->normal_index_value != nullptr ||
-          b.item_->normal_index_value != nullptr) {
-        if (a.begin_ || b.begin_) {
-          bool equal_a = a.item_->normal_index_value != nullptr
-                             ? a.item_->normal_index_value->iter ==
-                                   a.item_->normal_index_value->keys.begin()
-                             : a.begin_;
-          bool equal_b = b.item_->normal_index_value != nullptr
-                             ? b.item_->normal_index_value->iter ==
-                                   b.item_->normal_index_value->keys.begin()
-                             : b.begin_;
-
-          return !(equal_a && equal_b);
-        }
-        if (a.end_ || b.end_) {
-          bool equal_a = a.item_->normal_index_value != nullptr
-                             ? a.item_->normal_index_value->iter ==
-                                   a.item_->normal_index_value->keys.end()
-                             : a.end_;
-          bool equal_b = b.item_->normal_index_value != nullptr
-                             ? b.item_->normal_index_value->iter ==
-                                   b.item_->normal_index_value->keys.end()
-                             : b.end_;
-
-          return !(equal_a && equal_b);
-        }
-      }
-      return a.item_ != b.item_;
+      return a.item_->$seq == b.item_->$seq;
     }
 
-    const T& operator*() const { return *static_cast<const T*>(item_.get()); }
-    const T* operator->() const { return static_cast<const T*>(item_.get()); }
+    friend bool operator!=(const const_iterator &a, const const_iterator &b) {
+      return !(a == b);
+    }
+
+    const T &operator*() const {
+      T &obj = static_cast<T &>(*item_);
+      auto &seq2item = multiIndex_->seq2item_;
+      if (seq2item.find(item_->$seq) == seq2item.end()) {
+        get_state_db(static_cast<uint64_t>(TableName), item_->$seq, obj);
+        seq2item[item_->$seq] = item_;
+      }
+      return obj;
+    }
+
+    const T *operator->() const { return &const_cast<T &>(**this); }
+
+    const_iterator &operator++() {
+      uint64_t end_seq = multiIndex_->seq_.get();
+      if (item_->$seq == end_seq) {
+        return *this;
+      }
+
+      auto &seq2item = multiIndex_->seq2item_;
+      uint64_t seq = item_->$seq + 1;
+      if (seq2item.find(seq) == seq2item.end()) {
+        for (; seq < end_seq; ++seq) {
+          if (has_state_db(static_cast<uint64_t>(TableName), seq))
+            break;
+        }
+
+        // get item
+        if (seq2item.find(seq) != seq2item.end()) {
+          item_ = seq2item[seq];
+        } else {
+          item_ = std::make_shared<Item>(multiIndex_,
+                                         [&](auto &i) { i.$seq = seq; });
+        }
+      } else {
+        item_ = seq2item[seq];
+      }
+      return *this;
+    }
 
     const_iterator operator++(int) {
-      if (item_->normal_index_value != nullptr) {
-        const_iterator result(*this);
-        ++(*this);
-        return result;
+      auto result = *this;
+      ++(*this);
+      return result;
+    }
+
+    const_iterator &operator--() {
+      uint64_t end_seq = multiIndex_->seq_.get();
+      uint64_t seq = 0 == item_->$seq ? end_seq : item_->$seq - 1;
+      auto &seq2item = multiIndex_->seq2item_;
+      if (seq2item.find(seq) == seq2item.end()) {
+        constexpr uint64_t begin_seq = 0;
+        for (; seq >= begin_seq; --seq) {
+          if (has_state_db(static_cast<uint64_t>(TableName), seq))
+            break;
+          if (seq == begin_seq) {
+            seq = end_seq;
+            break;
+          }
+        }
+
+        // get item
+        if (seq2item.find(seq) != seq2item_.end()) {
+          item_ = seq2item[seq];
+        } else {
+          item_ = std::make_shared<Item>(multiIndex_,
+                                         [&](auto &i) { i.$seq = seq; });
+        }
+      } else {
+        item_ = seq2item[seq];
       }
-      item_ = nullptr;
       return *this;
     }
 
     const_iterator operator--(int) {
-      if (item_->normal_index_value != nullptr) {
-        const_iterator result(*this);
-        --(*this);
-        return result;
-      }
-      const_iterator end(*this);
-      end.end_ = true;
-      return end;
+      auto result = *this;
+      --(*this);
+      return result;
     }
 
-    const_iterator& operator++() {
-      if (item_->normal_index_value != nullptr) {
-        item_->normal_index_value->iter++;
-      } else {
-        item_ = nullptr;
-      }
-      return *this;
-    }
-    const_iterator& operator--() {
-      if (item_->normal_index_value != nullptr) {
-        if (item_->normal_index_value->iter !=
-            item_->normal_index_value->keys.begin()) {
-          item_->normal_index_value->iter--;
-        }
-      } else {
-        item_ = nullptr;
-      }
+  private:
+    const_iterator(MultiIndex *mi, std::shared_ptr<Item> i = nullptr)
+        : multiIndex_(mi), item_(i) {}
 
-      return *this;
-    }
-
-   private:
-    const_iterator(const MultiIndex* mi, std::shared_ptr<Item> i = nullptr)
-        : multi_index_(mi), item_(i) {}
-    const_iterator(const MultiIndex* mi, bool begin, bool end)
-        : multi_index_(mi), item_(nullptr), begin_(begin), end_(end) {}
     void reset(std::shared_ptr<Item> i) { item_ = i; }
 
-    const MultiIndex* multi_index_;
+    MultiIndex *multiIndex_;
     std::shared_ptr<Item> item_;
-    bool begin_ = false;
-    bool end_ = false;
     friend class MultiIndex;
-  };  /// class MultiIndex::const_iterator
+  }; /// class MultiIndex::const_iterator
 
-  template <uint64_t I>
-  struct IntC {
+  template <uint64_t I> struct IntC {
     enum e { value = I };
     operator uint64_t() const { return I; }
   };
 
- public:
+public:
   /**
    * @brief Iterator start position, but its return value cannot be incremented
    * or decremented because MultiIndex does not support full-order traversal
@@ -400,11 +378,27 @@ class MultiIndex {
      IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
                                           IndexType::NormalIndex>>>
      member_table;
-   auto iter = member_table.find<"index2"_n>(uint8_t(10));
-   assert(iter == member_table.cbegin())
+   for (auto it = member_table.cbegin(); it != it_end; ++it){}
    * @endcode
    */
-  const_iterator cbegin() const { return const_iterator(this, true, false); }
+  const_iterator cbegin() {
+    uint64_t begin_seq = 0;
+    uint64_t end_seq = seq_.get();
+    for (; begin_seq < end_seq; ++begin_seq) {
+      if (has_state_db(static_cast<uint64_t>(TableName), begin_seq))
+        break;
+    }
+
+    const_iterator result(this, nullptr);
+    if (seq2item_.find(begin_seq) != seq2item_.end()) {
+      result.reset(seq2item_[begin_seq]);
+    } else {
+      auto item =
+          std::make_shared<Item>(this, [&](auto &i) { i.$seq = begin_seq; });
+      result.reset(item);
+    }
+    return result;
+  }
 
   /**
    * @brief Insert new value
@@ -431,12 +425,15 @@ class MultiIndex {
      IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
                                           IndexType::NormalIndex>>>
      member_table;
-    auto iter = member_table.find<"index2"_n>(uint8_t(10));
-    for (; iter != member_table.cend(); iter++) {
+    for (auto it = member_table.cbegin(); it != it_end; ++it) {
     }
    * @endcode
    */
-  const_iterator cend() const { return const_iterator(this, false, true); }
+  const_iterator cend() {
+    auto item =
+        std::make_shared<Item>(this, [&](auto &i) { i.$seq = seq_.get(); });
+    return const_iterator(this, item);
+  }
 
   /**
    * @brief Iterator start position, but its return value cannot be incremented
@@ -477,55 +474,65 @@ class MultiIndex {
    * @endcode
    */
   template <typename Lambda>
-  std::pair<const_iterator, bool> emplace(Lambda&& constructor) {
+  std::pair<const_iterator, bool> emplace(Lambda &&constructor) {
     // create new item
-    auto item = std::make_shared<Item>(this, [&](auto& i) {
-      T& obj = static_cast<T&>(i);
+    auto item = std::make_shared<Item>(this, [&](auto &i) {
+      T &obj = static_cast<T &>(i);
       constructor(obj);
-      seq_++;
       i.$seq = seq_.get();
+      seq_.self() += 1;
     });
 
     // check unique index conflict
-    const T& obj = static_cast<T&>(*item);
+    const T &obj = static_cast<T &>(*item);
     if (has_unique_index()) {
-      typedef typename decltype(
-          +hana::at_c<0>(hana::at_c<0>(indices_)))::type IndexType;
-      if (IndexType::unique()) {
-        if (check_unique<typename IndexType::SecondaryKeyType>(
-                IndexType::table_name(), IndexType::index_name(),
-                IndexType::extract_secondary_key(obj))) {
-          return std::make_pair(const_iterator(this, nullptr), false);
+      bool is_conflict = hana::any_of(indices_, [&](auto &idx) {
+        typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
+        if (IndexType::unique()) {
+          if (check_unique<typename IndexType::SecondaryKeyType>(
+                  IndexType::table_name(), IndexType::index_name(),
+                  IndexType::extract_secondary_key(obj)))
+            return true;
         }
+        return false;
+      });
+      if (is_conflict) {
+        seq_.self() -= 1;
+        return std::make_pair(const_iterator(this, nullptr), false);
       }
     }
 
-    hana::for_each(indices_, [&](auto& idx) {
+    // set index into statedb
+    hana::for_each(indices_, [&](auto &idx) {
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
       // todo set index into statedb
       if (IndexType::unique()) {
         set_index_db<typename IndexType::SecondaryKeyType>(
-            IndexType::table_name(), IndexType::index_name(), seq_.get(),
-            IndexType::extract_secondary_key(obj), IndexType::unique());
+            IndexType::table_name(), IndexType::index_name(), item->$seq,
+            IndexType::extract_secondary_key(obj));
       } else {
         // todo append new
         append_secondary_index_db<typename IndexType::SecondaryKeyType>(
-            IndexType::table_name(), IndexType::index_name(), seq_.get(),
+            IndexType::table_name(), IndexType::index_name(), item->$seq,
             IndexType::extract_secondary_key(obj));
       }
     });
 
-    set_state_db(static_cast<uint64_t>(TableName), seq_.get(), obj);
+    set_state_db(static_cast<uint64_t>(TableName), item->$seq, obj);
+
+    // add
+    seq2item_[item->$seq] = item;
+
     return std::make_pair(const_iterator(this, item), true);
   }
 
   /**
-   * @brief Find the data, the unique index will only return one piece of data,
-   * the secondary index will return the data set, iterable through the
-   * iterator.
+   * @brief Find the data, the unique index will only return one piece of
+   data,
+   * the secondary index will return vector of iterator
    *
    * @param key key of index
-   * @return iterator of data set
+   * @return vector of iterator. The vector is empty when not found
    *
    * Example:
    *
@@ -547,45 +554,55 @@ class MultiIndex {
                                           IndexType::NormalIndex>>>
      member_table;
 
-    auto iter = member_table.find<"index2"_n>(uint8_t(10));
+    auto vect_iter = member_table.find<"index2"_n>(uint8_t(10));
    * @endcode
    */
-  template <Name::Raw IndexName, typename KEY>
-  const_iterator find(const KEY& key) {
-    const_iterator result(this, nullptr);
-    hana::for_each(indices_, [&](auto& idx) {
+  template <Name::Raw IndexName, typename KEY> auto find(const KEY &key) {
+    std::vector<const_iterator> result;
+    hana::for_each(indices_, [&](auto &idx) {
       uint64_t index_name = static_cast<uint64_t>(IndexName);
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
       if (IndexType::index_name() == index_name) {
+        bool has_key = has_index_db(static_cast<uint64_t>(TableName),
+                                    static_cast<uint64_t>(IndexName), key);
+        if (!has_key) {
+          return;
+        }
         if (IndexType::unique()) {
           auto seq = get_index_db<KEY, uint64_t>(
               static_cast<uint64_t>(TableName),
               static_cast<uint64_t>(IndexName), key);
-          if (!has_state_db(IndexType::table_name(), seq)) {
-            return;
+          if (seq2item_.find(seq) != seq2item_.end()) {
+            result.push_back(const_iterator(this, seq2item_[seq]));
+          } else {
+            auto item = std::make_shared<Item>(this, [&](auto &i) {
+              T &obj = static_cast<T &>(i);
+              get_state_db(IndexType::table_name(), seq, obj);
+              i.$seq = seq;
+            });
+            seq2item_[seq] = item;
+            result.push_back(const_iterator(this, item));
           }
-          auto item = std::make_shared<Item>(this, [&](auto& i) {
-            T& obj = reinterpret_cast<T&>(i);
-            get_state_db(IndexType::table_name(), seq, obj);
-          });
-          //          result = const_iterator(this, item);
-          result.reset(item);
         } else {
           NormalIndexValue value = get_index_db<KEY, NormalIndexValue>(
               static_cast<uint64_t>(TableName),
               static_cast<uint64_t>(IndexName), key);
           if (value.keys.empty()) {
-            result.reset(nullptr);
+            return;
           } else {
-            auto item = std::make_shared<Item>(this, [&](auto& i) {
-              value.iter = value.keys.begin();
-              T& obj = reinterpret_cast<T&>(i);
-              get_state_db(IndexType::table_name(), *value.iter, obj);
-              i.$seq = *value.iter;
-              i.normal_index_value = std::make_shared<NormalIndexValue>(value);
-              i.normal_index_value->iter = i.normal_index_value->keys.begin();
-            });
-            result.reset(item);
+            for (auto it = value.keys.begin(); it != value.keys.end(); ++it) {
+              if (seq2item_.find(*it) != seq2item_.end()) {
+                result.push_back(const_iterator(this, seq2item_[*it]));
+              } else {
+                auto item = std::make_shared<Item>(this, [&](auto &i) {
+                  T &obj = static_cast<T &>(i);
+                  get_state_db(IndexType::table_name(), *it, obj);
+                  i.$seq = *it;
+                });
+                seq2item_[item->$seq] = item;
+                result.push_back(const_iterator(this, item));
+              }
+            }
           }
         }
       }
@@ -625,22 +642,23 @@ class MultiIndex {
    * @endcode
    */
   template <typename Lambda>
-  void modify(const_iterator position, Lambda&& constructor) {
+  void modify(const_iterator position, Lambda &&constructor) {
     // reduce query statedb operation, don't chekc exists position in statedb
     // so user need make sure position exists
     // create new item
-    auto item = std::make_shared<Item>(this, [&](auto& i) {
-      T& obj = static_cast<T&>(i);
+    auto item = std::make_shared<Item>(this, [&](auto &i) {
+      T &obj = static_cast<T &>(i);
       obj = *position;
       constructor(obj);
+      i.$seq = position.item_->$seq;
     });
 
-    T& new_obj = static_cast<T&>(*item);
-    const T& old_obj = static_cast<const T&>(*position);
+    T &new_obj = static_cast<T &>(*item);
+    const T &old_obj = static_cast<const T &>(*position);
     bool enable = true;
 
     // update index key is illegal operation
-    hana::for_each(indices_, [&](auto& idx) {
+    hana::for_each(indices_, [&](auto &idx) {
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
       // check index key
       if (IndexType::extract_secondary_key(old_obj) !=
@@ -653,6 +671,7 @@ class MultiIndex {
       // update
       set_state_db(static_cast<uint64_t>(TableName), position.item_->$seq,
                    new_obj);
+      seq2item_[item->$seq] = item;
     }
   }
 
@@ -682,12 +701,12 @@ class MultiIndex {
                                         IndexType::NormalIndex>>>
     member_table;
 
-    auto iter = member_table.find<"index2"_n>(uint8_t(10));
-    member_table.erase(iter);
+    auto vect_iter = member_table.find<"index2"_n>(uint8_t(10));
+    member_table.erase(vect_iter[0]);
    * @endcode
    */
   void erase(const_iterator position) {
-    hana::for_each(indices_, [&](auto& idx) {
+    hana::for_each(indices_, [&](auto &idx) {
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
       if (IndexType::unique()) {
         delete_index_db<typename IndexType::SecondaryKeyType>(
@@ -699,35 +718,26 @@ class MultiIndex {
             position.item_->$seq, IndexType::extract_secondary_key(*position));
       }
     });
+
     // delete key
     delete_state_db(static_cast<uint64_t>(TableName), position.item_->$seq);
+
+    // delete
+    seq2item_.erase(position.item_->$seq);
   }
-  int unique_index_number() {
-    if (unique_number_ != -1) {
-      return unique_number_;
-    }
-    hana::for_each(indices_, [&](auto& idx) {
-      typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
-      if (IndexType::unique()) {
-        unique_number_ = IndexType::index_number();
-      }
-    });
-    return unique_number_;
-  }
-  bool has_unique_index() { return unique_index_number() != -1; }
+
   static constexpr auto transform_indices() {
     typedef decltype(hana::zip_shortest(
-        hana::make_tuple(IntC<0>(), IntC<1>(), IntC<2>(), IntC<3>(), IntC<4>()),
+        hana::make_tuple(IntC<0>(), IntC<1>(), IntC<2>(), IntC<3>(), IntC<4>(),
+                         IntC<5>(), IntC<6>(), IntC<7>(), IntC<8>(), IntC<9>(),
+                         IntC<10>(), IntC<11>(), IntC<12>(), IntC<13>(),
+                         IntC<14>(), IntC<15>()),
         hana::tuple<Indices...>())) IndicesInputType;
 
-    return hana::transform(IndicesInputType(), [&](auto&& idx) {
+    return hana::transform(IndicesInputType(), [&](auto &&idx) {
       typedef typename std::decay<decltype(hana::at_c<0>(idx))>::type NumType;
       typedef typename std::decay<decltype(hana::at_c<1>(idx))>::type IdxType;
       return hana::make_tuple(
-          hana::type_c<
-              Index<Name::Raw(static_cast<uint64_t>(IdxType::IndexName)),
-                    typename IdxType::SecondaryExtractorType, NumType::e::value,
-                    typename IdxType::SecondaryExtractorType::IndexType>>,
           hana::type_c<
               Index<Name::Raw(static_cast<uint64_t>(IdxType::IndexName)),
                     typename IdxType::SecondaryExtractorType, NumType::e::value,
@@ -737,9 +747,15 @@ class MultiIndex {
 
   typedef decltype(MultiIndex::transform_indices()) IndicesType;
 
+  static constexpr bool has_unique_index() {
+    return hana::any_of(IndicesType(), [&](auto &idx) {
+      typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
+      return IndexType::unique();
+    });
+  }
+
   IndicesType indices_;
   Uint64<TableName> seq_;
-  int unique_number_ = -1;
-};  // namespace db
-}  // namespace db
-}  // namespace platon
+}; // namespace db
+} // namespace db
+} // namespace platon

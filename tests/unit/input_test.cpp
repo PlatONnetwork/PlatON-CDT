@@ -1,10 +1,10 @@
-#include <string>
-#include <vector>
 #include "platon/contract.hpp"
 #include "platon/dispatcher.hpp"
 #include "platon/print.hpp"
 #include "platon/rlp_serialize.hpp"
 #include "unit_test.hpp"
+#include <string>
+#include <vector>
 
 using namespace platon;
 
@@ -30,7 +30,7 @@ void platon_get_input(uint8_t *value) {
 #endif
 
 class Info {
- public:
+public:
   uint64_t number_;
   uint64_t age_;
   uint8_t married_;
