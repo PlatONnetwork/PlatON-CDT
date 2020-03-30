@@ -4,7 +4,6 @@
 #include "platon/storagetype.hpp"
 #include "unit_test.hpp"
 
-
 using namespace platon;
 std::map<std::vector<byte>, std::vector<byte>> result;
 
@@ -52,7 +51,7 @@ int32_t platon_get_state(const uint8_t *key, size_t klen, uint8_t *value,
 #endif
 
 class TestContract {
-public:
+ public:
   TestContract() {}
 
   void AddMessage(const std::string &one_message) {
@@ -61,12 +60,11 @@ public:
 
   std::vector<std::string> GetMessage() { return info.self(); }
 
-private:
+ private:
   StorageType<"info"_n, std::vector<std::string>> info;
 };
 
 TEST_CASE(storage, add) {
-
   {
     TestContract test1;
     test1.AddMessage("test1");

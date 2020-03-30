@@ -3,14 +3,14 @@
 //
 #pragma once
 
+#include <string>
+#include <vector>
 #include "RLP.h"
 #include "chain.hpp"
 #include "common.h"
 #include "print.hpp"
 #include "rlp_extend.hpp"
 #include "rlp_size.hpp"
-#include <string>
-#include <vector>
 
 const uint8_t value_prefix = 0xfe;
 
@@ -79,7 +79,8 @@ inline size_t get_state(const KEY &key, VALUE &value) {
  * @tparam KEY Key type
  * @param key Key
  */
-template <typename KEY> inline void del_state(const KEY &key) {
+template <typename KEY>
+inline void del_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
   const bytesRef vect_key = state_stream.out();
@@ -94,7 +95,8 @@ template <typename KEY> inline void del_state(const KEY &key) {
  * @param key Key
  * @return true has state, false does not exist
  */
-template <typename KEY> inline bool has_state(const KEY &key) {
+template <typename KEY>
+inline bool has_state(const KEY &key) {
   RLPStream state_stream;
   state_stream << key;
   const bytesRef vect_key = state_stream.out();
@@ -102,4 +104,4 @@ template <typename KEY> inline bool has_state(const KEY &key) {
   return len != 0;
 }
 
-} // namespace platon
+}  // namespace platon
