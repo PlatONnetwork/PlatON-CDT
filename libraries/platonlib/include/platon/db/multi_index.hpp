@@ -29,13 +29,12 @@ struct NormalIndexKey {
 };
 
 struct NormalIndexValue {
-  // previous sequence
-  uint64_t pre_seq;
+  constexpr static size_t MAXSIZE = 32;
 
-  // next sequence
-  uint64_t next_seq;
+  // sequence data
+  std::vector<uint64_t> vect_seq;
 
-  PLATON_SERIALIZE(NormalIndexValue, (pre_seq)(next_seq));
+  PLATON_SERIALIZE(NormalIndexValue, (vect_seq));
 };
 
 struct IndexType {
@@ -155,18 +154,7 @@ bool has_normal_index_db(uint64_t table_name, uint64_t index_name,
   NormalIndexValue result;
   size_t len = get_state(key, result);
   if (0 == len) return false;
-  if (INVALIDSEQ == result.next_seq) return false;
   return true;
-}
-
-template <typename T>
-bool has_normal_index_one_db(uint64_t table_name, uint64_t index_name,
-                             const T &value, uint64_t seq) {
-  NormalIndexKey<T> key = {.table_name = table_name,
-                           .index_name = index_name,
-                           .value = value,
-                           .seq = seq};
-  return has_state(key);
 }
 
 template <typename T>
@@ -210,85 +198,161 @@ void append_normal_index_one_db(uint64_t table_name, uint64_t index_name,
                            .index_name = index_name,
                            .value = value,
                            .seq = INVALIDSEQ};
-  NormalIndexValue result;
-  size_t len = get_state(key, result);
+  NormalIndexValue head;
+  size_t len = get_state(key, head);
+
+  // the first data
   if (0 == len) {
-    NormalIndexValue head{.pre_seq = seq, .next_seq = seq};
+    head.vect_seq = std::vector{INVALIDSEQ, seq, INVALIDSEQ};
     set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
-    NormalIndexValue current = {.pre_seq = INVALIDSEQ, .next_seq = INVALIDSEQ};
-    set_normal_index_one_db(table_name, index_name, value, seq, current);
-  } else {
-    uint64_t last_seq = result.pre_seq;
+    return;
+  }
+
+  // the first one
+  if (INVALIDSEQ == head.vect_seq.front() &&
+      INVALIDSEQ == head.vect_seq.back()) {
+    if (head.vect_seq.size() < NormalIndexValue::MAXSIZE) {
+      head.vect_seq.back() = seq;
+      head.vect_seq.push_back(INVALIDSEQ);
+      set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+    } else {
+      NormalIndexValue new_value = {.vect_seq = {INVALIDSEQ, seq, INVALIDSEQ}};
+      set_normal_index_one_db(table_name, index_name, value, seq, new_value);
+      head.vect_seq.front() = seq;
+      head.vect_seq.back() = seq;
+      set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+    }
+    return;
+  }
+
+  // more then one
+  if (INVALIDSEQ != head.vect_seq.front()) {
+    uint64_t last_seq = head.vect_seq.front();
     NormalIndexValue old_last =
         get_normal_index_one_db(table_name, index_name, value, last_seq);
-    old_last.next_seq = seq;
-    set_normal_index_one_db(table_name, index_name, value, last_seq, old_last);
-    NormalIndexValue current = {.pre_seq = last_seq, .next_seq = INVALIDSEQ};
-    set_normal_index_one_db(table_name, index_name, value, seq, current);
-    result.pre_seq = seq;
-    set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, result);
+    if (old_last.vect_seq.size() < NormalIndexValue::MAXSIZE) {
+      old_last.vect_seq.back() = seq;
+      old_last.vect_seq.push_back(INVALIDSEQ);
+      set_normal_index_one_db(table_name, index_name, value, last_seq,
+                              old_last);
+    } else {
+      NormalIndexValue new_value = {.vect_seq = {last_seq, seq, INVALIDSEQ}};
+      set_normal_index_one_db(table_name, index_name, value, seq, new_value);
+      old_last.vect_seq.back() = seq;
+      set_normal_index_one_db(table_name, index_name, value, last_seq,
+                              old_last);
+      head.vect_seq.front() = seq;
+      set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+    }
   }
 }
 
 template <typename T>
 void delete_normal_index_db(uint64_t table_name, uint64_t index_name,
                             uint64_t seq, const T &value) {
-  NormalIndexValue delete_one =
-      get_normal_index_one_db(table_name, index_name, value, seq);
-  uint64_t pre_seq = delete_one.pre_seq;
-  uint64_t next_seq = delete_one.next_seq;
-  delete_normal_index_one_db(table_name, index_name, value, seq);
-  if (INVALIDSEQ == pre_seq && INVALIDSEQ == next_seq) {
-    delete_normal_index_one_db(table_name, index_name, value, INVALIDSEQ);
-  } else {
-    NormalIndexValue pre =
-        get_normal_index_one_db(table_name, index_name, value, pre_seq);
-    pre.next_seq = next_seq;
-    set_normal_index_one_db(table_name, index_name, value, pre_seq, pre);
-    NormalIndexValue next =
-        get_normal_index_one_db(table_name, index_name, value, next_seq);
-    next.pre_seq = pre_seq;
-    set_normal_index_one_db(table_name, index_name, value, next_seq, next);
+  bool bfind = false, bseq = false;
+  uint64_t real_seq = INVALIDSEQ;
+  uint64_t one_seq = INVALIDSEQ;
+  while (true) {
+    NormalIndexValue one_value =
+        get_normal_index_one_db(table_name, index_name, value, one_seq);
+    for (auto it = one_value.vect_seq.begin() + 1;
+         it + 1 != one_value.vect_seq.end(); ++it) {
+      if (seq == *it) {
+        bfind = true;
+        if (one_seq == seq) {
+          bseq = true;
+          real_seq = *(it + 1);
+        }
+        one_value.vect_seq.erase(it);
+        break;
+      }
+    }
+    if (bfind) {
+      if (2 == one_value.vect_seq.size()) {
+        uint64_t pre = one_value.vect_seq.front();
+        uint64_t next = one_value.vect_seq.back();
+        delete_normal_index_one_db(table_name, index_name, value, one_seq);
+        if (INVALIDSEQ == one_seq) {
+          // only one
+          if (INVALIDSEQ == next && INVALIDSEQ == pre) {
+            break;
+          } else if (INVALIDSEQ != next && pre == next) {
+            NormalIndexValue next_value =
+                get_normal_index_one_db(table_name, index_name, value, next);
+            next_value.vect_seq.front() = INVALIDSEQ;
+            next_value.vect_seq.back() = INVALIDSEQ;
+            delete_normal_index_one_db(table_name, index_name, value, next);
+            set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ,
+                                    next_value);
+          } else {
+            NormalIndexValue next_value =
+                get_normal_index_one_db(table_name, index_name, value, next);
+            next_value.vect_seq.front() = pre;
+            delete_normal_index_one_db(table_name, index_name, value, next);
+            set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ,
+                                    next_value);
+            NormalIndexValue pre_value =
+                get_normal_index_one_db(table_name, index_name, value, pre);
+            pre_value.vect_seq.back() = INVALIDSEQ;
+            set_normal_index_one_db(table_name, index_name, value, pre,
+                                    pre_value);
+          }
+        } else if (INVALIDSEQ == next && INVALIDSEQ == pre) {
+          NormalIndexValue head = get_normal_index_one_db(
+              table_name, index_name, value, INVALIDSEQ);
+          head.vect_seq.front() = INVALIDSEQ;
+          head.vect_seq.back() = INVALIDSEQ;
+          set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ,
+                                  head);
+        } else {
+          NormalIndexValue pre_value =
+              get_normal_index_one_db(table_name, index_name, value, pre);
+          pre_value.vect_seq.back() = next;
+          set_normal_index_one_db(table_name, index_name, value, pre,
+                                  pre_value);
+          NormalIndexValue next_value =
+              get_normal_index_one_db(table_name, index_name, value, next);
+          next_value.vect_seq.front() = pre;
+          set_normal_index_one_db(table_name, index_name, value, next,
+                                  next_value);
+        }
+      } else {
+        if (bseq) {
+          uint64_t pre = one_value.vect_seq.front();
+          NormalIndexValue pre_value =
+              get_normal_index_one_db(table_name, index_name, value, pre);
+          pre_value.vect_seq.back() = real_seq;
+          set_normal_index_one_db(table_name, index_name, value, pre,
+                                  pre_value);
+          delete_normal_index_one_db(table_name, index_name, value, one_seq);
+          set_normal_index_one_db(table_name, index_name, value, real_seq,
+                                  one_value);
+        } else {
+          set_normal_index_one_db(table_name, index_name, value, one_seq,
+                                  one_value);
+        }
+      }
+      break;
+    }
+    one_seq = one_value.vect_seq.back();
+    if (INVALIDSEQ == one_seq) break;
   }
-}
-
-template <typename T>
-uint64_t get_normal_index_first_db(uint64_t table_name, uint64_t index_name,
-                                   const T &value) {
-  NormalIndexValue head =
-      get_normal_index_one_db(table_name, index_name, value, INVALIDSEQ);
-  return head.next_seq;
-}
+}  // namespace db
 
 template <typename T>
 size_t get_normal_index_count_db(uint64_t table_name, uint64_t index_name,
                                  const T &value) {
-  size_t count = 0;
   NormalIndexValue head =
       get_normal_index_one_db(table_name, index_name, value, INVALIDSEQ);
-  while (INVALIDSEQ != head.next_seq) {
-    head =
-        get_normal_index_one_db(table_name, index_name, value, head.next_seq);
-    ++count;
+  size_t count = head.vect_seq.size() - 2;
+  while (INVALIDSEQ != head.vect_seq.back()) {
+    head = get_normal_index_one_db(table_name, index_name, value,
+                                   head.vect_seq.back());
+    count += head.vect_seq.size() - 2;
   }
 
   return count;
-}
-
-template <typename T>
-std::set<uint64_t> get_normal_index_all_db(uint64_t table_name,
-                                           uint64_t index_name,
-                                           const T &value) {
-  std::set<uint64_t> result;
-  NormalIndexValue head =
-      get_normal_index_one_db(table_name, index_name, value, INVALIDSEQ);
-  while (INVALIDSEQ != head.next_seq) {
-    result.insert(head.next_seq);
-    head =
-        get_normal_index_one_db(table_name, index_name, value, head.next_seq);
-  }
-
-  return result;
 }
 
 /**
@@ -322,7 +386,7 @@ std::set<uint64_t> get_normal_index_all_db(uint64_t table_name,
 
 template <Name::Raw TableName, typename T, typename... Indices>
 class MultiIndex {
- private:
+ public:
   static_assert(sizeof...(Indices) <= 16,
                 "multi_index only supports a maximum of 16 secondary indices");
 
@@ -351,8 +415,344 @@ class MultiIndex {
     static auto extract_secondary_key(const T &obj) {
       return SecondaryExtractorType()(obj);
     }
+
+    // iterator
+    class const_iterator
+        : public std::iterator<std::bidirectional_iterator_tag, const T> {
+     public:
+      friend bool operator==(const const_iterator &a, const const_iterator &b) {
+        if (a.multiIndex_ != b.multiIndex_) return false;
+        if (a.key_ != b.key_) return false;
+        if (a.vect_seq_ != b.vect_seq_) return false;
+        if (a.num_ != b.num_) return false;
+        return true;
+      }
+
+      friend bool operator!=(const const_iterator &a, const const_iterator &b) {
+        return !(a == b);
+      }
+
+      const T &operator*() const {
+        NormalIndexValue index_value = get_normal_index_one_db(
+            table_name(), index_name(), key_, vect_seq_);
+        uint64_t seq = index_value.vect_seq[num_];
+        return static_cast<T &>(*multiIndex_->get_item_ptr(seq));
+      }
+
+      uint64_t get_seq() {
+        NormalIndexValue index_value = get_normal_index_one_db(
+            table_name(), index_name(), key_, vect_seq_);
+        return index_value.vect_seq[num_];
+      }
+
+      const T *operator->() const { return &const_cast<T &>(**this); }
+
+      const_iterator &operator++() {
+        NormalIndexValue index_value = get_normal_index_one_db(
+            table_name(), index_name(), key_, vect_seq_);
+        if (num_ == index_value.vect_seq.size() - 2) {
+          vect_seq_ = index_value.vect_seq.back();
+          if (INVALIDSEQ == vect_seq_) {
+            num_ = NormalIndexValue::MAXSIZE;
+          } else {
+            num_ = 1;
+          }
+        } else {
+          ++num_;
+        }
+        return *this;
+      }
+
+      const_iterator operator++(int) {
+        auto result = *this;
+        ++(*this);
+        return result;
+      }
+
+      const_iterator &operator--() {
+        NormalIndexValue index_value = get_normal_index_one_db(
+            table_name(), index_name(), key_, vect_seq_);
+        if (num_ == 1) {
+          uint64_t old_vect_seq_ = vect_seq_;
+          vect_seq_ = index_value.vect_seq.front();
+          if (INVALIDSEQ == vect_seq_ && old_vect_seq_ == INVALIDSEQ) {
+            num_ = NormalIndexValue::MAXSIZE;
+          } else {
+            index_value = get_normal_index_one_db(table_name(), index_name(),
+                                                  key_, vect_seq_);
+            num_ = index_value.vect_seq.size() - 2;
+          }
+        } else {
+          --num_;
+        }
+        return *this;
+      }
+
+      const_iterator operator--(int) {
+        auto result = *this;
+        --(*this);
+        return result;
+      }
+
+     private:
+      const_iterator(MultiIndex *mi, const SecondaryKeyType &key,
+                     uint64_t vect_seq, size_t num)
+          : multiIndex_(mi), key_(key), vect_seq_(vect_seq), num_(num) {}
+
+      MultiIndex *multiIndex_;
+      SecondaryKeyType key_;
+      uint64_t vect_seq_;
+      size_t num_;
+
+      friend class MultiIndex;
+      friend class Index;
+    };
+
+    /**
+      * @brief Iterator start position
+      *
+      *
+      * @return const_iterator
+      *
+      * Example:
+      *
+      * @code
+       struct Member {
+        std::string name;
+        uint8_t age;
+        uint8_t sex;
+        uint64_t $seq_;
+        std::string Name() const { return name; }
+        uint8_t Age() const { return age; }
+        PLATON_SERIALIZE(Member, (name)(age)(sex))
+       };
+       MultiIndex<
+        "table"_n, Member,
+         IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                            IndexType::UniqueIndex>>,
+        IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                             IndexType::NormalIndex>>>
+        member_table;
+        auto index = member_table.get_index<"index2"_n>();
+        for (auto it = index.cbegin(uint8_t(10)); it != index.cend(uint8_t(10));
+       ++it) {}
+      * @endcode
+      */
+    const_iterator cbegin(const SecondaryKeyType &value) {
+      NormalIndexKey<SecondaryKeyType> key = {.table_name = table_name(),
+                                              .index_name = index_name(),
+                                              .value = value,
+                                              .seq = INVALIDSEQ};
+      NormalIndexValue result;
+      size_t len = get_state(key, result);
+      if (0 == len) return cend(value);
+      return const_iterator(multidx_, value, INVALIDSEQ, 1);
+    }
+
+    /**
+      * @brief Iterator end position
+      *
+      *
+      * @return const_iterator
+      *
+      * Example:
+      *
+      * @code
+        struct Member {
+        std::string name;
+        uint8_t age;
+        uint8_t sex;
+        uint64_t $seq_;
+        std::string Name() const { return name; }
+        uint8_t Age() const { return age; }
+        PLATON_SERIALIZE(Member, (name)(age)(sex))
+        };
+        MultiIndex<
+        "table"_n, Member,
+          IndexedBy<"index"_n, IndexMemberFun<Member, std::string,
+        &Member::Name, IndexType::UniqueIndex>>, IndexedBy<"index2"_n,
+        IndexMemberFun<Member, uint8_t, &Member::Age, IndexType::NormalIndex>>>
+            member_table;
+            auto index = member_table.get_index<"index2"_n>();
+            for (auto it = index.cbegin(uint8_t(10)); it !=
+        index.cend(uint8_t(10));
+            ++it) {}
+      * @endcode
+      */
+    const_iterator cend(const SecondaryKeyType &key) {
+      return const_iterator(multidx_, key, INVALIDSEQ,
+                            NormalIndexValue::MAXSIZE);
+    }
+
+    /**
+     * @brief Modify data based on iterator, but cannot modify all index-related
+     * fields .
+     *
+     * @param position position of iterator
+     * @param constructor lambda function that updates the target object
+     *
+     * Example:
+     *
+     * @code
+      struct Member {
+       std::string name;
+       uint8_t age;
+       uint8_t sex;
+       uint64_t $seq_;
+       std::string Name() const { return name; }
+       uint8_t Age() const { return age; }
+       PLATON_SERIALIZE(Member, (name)(age)(sex))
+      };
+      MultiIndex<
+       "table"_n, Member,
+        IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                           IndexType::UniqueIndex>>,
+       IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                            IndexType::NormalIndex>>>
+       member_table;
+
+      auto index = member_table.get_index<"index2"_n>();
+      iter = index.cbegin(uint8_t(10));
+      index.modify(iter, [&](auto &m) { m.sex = 15; });
+     * @endcode
+     */
+    template <typename Lambda>
+    void modify(const_iterator position, Lambda &&constructor) {
+      auto item = std::make_shared<Item>(multidx_, [&](auto &i) {
+        T &obj = static_cast<T &>(i);
+        obj = *position;
+        constructor(obj);
+        i.$seq = position.get_seq();
+      });
+
+      T &new_obj = static_cast<T &>(*item);
+      const T &old_obj = static_cast<const T &>(*position);
+      bool enable = true;
+
+      // update index key is illegal operation
+      hana::any_of(multidx_->indices_, [&](auto &idx) {
+        typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
+        // check index key
+        if (IndexType::extract_secondary_key(old_obj) !=
+            IndexType::extract_secondary_key(new_obj)) {
+          enable = false;
+          return true;
+        }
+        return false;
+      });
+
+      if (enable) {
+        // update
+        set_state_db(static_cast<uint64_t>(TableName), position.get_seq(),
+                     new_obj);
+        multidx_->seq2item_[item->$seq] = item;
+      }
+    }
+
+    /**
+     * @brief Modify data based on iterator, but cannot modify all index-related
+     * fields .
+     *
+     * @param position position of iterator
+     *
+     * Example:
+     *
+     * @code
+      struct Member {
+       std::string name;
+       uint8_t age;
+       uint8_t sex;
+       uint64_t $seq_;
+       std::string Name() const { return name; }
+       uint8_t Age() const { return age; }
+       PLATON_SERIALIZE(Member, (name)(age)(sex))
+      };
+      MultiIndex<
+      "table"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                         IndexType::UniqueIndex>>,
+      IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                          IndexType::NormalIndex>>>
+      member_table;
+
+      auto index = member_table.get_index<"index2"_n>();
+      auto iter = index.cbegin(uint8_t(10));
+      index.erase(iter);
+     * @endcode
+     */
+    void erase(const_iterator position) {
+      uint64_t seq = position.get_seq();
+      hana::for_each(multidx_->indices_, [&](auto &idx) {
+        typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
+        if (IndexType::unique()) {
+          delete_index_db<typename IndexType::SecondaryKeyType>(
+              IndexType::table_name(), IndexType::index_name(),
+              IndexType::extract_secondary_key(*position));
+        } else {
+          delete_normal_index_db<typename IndexType::SecondaryKeyType>(
+              IndexType::table_name(), IndexType::index_name(), seq,
+              IndexType::extract_secondary_key(*position));
+        }
+      });
+
+      // delete key
+      delete_state_db(static_cast<uint64_t>(TableName), seq);
+
+      // delete
+      multidx_->seq2item_.erase(seq);
+    }
+
+   private:
+    friend class MultiIndex;
+    Index(MultiIndex *midx) : multidx_(midx) {}
+    MultiIndex *multidx_;
   };
 
+  /**
+    * @brief Gets the index object of a non-unique index
+    *
+    *
+    * @return index object
+    *
+    * Example:
+    *
+    * @code
+     struct Member {
+      std::string name;
+      uint8_t age;
+      uint8_t sex;
+      uint64_t $seq_;
+      std::string Name() const { return name; }
+      uint8_t Age() const { return age; }
+      PLATON_SERIALIZE(Member, (name)(age)(sex))
+     };
+     MultiIndex<
+      "table"_n, Member,
+       IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                          IndexType::UniqueIndex>>,
+      IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                           IndexType::NormalIndex>>>
+      member_table;
+      auto index = member_table.get_index<"index2"_n>();
+    * @endcode
+    */
+  template <Name::Raw IndexName>
+  auto get_index() {
+    static_assert(
+        !check_index_unique<IndexName>(),
+        "name provided cannot be the unique index within multi_index");
+    auto res = hana::find_if(indices_, [&](auto &&idx) {
+      typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
+      return std::integral_constant<
+          bool, IndexType::index_name() == static_cast<uint64_t>(IndexName)>();
+    });
+    static_assert(res != hana::nothing,
+                  "name provided is not the name of any secondary index within "
+                  "multi_index");
+    return typename decltype(+hana::at_c<0>(res.value()))::type(this);
+  }
+
+ private:
   // item
   struct Item : public T {
     template <typename Constructor>
@@ -366,6 +766,29 @@ class MultiIndex {
 
   std::map<uint64_t, std::shared_ptr<Item>> seq2item_;
 
+  std::shared_ptr<Item> get_item_ptr(uint64_t seq) {
+    std::shared_ptr<Item> result;
+    if (seq2item_.find(seq) != seq2item_.end()) {
+      result = seq2item_[seq];
+    } else {
+      auto item = std::make_shared<Item>(this, [&](auto &i) {
+        T &obj = static_cast<T &>(i);
+        get_state_db(static_cast<uint64_t>(TableName), seq, obj);
+        i.$seq = seq;
+      });
+      seq2item_[seq] = item;
+      result = item;
+    }
+    return result;
+  }
+
+  template <uint64_t I>
+  struct IntC {
+    enum e { value = I };
+    operator uint64_t() const { return I; }
+  };
+
+ public:
   class const_iterator
       : public std::iterator<std::bidirectional_iterator_tag, const T> {
    public:
@@ -468,17 +891,8 @@ class MultiIndex {
     friend class MultiIndex;
   };  /// class MultiIndex::const_iterator
 
-  template <uint64_t I>
-  struct IntC {
-    enum e { value = I };
-    operator uint64_t() const { return I; }
-  };
-
- public:
   /**
-   * @brief Iterator start position, but its return value cannot be incremented
-   * or decremented because MultiIndex does not support full-order traversal
-   * container.
+   * @brief Iterator start position
    *
    *
    * @return const_iterator
@@ -524,7 +938,7 @@ class MultiIndex {
   }
 
   /**
-   * @brief Insert new value
+   * @brief Iterator end position
    *
    *
    * @return const_iterator
@@ -621,7 +1035,7 @@ class MultiIndex {
       });
       if (is_conflict) {
         seq_.self() -= 1;
-        return std::make_pair(const_iterator(this, nullptr), false);
+        return std::make_pair(cend(), false);
       }
     }
 
@@ -650,8 +1064,7 @@ class MultiIndex {
   }
 
   /**
-   * @brief Find the data, the unique index will only return one piece of
-   data, the secondary index will return the first iterator.
+   * @brief Find the data, Only a unique index is available.
    *
    * @param key key of index
    * @return the first iterator. cend() if not found.
@@ -680,80 +1093,74 @@ class MultiIndex {
    * @endcode
    */
   template <Name::Raw IndexName, typename KEY>
-  auto find(const KEY &key) {
+  const_iterator find(const KEY &key) {
+    static_assert(check_index_unique<IndexName>(),
+                  "name provided is not the unique index within multi_index");
     const_iterator result = cend();
     hana::any_of(indices_, [&](auto &idx) {
       uint64_t index_name = static_cast<uint64_t>(IndexName);
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
       if (IndexType::index_name() == index_name) {
-        if (IndexType::unique()) {
-          if (!has_index_db(static_cast<uint64_t>(TableName),
-                            static_cast<uint64_t>(IndexName), key))
-            return true;
-          auto seq = get_index_db<KEY, uint64_t>(
+        if (has_index_db(static_cast<uint64_t>(TableName),
+                         static_cast<uint64_t>(IndexName), key)) {
+          uint64_t seq = get_index_db<KEY, uint64_t>(
               static_cast<uint64_t>(TableName),
               static_cast<uint64_t>(IndexName), key);
-          if (seq2item_.find(seq) != seq2item_.end()) {
-            result.reset(seq2item_[seq]);
-          } else {
-            auto item = std::make_shared<Item>(this, [&](auto &i) {
-              T &obj = static_cast<T &>(i);
-              get_state_db(IndexType::table_name(), seq, obj);
-              i.$seq = seq;
-            });
-            seq2item_[seq] = item;
-            result.reset(item);
-          }
-        } else {
-          if (!has_normal_index_db(static_cast<uint64_t>(TableName),
-                                   static_cast<uint64_t>(IndexName), key))
-            return true;
-          auto seq =
-              get_normal_index_first_db(static_cast<uint64_t>(TableName),
-                                        static_cast<uint64_t>(IndexName), key);
-          if (seq2item_.find(seq) != seq2item_.end()) {
-            result.reset(seq2item_[seq]);
-          } else {
-            auto item = std::make_shared<Item>(this, [&](auto &i) {
-              T &obj = static_cast<T &>(i);
-              get_state_db(IndexType::table_name(), seq, obj);
-              i.$seq = seq;
-            });
-            seq2item_[seq] = item;
-            result.reset(item);
-          }
+          auto item = get_item_ptr(seq);
+          result.reset(item);
         }
         return true;
       }
       return false;
     });
-
     return result;
   }
 
+  /**
+    * @brief
+    *
+    *
+    * @return Gets the number of data corresponding to the index value
+    *
+    * Example:
+    *
+    * @code
+     struct Member {
+      std::string name;
+      uint8_t age;
+      uint8_t sex;
+      uint64_t $seq_;
+      std::string Name() const { return name; }
+      uint8_t Age() const { return age; }
+      PLATON_SERIALIZE(Member, (name)(age)(sex))
+     };
+     MultiIndex<
+      "table"_n, Member,
+       IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                          IndexType::UniqueIndex>>,
+      IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                           IndexType::NormalIndex>>>
+      member_table;
+      auto count = member_table.count<"index2"_n>(uint8_t(10));
+    * @endcode
+    */
   template <Name::Raw IndexName, typename KEY>
-  auto count(const KEY &key) {
+  size_t count(const KEY &key) {
     size_t result = 0;
     hana::any_of(indices_, [&](auto &idx) {
       uint64_t index_name = static_cast<uint64_t>(IndexName);
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
       if (IndexType::index_name() == index_name) {
         if (IndexType::unique()) {
-          if (!has_index_db(static_cast<uint64_t>(TableName),
-                            static_cast<uint64_t>(IndexName), key)) {
-            return true;
-          } else {
+          if (has_index_db(static_cast<uint64_t>(TableName),
+                           static_cast<uint64_t>(IndexName), key))
             result = 1;
-          }
         } else {
-          if (!has_normal_index_db(static_cast<uint64_t>(TableName),
-                                   static_cast<uint64_t>(IndexName), key)) {
-            return true;
-          } else {
+          if (has_normal_index_db(static_cast<uint64_t>(TableName),
+                                  static_cast<uint64_t>(IndexName), key))
             result = get_normal_index_count_db(static_cast<uint64_t>(TableName),
                                                static_cast<uint64_t>(IndexName),
                                                key);
-          }
         }
         return true;
       }
@@ -901,6 +1308,8 @@ class MultiIndex {
 
   typedef decltype(MultiIndex::transform_indices()) IndicesType;
 
+  IndicesType indices_;
+
   static constexpr bool has_unique_index() {
     return hana::any_of(IndicesType(), [&](auto &idx) {
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
@@ -908,62 +1317,24 @@ class MultiIndex {
     });
   }
 
-  template <Name::Raw IndexName, typename KEY>
-  auto find_all(const KEY &key) {
-    std::vector<const_iterator> result;
-    hana::any_of(indices_, [&](auto &idx) {
-      uint64_t index_name = static_cast<uint64_t>(IndexName);
+  template <Name::Raw IndexName>
+  static constexpr bool check_index_unique() {
+    return hana::any_of(IndicesType(), [&](auto &idx) {
       typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
-      if (IndexType::index_name() == index_name) {
-        if (IndexType::unique()) {
-          if (!has_index_db(static_cast<uint64_t>(TableName),
-                            static_cast<uint64_t>(IndexName), key))
-            return true;
-          auto seq = get_index_db<KEY, uint64_t>(
-              static_cast<uint64_t>(TableName),
-              static_cast<uint64_t>(IndexName), key);
-          if (seq2item_.find(seq) != seq2item_.end()) {
-            result.push_back(const_iterator(this, seq2item_[seq]));
-          } else {
-            auto item = std::make_shared<Item>(this, [&](auto &i) {
-              T &obj = static_cast<T &>(i);
-              get_state_db(IndexType::table_name(), seq, obj);
-              i.$seq = seq;
-            });
-            seq2item_[seq] = item;
-            result.push_back(const_iterator(this, item));
-          }
-        } else {
-          if (!has_normal_index_db(static_cast<uint64_t>(TableName),
-                                   static_cast<uint64_t>(IndexName), key))
-            return true;
-          auto all_seq =
-              get_normal_index_all_db(static_cast<uint64_t>(TableName),
-                                      static_cast<uint64_t>(IndexName), key);
-          for (auto it = all_seq.begin(); it != all_seq.end(); ++it) {
-            if (seq2item_.find(*it) != seq2item_.end()) {
-              result.push_back(const_iterator(this, seq2item_[*it]));
-            } else {
-              auto item = std::make_shared<Item>(this, [&](auto &i) {
-                T &obj = static_cast<T &>(i);
-                get_state_db(IndexType::table_name(), *it, obj);
-                i.$seq = *it;
-              });
-              seq2item_[item->$seq] = item;
-              result.push_back(const_iterator(this, item));
-            }
-          }
-        }
-        return true;
-      }
-      return false;
+      return IndexType::index_name() == static_cast<uint64_t>(IndexName) &&
+             IndexType::unique();
     });
-
-    return result;
   }
 
-  IndicesType indices_;
+  template <Name::Raw IndexName>
+  static constexpr bool check_index_exist() {
+    return hana::any_of(IndicesType(), [&](auto &idx) {
+      typedef typename decltype(+hana::at_c<0>(idx))::type IndexType;
+      return IndexType::index_name() == static_cast<uint64_t>(IndexName);
+    });
+  }
+
   Uint64<TableName> seq_;
-};  // namespace db
+};
 }  // namespace db
 }  // namespace platon
