@@ -24,17 +24,22 @@ struct NormalIndexKey {
   uint64_t table_name;
   uint64_t index_name;
   T value;
-  uint64_t seq;
-  PLATON_SERIALIZE(NormalIndexKey, (table_name)(index_name)(value)(seq))
+
+  // section number
+  uint64_t serial;
+
+  PLATON_SERIALIZE(NormalIndexKey, (table_name)(index_name)(value)(serial))
 };
 
 struct NormalIndexValue {
-  constexpr static size_t MAXSIZE = 32;
+  constexpr static size_t MAXSIZE = 30;
 
+  uint64_t previous;
   // sequence data
   std::vector<uint64_t> vect_seq;
+  uint64_t next;
 
-  PLATON_SERIALIZE(NormalIndexValue, (vect_seq));
+  PLATON_SERIALIZE(NormalIndexValue, (previous)(vect_seq)(next));
 };
 
 struct IndexType {
@@ -142,7 +147,7 @@ bool check_unique(uint64_t table_name, uint64_t index_name, const T &value) {
 }
 
 // normal index key and previous sequence, next sequence
-constexpr uint64_t INVALIDSEQ = ~uint64_t(0);
+constexpr uint64_t HEADSERIAL = 0;
 
 template <typename T>
 bool has_normal_index_db(uint64_t table_name, uint64_t index_name,
@@ -150,7 +155,7 @@ bool has_normal_index_db(uint64_t table_name, uint64_t index_name,
   NormalIndexKey<T> key = {.table_name = table_name,
                            .index_name = index_name,
                            .value = value,
-                           .seq = INVALIDSEQ};
+                           .serial = HEADSERIAL};
   NormalIndexValue result;
   size_t len = get_state(key, result);
   if (0 == len) return false;
@@ -160,11 +165,11 @@ bool has_normal_index_db(uint64_t table_name, uint64_t index_name,
 template <typename T>
 NormalIndexValue get_normal_index_one_db(uint64_t table_name,
                                          uint64_t index_name, const T &value,
-                                         uint64_t seq) {
+                                         uint64_t serial) {
   NormalIndexKey<T> key = {.table_name = table_name,
                            .index_name = index_name,
                            .value = value,
-                           .seq = seq};
+                           .serial = serial};
   NormalIndexValue result;
   get_state(key, result);
   return result;
@@ -172,22 +177,22 @@ NormalIndexValue get_normal_index_one_db(uint64_t table_name,
 
 template <typename T>
 void set_normal_index_one_db(uint64_t table_name, uint64_t index_name,
-                             const T &value, uint64_t seq,
+                             const T &value, uint64_t serial,
                              const NormalIndexValue &index_value) {
   NormalIndexKey<T> key = {.table_name = table_name,
                            .index_name = index_name,
                            .value = value,
-                           .seq = seq};
+                           .serial = serial};
   set_state(key, index_value);
 }
 
 template <typename T>
 void delete_normal_index_one_db(uint64_t table_name, uint64_t index_name,
-                                const T &value, uint64_t seq) {
+                                const T &value, uint64_t serial) {
   NormalIndexKey<T> key = {.table_name = table_name,
                            .index_name = index_name,
                            .value = value,
-                           .seq = seq};
+                           .serial = serial};
   del_state(key);
 }
 
@@ -197,52 +202,57 @@ void append_normal_index_one_db(uint64_t table_name, uint64_t index_name,
   NormalIndexKey<T> key = {.table_name = table_name,
                            .index_name = index_name,
                            .value = value,
-                           .seq = INVALIDSEQ};
+                           .serial = HEADSERIAL};
   NormalIndexValue head;
   size_t len = get_state(key, head);
 
   // the first data
   if (0 == len) {
-    head.vect_seq = std::vector{INVALIDSEQ, seq, INVALIDSEQ};
-    set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+    head.vect_seq = std::vector<uint64_t>{seq};
+    head.previous = HEADSERIAL;
+    head.next = HEADSERIAL;
+    set_normal_index_one_db(table_name, index_name, value, HEADSERIAL, head);
     return;
   }
 
   // the first one
-  if (INVALIDSEQ == head.vect_seq.front() &&
-      INVALIDSEQ == head.vect_seq.back()) {
+  if (HEADSERIAL == head.previous && HEADSERIAL == head.next) {
     if (head.vect_seq.size() < NormalIndexValue::MAXSIZE) {
-      head.vect_seq.back() = seq;
-      head.vect_seq.push_back(INVALIDSEQ);
-      set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+      head.vect_seq.push_back(seq);
+      set_normal_index_one_db(table_name, index_name, value, HEADSERIAL, head);
     } else {
-      NormalIndexValue new_value = {.vect_seq = {INVALIDSEQ, seq, INVALIDSEQ}};
-      set_normal_index_one_db(table_name, index_name, value, seq, new_value);
-      head.vect_seq.front() = seq;
-      head.vect_seq.back() = seq;
-      set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+      NormalIndexValue new_value = {
+          .previous = HEADSERIAL, .vect_seq = {seq}, .next = HEADSERIAL};
+      uint64_t new_serial = HEADSERIAL + 1;
+      set_normal_index_one_db(table_name, index_name, value, new_serial,
+                              new_value);
+      head.previous = new_serial;
+      head.next = new_serial;
+      set_normal_index_one_db(table_name, index_name, value, HEADSERIAL, head);
     }
     return;
   }
 
-  // more then one
-  if (INVALIDSEQ != head.vect_seq.front()) {
-    uint64_t last_seq = head.vect_seq.front();
+  // more than one
+  if (HEADSERIAL != head.previous) {
+    uint64_t last_serial = head.previous;
     NormalIndexValue old_last =
-        get_normal_index_one_db(table_name, index_name, value, last_seq);
+        get_normal_index_one_db(table_name, index_name, value, last_serial);
     if (old_last.vect_seq.size() < NormalIndexValue::MAXSIZE) {
-      old_last.vect_seq.back() = seq;
-      old_last.vect_seq.push_back(INVALIDSEQ);
-      set_normal_index_one_db(table_name, index_name, value, last_seq,
+      old_last.vect_seq.push_back(seq);
+      set_normal_index_one_db(table_name, index_name, value, last_serial,
                               old_last);
     } else {
-      NormalIndexValue new_value = {.vect_seq = {last_seq, seq, INVALIDSEQ}};
-      set_normal_index_one_db(table_name, index_name, value, seq, new_value);
-      old_last.vect_seq.back() = seq;
-      set_normal_index_one_db(table_name, index_name, value, last_seq,
+      NormalIndexValue new_value = {
+          .previous = last_serial, .vect_seq = {seq}, .next = HEADSERIAL};
+      uint64_t new_serial = last_serial + 1;
+      set_normal_index_one_db(table_name, index_name, value, new_serial,
+                              new_value);
+      old_last.next = new_serial;
+      set_normal_index_one_db(table_name, index_name, value, last_serial,
                               old_last);
-      head.vect_seq.front() = seq;
-      set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ, head);
+      head.previous = new_serial;
+      set_normal_index_one_db(table_name, index_name, value, HEADSERIAL, head);
     }
   }
 }
@@ -250,106 +260,169 @@ void append_normal_index_one_db(uint64_t table_name, uint64_t index_name,
 template <typename T>
 void delete_normal_index_db(uint64_t table_name, uint64_t index_name,
                             uint64_t seq, const T &value) {
-  bool bfind = false, bseq = false;
-  uint64_t real_seq = INVALIDSEQ;
-  uint64_t one_seq = INVALIDSEQ;
-  while (true) {
-    NormalIndexValue one_value =
-        get_normal_index_one_db(table_name, index_name, value, one_seq);
-    for (auto it = one_value.vect_seq.begin() + 1;
-         it + 1 != one_value.vect_seq.end(); ++it) {
-      if (seq == *it) {
+  NormalIndexKey<T> key = {.table_name = table_name,
+                           .index_name = index_name,
+                           .value = value,
+                           .serial = HEADSERIAL};
+  NormalIndexValue head;
+  size_t len = get_state(key, head);
+  if (0 == len) return;
+
+  // only one
+  if (HEADSERIAL == head.previous && HEADSERIAL == head.next) {
+    auto iter =
+        std::lower_bound(head.vect_seq.begin(), head.vect_seq.end(), seq);
+    if (head.vect_seq.end() == iter) return;
+    head.vect_seq.erase(iter);
+    if (0 == head.vect_seq.size()) {
+      delete_normal_index_one_db(table_name, index_name, value, HEADSERIAL);
+    } else {
+      set_normal_index_one_db(table_name, index_name, value, HEADSERIAL, head);
+    }
+    return;
+  }
+
+  // more than one
+  auto next_valid = [&](uint64_t serial, bool &bfind) {
+    NormalIndexValue one_value;
+    while (true) {
+      NormalIndexKey<T> key = {.table_name = table_name,
+                               .index_name = index_name,
+                               .value = value,
+                               .serial = serial};
+      size_t len = get_state(key, one_value);
+      if (0 != len) {
         bfind = true;
-        if (one_seq == seq) {
-          bseq = true;
-          real_seq = *(it + 1);
-        }
-        one_value.vect_seq.erase(it);
+        break;
+      }
+      ++serial;
+      if (serial > head.previous) {
+        bfind = false;
         break;
       }
     }
-    if (bfind) {
-      if (2 == one_value.vect_seq.size()) {
-        uint64_t pre = one_value.vect_seq.front();
-        uint64_t next = one_value.vect_seq.back();
-        delete_normal_index_one_db(table_name, index_name, value, one_seq);
-        if (INVALIDSEQ == one_seq) {
+    return std::make_pair(serial, one_value);
+  };
+
+  auto previous_valid = [&](uint64_t serial, bool &bfind) {
+    NormalIndexValue one_value;
+    while (true) {
+      NormalIndexKey<T> key = {.table_name = table_name,
+                               .index_name = index_name,
+                               .value = value,
+                               .serial = serial};
+      size_t len = get_state(key, one_value);
+      if (0 != len) {
+        bfind = true;
+        break;
+      }
+      if (HEADSERIAL == serial) {
+        bfind = false;
+        break;
+      }
+      --serial;
+    }
+    return std::make_pair(serial, one_value);
+  };
+
+  uint64_t begin_serial = HEADSERIAL;
+  uint64_t end_serial = head.previous;
+  bool find_valid = false;
+
+  while (begin_serial <= end_serial) {
+    uint64_t mid_serial = (begin_serial + end_serial) / 2;
+
+    auto next_valid_pair = next_valid(mid_serial, find_valid);
+    if (!find_valid) return;
+
+    if (next_valid_pair.second.vect_seq.back() < seq) {
+      begin_serial = next_valid(next_valid_pair.first + 1, find_valid).first;
+      if (!find_valid) return;
+    } else if (next_valid_pair.second.vect_seq.front() > seq) {
+      if (mid_serial == next_valid_pair.first) mid_serial -= 1;
+      end_serial = previous_valid(mid_serial, find_valid).first;
+      if (!find_valid) return;
+    } else {
+      uint64_t real_serial = next_valid_pair.first;
+      NormalIndexValue real_value = next_valid_pair.second;
+      auto iter = std::lower_bound(real_value.vect_seq.begin(),
+                                   real_value.vect_seq.end(), seq);
+      if (real_value.vect_seq.end() == iter) return;
+      real_value.vect_seq.erase(iter);
+      if (0 == real_value.vect_seq.size()) {
+        uint64_t previous = real_value.previous;
+        uint64_t next = real_value.next;
+        delete_normal_index_one_db(table_name, index_name, value, real_serial);
+
+        // head
+        if (HEADSERIAL == real_serial) {
           // only one
-          if (INVALIDSEQ == next && INVALIDSEQ == pre) {
-            break;
-          } else if (INVALIDSEQ != next && pre == next) {
+          if (HEADSERIAL == previous && HEADSERIAL == next) return;
+
+          // only two
+          if (previous == next) {
             NormalIndexValue next_value =
                 get_normal_index_one_db(table_name, index_name, value, next);
-            next_value.vect_seq.front() = INVALIDSEQ;
-            next_value.vect_seq.back() = INVALIDSEQ;
             delete_normal_index_one_db(table_name, index_name, value, next);
-            set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ,
+            set_normal_index_one_db(table_name, index_name, value, HEADSERIAL,
                                     next_value);
-          } else {
-            NormalIndexValue next_value =
-                get_normal_index_one_db(table_name, index_name, value, next);
-            next_value.vect_seq.front() = pre;
-            delete_normal_index_one_db(table_name, index_name, value, next);
-            set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ,
-                                    next_value);
-            NormalIndexValue pre_value =
-                get_normal_index_one_db(table_name, index_name, value, pre);
-            pre_value.vect_seq.back() = INVALIDSEQ;
-            set_normal_index_one_db(table_name, index_name, value, pre,
-                                    pre_value);
+            return;
           }
-        } else if (INVALIDSEQ == next && INVALIDSEQ == pre) {
-          NormalIndexValue head = get_normal_index_one_db(
-              table_name, index_name, value, INVALIDSEQ);
-          head.vect_seq.front() = INVALIDSEQ;
-          head.vect_seq.back() = INVALIDSEQ;
-          set_normal_index_one_db(table_name, index_name, value, INVALIDSEQ,
-                                  head);
-        } else {
-          NormalIndexValue pre_value =
-              get_normal_index_one_db(table_name, index_name, value, pre);
-          pre_value.vect_seq.back() = next;
-          set_normal_index_one_db(table_name, index_name, value, pre,
-                                  pre_value);
+
+          // more than two
           NormalIndexValue next_value =
               get_normal_index_one_db(table_name, index_name, value, next);
-          next_value.vect_seq.front() = pre;
-          set_normal_index_one_db(table_name, index_name, value, next,
+          next_value.previous = previous;
+          delete_normal_index_one_db(table_name, index_name, value, next);
+          set_normal_index_one_db(table_name, index_name, value, HEADSERIAL,
                                   next_value);
+          uint64_t new_next = next_value.next;
+          NormalIndexValue new_next_value =
+              get_normal_index_one_db(table_name, index_name, value, new_next);
+          new_next_value.previous = HEADSERIAL;
+          set_normal_index_one_db(table_name, index_name, value, new_next,
+                                  new_next_value);
+          return;
         }
+
+        // only two
+        if (HEADSERIAL == previous && HEADSERIAL == next) {
+          head.previous = HEADSERIAL;
+          head.next = HEADSERIAL;
+          set_normal_index_one_db(table_name, index_name, value, HEADSERIAL,
+                                  head);
+          return;
+        }
+
+        // more than two
+        NormalIndexValue previous_value =
+            get_normal_index_one_db(table_name, index_name, value, previous);
+        previous_value.next = next;
+        set_normal_index_one_db(table_name, index_name, value, previous,
+                                previous_value);
+        NormalIndexValue next_value =
+            get_normal_index_one_db(table_name, index_name, value, next);
+        next_value.previous = previous;
+        set_normal_index_one_db(table_name, index_name, value, next,
+                                next_value);
       } else {
-        if (bseq) {
-          uint64_t pre = one_value.vect_seq.front();
-          NormalIndexValue pre_value =
-              get_normal_index_one_db(table_name, index_name, value, pre);
-          pre_value.vect_seq.back() = real_seq;
-          set_normal_index_one_db(table_name, index_name, value, pre,
-                                  pre_value);
-          delete_normal_index_one_db(table_name, index_name, value, one_seq);
-          set_normal_index_one_db(table_name, index_name, value, real_seq,
-                                  one_value);
-        } else {
-          set_normal_index_one_db(table_name, index_name, value, one_seq,
-                                  one_value);
-        }
+        set_normal_index_one_db(table_name, index_name, value, real_serial,
+                                real_value);
       }
       break;
     }
-    one_seq = one_value.vect_seq.back();
-    if (INVALIDSEQ == one_seq) break;
   }
-}  // namespace db
+}
 
 template <typename T>
 size_t get_normal_index_count_db(uint64_t table_name, uint64_t index_name,
                                  const T &value) {
   NormalIndexValue head =
-      get_normal_index_one_db(table_name, index_name, value, INVALIDSEQ);
-  size_t count = head.vect_seq.size() - 2;
-  while (INVALIDSEQ != head.vect_seq.back()) {
-    head = get_normal_index_one_db(table_name, index_name, value,
-                                   head.vect_seq.back());
-    count += head.vect_seq.size() - 2;
+      get_normal_index_one_db(table_name, index_name, value, HEADSERIAL);
+  size_t count = head.vect_seq.size();
+  while (HEADSERIAL != head.next) {
+    head = get_normal_index_one_db(table_name, index_name, value, head.next);
+    count += head.vect_seq.size();
   }
 
   return count;
@@ -423,7 +496,7 @@ class MultiIndex {
       friend bool operator==(const const_iterator &a, const const_iterator &b) {
         if (a.multiIndex_ != b.multiIndex_) return false;
         if (a.key_ != b.key_) return false;
-        if (a.vect_seq_ != b.vect_seq_) return false;
+        if (a.serial_ != b.serial_) return false;
         if (a.num_ != b.num_) return false;
         return true;
       }
@@ -433,29 +506,29 @@ class MultiIndex {
       }
 
       const T &operator*() const {
-        NormalIndexValue index_value = get_normal_index_one_db(
-            table_name(), index_name(), key_, vect_seq_);
+        NormalIndexValue index_value =
+            get_normal_index_one_db(table_name(), index_name(), key_, serial_);
         uint64_t seq = index_value.vect_seq[num_];
         return static_cast<T &>(*multiIndex_->get_item_ptr(seq));
       }
 
       uint64_t get_seq() {
-        NormalIndexValue index_value = get_normal_index_one_db(
-            table_name(), index_name(), key_, vect_seq_);
+        NormalIndexValue index_value =
+            get_normal_index_one_db(table_name(), index_name(), key_, serial_);
         return index_value.vect_seq[num_];
       }
 
       const T *operator->() const { return &const_cast<T &>(**this); }
 
       const_iterator &operator++() {
-        NormalIndexValue index_value = get_normal_index_one_db(
-            table_name(), index_name(), key_, vect_seq_);
-        if (num_ == index_value.vect_seq.size() - 2) {
-          vect_seq_ = index_value.vect_seq.back();
-          if (INVALIDSEQ == vect_seq_) {
+        NormalIndexValue index_value =
+            get_normal_index_one_db(table_name(), index_name(), key_, serial_);
+        if (num_ == index_value.vect_seq.size() - 1) {
+          serial_ = index_value.next;
+          if (HEADSERIAL == serial_) {
             num_ = NormalIndexValue::MAXSIZE;
           } else {
-            num_ = 1;
+            num_ = 0;
           }
         } else {
           ++num_;
@@ -470,17 +543,16 @@ class MultiIndex {
       }
 
       const_iterator &operator--() {
-        NormalIndexValue index_value = get_normal_index_one_db(
-            table_name(), index_name(), key_, vect_seq_);
-        if (num_ == 1) {
-          uint64_t old_vect_seq_ = vect_seq_;
-          vect_seq_ = index_value.vect_seq.front();
-          if (INVALIDSEQ == vect_seq_ && old_vect_seq_ == INVALIDSEQ) {
+        NormalIndexValue index_value =
+            get_normal_index_one_db(table_name(), index_name(), key_, serial_);
+        if (num_ == 0) {
+          if (HEADSERIAL == serial_) {
             num_ = NormalIndexValue::MAXSIZE;
           } else {
+            serial_ = index_value.previous;
             index_value = get_normal_index_one_db(table_name(), index_name(),
-                                                  key_, vect_seq_);
-            num_ = index_value.vect_seq.size() - 2;
+                                                  key_, serial_);
+            num_ = index_value.vect_seq.size() - 1;
           }
         } else {
           --num_;
@@ -496,12 +568,12 @@ class MultiIndex {
 
      private:
       const_iterator(MultiIndex *mi, const SecondaryKeyType &key,
-                     uint64_t vect_seq, size_t num)
-          : multiIndex_(mi), key_(key), vect_seq_(vect_seq), num_(num) {}
+                     uint64_t serial, size_t num)
+          : multiIndex_(mi), key_(key), serial_(serial), num_(num) {}
 
       MultiIndex *multiIndex_;
       SecondaryKeyType key_;
-      uint64_t vect_seq_;
+      uint64_t serial_;
       size_t num_;
 
       friend class MultiIndex;
@@ -542,11 +614,11 @@ class MultiIndex {
       NormalIndexKey<SecondaryKeyType> key = {.table_name = table_name(),
                                               .index_name = index_name(),
                                               .value = value,
-                                              .seq = INVALIDSEQ};
+                                              .serial = HEADSERIAL};
       NormalIndexValue result;
       size_t len = get_state(key, result);
       if (0 == len) return cend(value);
-      return const_iterator(multidx_, value, INVALIDSEQ, 1);
+      return const_iterator(multidx_, value, HEADSERIAL, 0);
     }
 
     /**
@@ -580,7 +652,7 @@ class MultiIndex {
       * @endcode
       */
     const_iterator cend(const SecondaryKeyType &key) {
-      return const_iterator(multidx_, key, INVALIDSEQ,
+      return const_iterator(multidx_, key, HEADSERIAL,
                             NormalIndexValue::MAXSIZE);
     }
 
@@ -650,8 +722,7 @@ class MultiIndex {
     }
 
     /**
-     * @brief Modify data based on iterator, but cannot modify all index-related
-     * fields .
+     * @brief erase data based on iterator.
      *
      * @param position position of iterator
      *
@@ -1237,8 +1308,7 @@ class MultiIndex {
   }
 
   /**
-   * @brief Modify data based on iterator, but cannot modify all index-related
-   * fields .
+   * @brief erase data based on iterator.
    *
    * @param position position of iterator
    *

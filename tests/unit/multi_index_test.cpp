@@ -96,16 +96,16 @@ TEST_CASE(multi_index, unique) {
 
   unique_multi_type member_table;
 
-  // 增加
+  // emplace
   auto r = member_table.emplace([&](auto &m) {
     m.age = 10;
     m.name = "zhao";
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
-  // 重复
+  // repeate
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
     m.name = "zhao";
@@ -119,7 +119,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -127,7 +127,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -135,7 +135,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -143,7 +143,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -151,7 +151,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -159,7 +159,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -167,7 +167,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -175,7 +175,7 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
   r = member_table.emplace([&](auto &m) {
     m.age = 10;
@@ -183,39 +183,54 @@ TEST_CASE(multi_index, unique) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
 
-  println("------------------");
-  // 遍历
+  // println("------------------");
+  // traverse
+  size_t count = 0;
   auto it_end = member_table.cend();
   for (auto it = member_table.cbegin(); it != it_end; ++it) {
-    it->print_info();
+    count++;
+    // it->print_info();
   }
+  ASSERT(count == 10);
 
-  println("------------------");
-  // 更改
+  // println("------------------");
+  // traverse
+  count = member_table.count<"index2"_n>(uint8_t(10));
+  ASSERT(count == 10);
+  count = 0;
+  auto index = member_table.get_index<"index2"_n>();
+  auto index_iter = index.cbegin(uint8_t(10));
+  for (; index_iter != index.cend(uint8_t(10)); ++index_iter) {
+    // index_iter->print_info();
+    count++;
+  }
+  ASSERT(count == 10);
 
+  // println("------------------");
+  // modify
   auto iter = member_table.find<"index"_n>(std::string("wang"));
   member_table.modify(iter, [&](auto &m) { m.sex = 15; });
   iter = member_table.find<"index"_n>(std::string("wang"));
   ASSERT(iter != member_table.cend());
   ASSERT(iter->sex == 15, "sex:", iter->sex);
-  iter->print_info();
-  size_t count = member_table.count<"index"_n>(std::string("wang"));
+  // iter->print_info();
+  count = member_table.count<"index"_n>(std::string("wang"));
   ASSERT(1 == count);
 
-  // 删除
+  // erase
   member_table.erase(iter);
   iter = member_table.find<"index"_n>(std::string("wang"));
   ASSERT(iter == member_table.cend());
   count = member_table.count<"index"_n>(std::string("wang"));
   ASSERT(0 == count);
 
-  // 删除
+  // erase
   iter = member_table.find<"index"_n>(std::string("zhao"));
   ASSERT(iter != member_table.cend());
   ASSERT(iter->sex == 1, "sex:", iter->sex);
-  iter->print_info();
+  // iter->print_info();
   count = member_table.count<"index"_n>(std::string("zhao"));
   ASSERT(count == 1);
   member_table.erase(iter);
@@ -224,54 +239,63 @@ TEST_CASE(multi_index, unique) {
   count = member_table.count<"index"_n>(std::string("zhao"));
   ASSERT(count == 0);
 
-  // 更改
+  // modify
   iter = member_table.find<"index"_n>(std::string("qian"));
   member_table.modify(iter, [&](auto &m) { m.sex = 15; });
   iter = member_table.find<"index"_n>(std::string("qian"));
   ASSERT(iter != member_table.cend());
   ASSERT(iter->sex == 15, "sex:", iter->sex);
-  iter->print_info();
+  // iter->print_info();
   count = member_table.count<"index"_n>(std::string("qian"));
   ASSERT(count == 1);
 
-  println("------------------");
+  // println("------------------");
 
-  // 遍历
+  // traverse
+  count = 0;
   it_end = member_table.cend();
   for (auto it = member_table.cbegin(); it != it_end; ++it) {
-    it->print_info();
+    // it->print_info();
+    count++;
   }
+  ASSERT(count == 8);
 
-  // 删除
+  // erase
   iter = member_table.find<"index"_n>(std::string("zhou"));
   ASSERT(iter != member_table.cend());
   count = member_table.count<"index"_n>(std::string("zhou"));
   ASSERT(1 == count);
-  iter->print_info();
+  // iter->print_info();
   member_table.erase(iter);
   iter = member_table.find<"index"_n>(std::string("zhou"));
   ASSERT(iter == member_table.cend());
   count = member_table.count<"index"_n>(std::string("zhou"));
   ASSERT(0 == count);
 
-  println("------------------");
+  // println("------------------");
 
-  // 查找
+  // find
   count = member_table.count<"index2"_n>(uint8_t(10));
   ASSERT(count == 7);
 
-  auto index = member_table.get_index<"index2"_n>();
-  auto index_iter = index.cbegin(uint8_t(10));
+  count = 0;
+  index = member_table.get_index<"index2"_n>();
+  index_iter = index.cbegin(uint8_t(10));
   for (; index_iter != index.cend(uint8_t(10)); ++index_iter) {
-    index_iter->print_info();
+    // index_iter->print_info();
+    count++;
   }
+  ASSERT(count == 7);
 
-  println("------------------");
+  // println("------------------");
+  count = 0;
   it_end = member_table.cend();
   for (auto it = member_table.cbegin(); it != it_end; ++it) {
-    it->print_info();
+    // it->print_info();
+    count++;
   }
-  println("------------------");
+  ASSERT(count == 7);
+  // println("------------------");
 }
 
 TEST_CASE(multi_index, normal) {
@@ -289,22 +313,25 @@ TEST_CASE(multi_index, normal) {
     m.sex = 1;
   });
   ASSERT(r.second);
-  r.first->print_info();
+  // r.first->print_info();
+  auto count = 0;
   for (auto it = member_table.cbegin(); it != member_table.cend(); ++it) {
-    it->print_info();
+    // it->print_info();
+    count++;
   }
+  ASSERT(1 == count);
   member_table.erase(r.first);
 
-  // 查找
+  // find
   auto iter = member_table.find<"index"_n>(std::string("yang"));
   ASSERT(iter == member_table.cend());
-  auto count = member_table.count<"index"_n>(std::string("yang"));
+  count = member_table.count<"index"_n>(std::string("yang"));
   ASSERT(0 == count);
   auto index = member_table.get_index<"index2"_n>();
   auto index_iter = index.cbegin(uint8_t(10));
   ASSERT(index_iter == index.cend(uint8_t(10)));
 
-  // 增加
+  // emplace
   for (int i = 0; i < 100; ++i) {
     std::string name = "jatel" + std::to_string(i);
     auto r = member_table.emplace([&](auto &m) {
@@ -313,25 +340,30 @@ TEST_CASE(multi_index, normal) {
       m.sex = 1;
     });
     ASSERT(r.second);
+    // r.first->print_info();
   }
 
+  // printf("-----------------------------\t\n");
   count = member_table.count<"index2"_n>(uint8_t(10));
   ASSERT(count == 100);
   count = 0;
   index = member_table.get_index<"index2"_n>();
   for (auto it = index.cbegin(uint8_t(10)); it != index.cend(uint8_t(10));
        ++it) {
+    // it->print_info();
     ++count;
   }
   ASSERT(count == 100);
 
+  // printf("-----------------------------\t\n");
   count = 0;
   for (auto it = member_table.cbegin(); it != member_table.cend(); ++it) {
     ++count;
+    // it->print_info();
   }
   ASSERT(count == 100);
 
-  // 删除
+  // erase
   for (int i = 0; i < 32; ++i) {
     std::string name = "jatel" + std::to_string(i);
     iter = member_table.find<"index"_n>(name);
@@ -339,23 +371,27 @@ TEST_CASE(multi_index, normal) {
     member_table.erase(iter);
   }
 
+  // printf("-----------------------------\t\n");
   count = member_table.count<"index2"_n>(uint8_t(10));
   ASSERT(count == 68);
   count = 0;
   index = member_table.get_index<"index2"_n>();
   for (auto it = index.cbegin(uint8_t(10)); it != index.cend(uint8_t(10));
        ++it) {
+    // it->print_info();
     ++count;
   }
   ASSERT(count == 68);
 
+  // printf("-----------------------------\t\n");
   count = 0;
   for (auto it = member_table.cbegin(); it != member_table.cend(); ++it) {
     ++count;
+    // it->print_info();
   }
   ASSERT(count == 68);
 
-  // 删除
+  // erase
   for (int i = 99; i >= 68; --i) {
     std::string name = "jatel" + std::to_string(i);
     iter = member_table.find<"index"_n>(name);
@@ -363,6 +399,7 @@ TEST_CASE(multi_index, normal) {
     member_table.erase(iter);
   }
 
+  // printf("-----------------------------\t\n");
   count = member_table.count<"index2"_n>(uint8_t(10));
   ASSERT(count == 36);
   count = 0;
@@ -370,16 +407,19 @@ TEST_CASE(multi_index, normal) {
   for (auto it = index.cbegin(uint8_t(10)); it != index.cend(uint8_t(10));
        ++it) {
     ++count;
+    // it->print_info();
   }
   ASSERT(count == 36);
 
+  // printf("-----------------------------\t\n");
   count = 0;
   for (auto it = member_table.cbegin(); it != member_table.cend(); ++it) {
     ++count;
+    // it->print_info();
   }
   ASSERT(count == 36);
 
-  // 增加
+  // emplace
   for (int i = 68; i < 100; ++i) {
     std::string name = "jatel" + std::to_string(i);
     auto r = member_table.emplace([&](auto &m) {
@@ -390,7 +430,7 @@ TEST_CASE(multi_index, normal) {
     ASSERT(r.second);
   }
 
-  // 删除
+  // erase
   for (int i = 32; i < 100; i += 3) {
     std::string name = "jatel" + std::to_string(i);
     iter = member_table.find<"index"_n>(name);
@@ -398,19 +438,22 @@ TEST_CASE(multi_index, normal) {
     member_table.erase(iter);
   }
 
-  println("------------------");
+  // println("------------------");
   count = member_table.count<"index2"_n>(uint8_t(10));
   ASSERT(count == 45);
   count = 0;
   index = member_table.get_index<"index2"_n>();
   for (auto it = index.cbegin(uint8_t(10)); it != index.cend(uint8_t(10));
        ++it) {
+    // it->print_info();
     ++count;
   }
   ASSERT(count == 45);
 
+  // println("------------------");
   count = 0;
   for (auto it = member_table.cbegin(); it != member_table.cend(); ++it) {
+    // it->print_info();
     ++count;
   }
   ASSERT(count == 45);
@@ -425,7 +468,7 @@ TEST_CASE(multi_index, find) {
                                            IndexType::NormalIndex>>>
       member_table;
 
-  // 增加
+  // emplace
   for (int i = 0; i < 5; ++i) {
     std::string name = "jatel" + std::to_string(i);
     auto r = member_table.emplace([&](auto &m) {
@@ -446,13 +489,16 @@ TEST_CASE(multi_index, find) {
 
   size_t count = 0;
   for (auto it = member_table.cbegin(); it != member_table.cend(); ++it) {
+    // it->print_info();
     count++;
   }
   ASSERT(4 == count);
 
+  // println("------------------");
   count = 0;
   for (auto it = index.cbegin(uint8_t(10)); it != index.cend(uint8_t(10));
        ++it) {
+    // it->print_info();
     count++;
   }
   ASSERT(4 == count);
