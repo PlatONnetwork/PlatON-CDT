@@ -272,7 +272,7 @@ void delete_normal_index_db(uint64_t table_name, uint64_t index_name,
   if (HEADSERIAL == head.previous && HEADSERIAL == head.next) {
     auto iter =
         std::lower_bound(head.vect_seq.begin(), head.vect_seq.end(), seq);
-    if (head.vect_seq.end() == iter) return;
+    if (head.vect_seq.end() == iter || *iter != seq) return;
     head.vect_seq.erase(iter);
     if (0 == head.vect_seq.size()) {
       delete_normal_index_one_db(table_name, index_name, value, HEADSERIAL);
@@ -347,7 +347,7 @@ void delete_normal_index_db(uint64_t table_name, uint64_t index_name,
       NormalIndexValue real_value = next_valid_pair.second;
       auto iter = std::lower_bound(real_value.vect_seq.begin(),
                                    real_value.vect_seq.end(), seq);
-      if (real_value.vect_seq.end() == iter) return;
+      if (real_value.vect_seq.end() == iter || *iter != seq) return;
       real_value.vect_seq.erase(iter);
       if (0 == real_value.vect_seq.size()) {
         uint64_t previous = real_value.previous;
@@ -554,6 +554,11 @@ class MultiIndex {
                                                   key_, serial_);
             num_ = index_value.vect_seq.size() - 1;
           }
+        } else if (NormalIndexValue::MAXSIZE == num_ && HEADSERIAL == serial_) {
+          serial_ = index_value.previous;
+          index_value = get_normal_index_one_db(table_name(), index_name(),
+                                                key_, serial_);
+          num_ = index_value.vect_seq.size() - 1;
         } else {
           --num_;
         }

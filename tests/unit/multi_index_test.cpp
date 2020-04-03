@@ -504,8 +504,40 @@ TEST_CASE(multi_index, find) {
   ASSERT(4 == count);
 }
 
+TEST_CASE(multi_index, effective) {
+  MultiIndex<
+      "tablefind"_n, Member,
+      IndexedBy<"index"_n, IndexMemberFun<Member, std::string, &Member::Name,
+                                          IndexType::UniqueIndex>>,
+      IndexedBy<"index2"_n, IndexMemberFun<Member, uint8_t, &Member::Age,
+                                           IndexType::NormalIndex>>>
+      member_table;
+  // emplace
+  for (int i = 0; i < 1000; ++i) {
+    std::string name = "effective" + std::to_string(i);
+    auto r = member_table.emplace([&](auto &m) {
+      m.age = 10;
+      m.name = name;
+      m.sex = 1;
+    });
+    ASSERT(r.second);
+    // r.first->print_info();
+  }
+
+  platon_debug_gas(__LINE__, __func__, strlen(__func__));
+  auto index = member_table.get_index<"index2"_n>();
+  auto index_iter = index.cbegin(uint8_t(10));
+  for (int i = 450; index_iter != index.cend(uint8_t(10)) && i <= 500;
+       ++index_iter, ++i) {
+    if (0 == i % 10) index.erase(index_iter);
+    // index_iter->print_info();
+  }
+  platon_debug_gas(__LINE__, __func__, strlen(__func__));
+}
+
 UNITTEST_MAIN() {
   RUN_TEST(multi_index, unique);
   RUN_TEST(multi_index, normal);
   RUN_TEST(multi_index, find);
+  RUN_TEST(multi_index, effective);
 }
