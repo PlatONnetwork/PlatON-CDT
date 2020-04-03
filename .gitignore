@@ -35,3 +35,14 @@
 
 # Build
 build/*
+
+# llvm
+depends/clang_llvm_8.0/*
+
+# test
+tests/unit/*.wasm
+tests/unit/*.json
+
+# example
+example/*.wasm
+example/*.json
