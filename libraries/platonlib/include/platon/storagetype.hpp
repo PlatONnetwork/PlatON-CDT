@@ -151,7 +151,7 @@ class StorageType {
    *
    */
   void Flush() { set_state(name_, t_); }
-  T default_;
+  T default_ = T();
   const uint64_t name_ = uint64_t(StorageName);
   T t_;
 };

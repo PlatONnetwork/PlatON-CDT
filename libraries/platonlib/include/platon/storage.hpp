@@ -11,6 +11,7 @@
 #include "print.hpp"
 #include "rlp_extend.hpp"
 #include "rlp_size.hpp"
+
 const uint8_t value_prefix = 0xfe;
 
 namespace platon {
@@ -60,8 +61,11 @@ inline size_t get_state(const KEY &key, VALUE &value) {
   }
   std::vector<byte> result;
   result.resize(len);
-  ::platon_get_state(vect_key.data(), vect_key.size(), result.data(),
-                     result.size());
+  int32_t ret = ::platon_get_state(vect_key.data(), vect_key.size(),
+                                   result.data(), result.size());
+  if (-1 == ret) {
+    return 0;
+  }
 
   fetch(RLP(result.data() + sizeof(value_prefix),
             result.size() - sizeof(value_prefix)),
