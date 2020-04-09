@@ -154,5 +154,5 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
   lldArgs.push_back("-o");
   lldArgs.push_back(Option.Output.data());
 
-  return !lld::wasm::link(lldArgs, true);
+  return !lld::wasm::link(lldArgs, false);
 }
