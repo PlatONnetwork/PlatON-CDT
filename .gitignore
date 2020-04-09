@@ -39,6 +39,9 @@ build/*
 # llvm
 depends/clang_llvm_8.0/*
 
+# binaryen
+depends/binaryen-version_91/*
+
 # test
 tests/unit/*.wasm
 tests/unit/*.json

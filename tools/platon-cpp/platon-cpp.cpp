@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <cstdlib>
 
 #include "llvm/IR/DiagnosticInfo.h"
 #include "llvm/IR/LLVMContext.h"
@@ -113,5 +114,12 @@ int main(int argc, char **argv) {
 
   PCCPass(*M);
 
-  return GenerateWASM(Option, M.get());
+  int result = GenerateWASM(Option, M.get());
+  if (0 == result) {
+    std::string command =
+        "wasm-opt -Oz -o " + Option.Output + " " + Option.Output;
+    system(command.c_str());
+  }
+
+  return result;
 }

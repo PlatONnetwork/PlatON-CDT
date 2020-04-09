@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.4.3)
 
+if(NOT CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX /usr/local)
+else()
+  message("CMAKE_INSTALL_PREFIX already set to: ${CMAKE_INSTALL_PREFIX}")
+endif()
+
 add_subdirectory(depends)
 
 execute_process(COMMAND ${LLVM_CONFIG} --bindir
