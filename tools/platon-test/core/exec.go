@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	wasmExec "github.com/PlatONnetwork/wagon/exec"
+	"github.com/PlatONnetwork/wagon/exec"
 	"github.com/PlatONnetwork/wagon/wasm"
 	"github.com/urfave/cli"
 )
@@ -24,6 +24,8 @@ var execCmdFlags = []cli.Flag{
 	WasmDirFlag,
 	WasmFileFlag,
 }
+
+const memoryLimit = 16 * 1014 * 1024
 
 func execTest(c *cli.Context) error {
 	dir := c.String(WasmDirFlag.Name)
@@ -104,8 +106,15 @@ func ExecFile(filePath string) error {
 		return err
 	}
 
+	//compile
+	compiled, err := exec.CompileModule(wasmModule)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not compile module: %v\n", err)
+		return err
+	}
+
 	// create vm
-	vm, err := wasmExec.NewVM(wasmModule)
+	vm, err := exec.NewVMWithCompiled(compiled, memoryLimit)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not create VM: %v\n", err)
 		return err
