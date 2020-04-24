@@ -53,6 +53,8 @@ target_link_libraries(abi-test
   LLVMMC
   LLVMBitReader
   LLVMCore
+  LLVMRemarks
+  LLVMBitstreamReader
   LLVMBinaryFormat
   LLVMSupport
   LLVMDemangle

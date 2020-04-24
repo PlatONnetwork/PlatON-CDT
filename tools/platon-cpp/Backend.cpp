@@ -1,4 +1,5 @@
 
+#include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
@@ -106,10 +107,10 @@ int compileModule(Module* M, SmallString<128> &TempPath){
     raw_pwrite_stream *OS = &Out.os();
 
     LLVMTargetMachine &LLVMTM = static_cast<LLVMTargetMachine&>(*Target);
-    MachineModuleInfo *MMI = new MachineModuleInfo(&LLVMTM);
+    MachineModuleInfoWrapperPass *MMI = new MachineModuleInfoWrapperPass(&LLVMTM);
 
     if (Target->addPassesToEmitFile(PM, *OS, nullptr,
-                                           TargetMachine::CGFT_ObjectFile, false, MMI)) {
+                                          llvm::CodeGenFileType::CGFT_ObjectFile, false, MMI)) {
       WithColor::warning(errs(), CompileBin)
           << "target does not support generation of this"
           << " file type!\n";
@@ -144,6 +145,11 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   lldArgs.push_back("--strip-all");
   lldArgs.push_back("--no-threads");
+  lldArgs.push_back("--lto-O3");
+  lldArgs.push_back("--gc-sections");
+  lldArgs.push_back("--merge-data-segments");
+  // std::string max_memory = "--max-memory=" + std::to_string(16*1024*1024);
+  // lldArgs.push_back(max_memory.c_str());
   lldArgs.push_back("--entry");
   lldArgs.push_back("invoke");
 
@@ -154,5 +160,5 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
   lldArgs.push_back("-o");
   lldArgs.push_back(Option.Output.data());
 
-  return !lld::wasm::link(lldArgs, false);
+  return !lld::wasm::link(lldArgs, false, llvm::outs(), llvm::errs());
 }

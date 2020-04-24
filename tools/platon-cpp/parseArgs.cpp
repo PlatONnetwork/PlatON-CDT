@@ -23,9 +23,9 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
   bindir = bindir0.c_str();
 
   unsigned MissingArgIndex, MissingArgCount;
-  unique_ptr<OptTable> clangOpts = clang::driver::createDriverOptTable();
+  const OptTable &clangOpts = clang::driver::getDriverOptTable();
 
-  InputArgList Args = clangOpts->ParseArgs(
+  InputArgList Args = clangOpts.ParseArgs(
     makeArrayRef(argv + 1, argc - 1),
     MissingArgIndex, MissingArgCount);
 
@@ -68,7 +68,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
   }
 
   if(Help){
-    clangOpts->PrintHelp(
+    clangOpts.PrintHelp(
         llvm::outs(), "platon-cpp [clang args]",
         "PlatON C++ WASM Compiler",
         0, 0, false);
@@ -97,11 +97,18 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
 void PCCOption::AdjustClangArgs(bool NoStdlib){
   clangArgs.push_back("--target=wasm32-wasm");
   clangArgs.push_back("-fno-rtti");
+  clangArgs.push_back("-fno-builtin");
+  clangArgs.push_back("-nostdlib");
+  clangArgs.push_back("-ffreestanding");
+  clangArgs.push_back("-fno-threadsafe-statics");
   clangArgs.push_back("-fno-exceptions");
+  clangArgs.push_back("-flto");
   clangArgs.push_back("-Werror=return-type");
   clangArgs.push_back("-std=c++17");
   clangArgs.push_back("-g");
   clangArgs.push_back("-DNDEBUG");
+  clangArgs.push_back("-DBOOST_DISABLE_ASSERTS");
+  clangArgs.push_back("-DBOOST_EXCEPTION_DISABLE");
   clangArgs.push_back("-Oz");
   clangArgs.push_back("-I.");
 
