@@ -47,7 +47,7 @@ DIType* getTypeParam(DICompositeType* CT, unsigned i){
   const MDOperand &Op = CT->getTemplateParams()->getOperand(i);
   const DITemplateTypeParameter* TP = cast<const DITemplateTypeParameter>(Op);
 
-  return TP->getType().resolve();
+  return TP->getType();
 }
 
 Value* getValueParam(DICompositeType* CT, unsigned i){
@@ -88,7 +88,7 @@ StringRef MakeAbi::handleArray(DINode* Node, DICompositeType* CT){
   return SSaver.save(str);
 }
 
-StringRef MakeAbi::handleStd1(DINode* Node, DICompositeType* CT, char* name){
+StringRef MakeAbi::handleStd1(DINode* Node, DICompositeType* CT, const char* name){
 
   DIType* T = getTypeParam(CT, 0);
   StringRef s = handleType(Node, T);
@@ -101,7 +101,7 @@ StringRef MakeAbi::handleStd1(DINode* Node, DICompositeType* CT, char* name){
   return SSaver.save(str);
 }
 
-StringRef MakeAbi::handleStd2(DINode* Node, DICompositeType* CT, char* name){
+StringRef MakeAbi::handleStd2(DINode* Node, DICompositeType* CT, const char* name){
 
   DIType* T0 = getTypeParam(CT, 0);
   StringRef s0 = handleType(Node, T0);

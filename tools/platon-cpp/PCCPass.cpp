@@ -23,7 +23,7 @@ static void AddOptimizationPasses(legacy::PassManagerBase &MPM,
   Builder.SizeLevel = SizeLevel;
 
   Builder.Inliner = createFunctionInliningPass(OptLevel, SizeLevel, false);
-  Builder.DisableUnitAtATime = false;
+  //Builder.DisableUnitAtATime = false;
   Builder.DisableUnrollLoops = true;
   Builder.LoopVectorize = false;
   Builder.SLPVectorize = false;

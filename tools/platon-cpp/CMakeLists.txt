@@ -9,7 +9,7 @@ execute_process(COMMAND ${LLVM_CONFIG} --libdir
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC -fvisibility-inlines-hidden -Werror=date-time -std=c++11 -Wall -W -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wno-missing-field-initializers -pedantic -Wno-long-long -Wno-uninitialized -Wdelete-non-virtual-dtor -Wno-comment -g  -fno-exceptions -fno-rtti -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS")
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC -fvisibility-inlines-hidden -Werror=date-time -std=c++17 -Wall -W -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wno-missing-field-initializers -pedantic -Wno-long-long -Wno-uninitialized -Wdelete-non-virtual-dtor -Wno-comment -g  -fno-exceptions -fno-rtti -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS")
 
 include_directories(${LLVM_INCLUDEDIR})
 
@@ -32,6 +32,8 @@ target_link_libraries(platon-cpp MakeAbi)
 
 target_link_libraries(platon-cpp
   clangCodeGen
+  Polly
+  PollyISL
   clangTooling
   clangFrontend
   clangASTMatchers
@@ -56,10 +58,10 @@ target_link_libraries(platon-cpp
   LLVMLTO
   LLVMPasses
   LLVMObjCARCOpts
+  LLVMAMDGPUCodeGen
   LLVMMIRParser
   LLVMSymbolize
   LLVMDebugInfoPDB
-  LLVMDebugInfoDWARF
   LLVMCoverage
   LLVMTableGen
   LLVMDlltoolDriver
@@ -69,7 +71,6 @@ target_link_libraries(platon-cpp
   LLVMWebAssemblyDisassembler
   LLVMWebAssemblyCodeGen
   LLVMWebAssemblyDesc
-  LLVMWebAssemblyAsmPrinter
   LLVMWebAssemblyAsmParser
   LLVMWebAssemblyInfo
 
@@ -77,46 +78,38 @@ target_link_libraries(platon-cpp
   LLVMXCoreCodeGen
   LLVMXCoreDesc
   LLVMXCoreInfo
-  LLVMXCoreAsmPrinter
   LLVMSystemZDisassembler
   LLVMSystemZCodeGen
   LLVMSystemZAsmParser
   LLVMSystemZDesc
   LLVMSystemZInfo
-  LLVMSystemZAsmPrinter
   LLVMSparcDisassembler
   LLVMSparcCodeGen
   LLVMSparcAsmParser
   LLVMSparcDesc
   LLVMSparcInfo
-  LLVMSparcAsmPrinter
   LLVMPowerPCDisassembler
   LLVMPowerPCCodeGen
   LLVMPowerPCAsmParser
   LLVMPowerPCDesc
   LLVMPowerPCInfo
-  LLVMPowerPCAsmPrinter
   LLVMNVPTXCodeGen
   LLVMNVPTXDesc
   LLVMNVPTXInfo
-  LLVMNVPTXAsmPrinter
   LLVMMSP430Disassembler
   LLVMMSP430CodeGen
   LLVMMSP430AsmParser
   LLVMMSP430Desc
   LLVMMSP430Info
-  LLVMMSP430AsmPrinter
   LLVMMipsDisassembler
   LLVMMipsCodeGen
   LLVMMipsAsmParser
   LLVMMipsDesc
   LLVMMipsInfo
-  LLVMMipsAsmPrinter
   LLVMLanaiDisassembler
   LLVMLanaiCodeGen
   LLVMLanaiAsmParser
   LLVMLanaiDesc
-  LLVMLanaiAsmPrinter
   LLVMLanaiInfo
   LLVMHexagonDisassembler
   LLVMHexagonCodeGen
@@ -128,32 +121,26 @@ target_link_libraries(platon-cpp
   LLVMBPFAsmParser
   LLVMBPFDesc
   LLVMBPFInfo
-  LLVMBPFAsmPrinter
   LLVMARMDisassembler
   LLVMARMCodeGen
   LLVMARMAsmParser
   LLVMARMDesc
   LLVMARMInfo
-  LLVMARMAsmPrinter
   LLVMARMUtils
   LLVMAMDGPUDisassembler
-  LLVMAMDGPUCodeGen
   LLVMAMDGPUAsmParser
   LLVMAMDGPUDesc
   LLVMAMDGPUInfo
-  LLVMAMDGPUAsmPrinter
   LLVMAMDGPUUtils
   LLVMAArch64Disassembler
   LLVMAArch64CodeGen
   LLVMAArch64AsmParser
   LLVMAArch64Desc
   LLVMAArch64Info
-  LLVMAArch64AsmPrinter
   LLVMAArch64Utils
   LLVMObjectYAML
   LLVMLibDriver
   LLVMOption
-  LLVMOptRemarks
   LLVMWindowsManifest
   LLVMTextAPI
   LLVMFuzzMutate
@@ -162,18 +149,26 @@ target_link_libraries(platon-cpp
   LLVMX86CodeGen
   LLVMGlobalISel
   LLVMSelectionDAG
-  LLVMAsmPrinter
   LLVMX86Desc
   LLVMMCDisassembler
   LLVMX86Info
-  LLVMX86AsmPrinter
   LLVMX86Utils
-
+  LLVMCFGuard
+  LLVMFrontendOpenMP
+  LLVMRISCVUtils
+  LLVMRISCVDesc
+  LLVMRISCVAsmParser
+  LLVMRISCVInfo
+  LLVMRISCVCodeGen
+  LLVMBitstreamReader
+  LLVMCore
+  LLVMRemarks
 
   LLVMAggressiveInstCombine
   LLVMGlobalISel
   LLVMSelectionDAG
   LLVMAsmPrinter
+  LLVMDebugInfoDWARF
   LLVMDebugInfoCodeView
   LLVMDebugInfoMSF
   LLVMMCDisassembler

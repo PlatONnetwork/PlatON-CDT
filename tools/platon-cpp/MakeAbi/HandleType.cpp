@@ -114,7 +114,7 @@ StringRef MakeAbi::handleBasicType(DINode* Node, DIBasicType* BT){
 
 StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT){
 
-  DIType* BT = DevT->getBaseType().resolve();
+  DIType* BT = DevT->getBaseType();
 
   switch(DevT->getTag()){
 
@@ -144,7 +144,7 @@ StringRef MakeAbi::handleStructType(DINode* Node, DICompositeType* CT){
 
   for(DINode* DN : CT->getElements()){
     if(DIDerivedType* Elem = dyn_cast<DIDerivedType>(DN)){
-      DIType* BT = Elem->getBaseType().resolve();
+      DIType* BT = Elem->getBaseType();
       if(Elem->getTag() == dwarf::DW_TAG_member){
         json::Value e = handleElem(Elem, BT);
         Elems.getAsArray()->push_back(e);
@@ -267,7 +267,7 @@ void MakeAbi::handleSubprogram(DISubprogram* SP, vector<DILocalVariable*> &LVs, 
 
   json::Value Params = {};
   for(DILocalVariable* LV : LVs){
-    DIType* T = LV->getType().resolve();
+    DIType* T = LV->getType();
     json::Value elem = handleElem(LV, T);
     Params.getAsArray()->push_back(elem);
   }
