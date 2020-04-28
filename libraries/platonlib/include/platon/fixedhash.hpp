@@ -143,21 +143,4 @@ using h160 = FixedHash<20>;
 using h128 = FixedHash<16>;
 using h64 = FixedHash<8>;
 using Address = FixedHash<20>;
-
-template <size_t M> Address make_address(const char (&str)[M]) {
-
-  constexpr size_t N = 20;
-  constexpr size_t PREFIX = 2;
-
-  // The address string must begin with 0x and be 43 bytes in size
-  static_assert(M - 3 == 2 * 20, "Incorrect string length");
-
-  Address result;
-  for (size_t i = PREFIX; i < M - 1; i += 2) {
-    result[(i - PREFIX) / 2] =
-        fromHexChar(str[i]) * 16 + fromHexChar(str[i + 1]);
-  }
-
-  return result;
-}
 } // namespace platon

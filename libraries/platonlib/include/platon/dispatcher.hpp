@@ -110,8 +110,8 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
 #define PLATON_DISPATCH(TYPE, MEMBERS)                       \
   extern "C" {                                               \
   void __wasm_call_ctors();                                  \
-  void invoke(void) {                                        \
-    __wasm_call_ctors();                                     \
+  void __funcs_on_exit();                                    \
+  void _invoke(void) {                                       \
     size_t len = 0;                                          \
     auto input = platon::get_input(len);                     \
     platon::RLP rlp(input, len);                             \
@@ -124,6 +124,11 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
     else {                                                   \
       platon::internal::platon_throw("no method to call\n"); \
     }                                                        \
+  }                                                          \
+  void invoke(void) {                                        \
+    __wasm_call_ctors();                                     \
+    _invoke();                                               \
+    __funcs_on_exit();                                       \
   }                                                          \
   }
 

@@ -152,7 +152,7 @@ TEST(ABITest, handleElemTest) {
 
   json::Value result = Object {{"name", "n"}, {"type", "int32"}};
 
-  EXPECT_EQ(MABI.handleElem(DT, DT->getBaseType(), result);
+  EXPECT_EQ(MABI.handleElem(DT, DT->getBaseType()), result);
 }
 
 TEST(ABITest, handleDerivedTypeTest) {

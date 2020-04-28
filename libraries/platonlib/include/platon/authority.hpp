@@ -1,4 +1,5 @@
 #pragma once
+#include "bech32.hpp"
 #include "chain.hpp"
 #include "fixedhash.hpp"
 #include "storagetype.hpp"
@@ -51,9 +52,12 @@ Address platon_address() {
  *                set caller as contract owner
  */
 void set_owner(const std::string &address = std::string()) {
-  Address platon_addr(address);
+  Address platon_addr;
   if (address.empty()) {
     platon_addr = platon_caller();
+  } else {
+    auto result = make_address(address);
+    if (!result.second) platon_addr = result.first;
   }
 
   StorageType<"platonowner"_n, Address> owner_addr;
@@ -78,9 +82,12 @@ Address owner() {
  * @return true if the input address is owner, false otherwise
  */
 bool is_owner(const std::string &addr = std::string()) {
-  Address platon_addr(addr);
+  Address platon_addr;
   if (addr.empty()) {
     platon_addr = platon_origin();
+  } else {
+    auto result = make_address(addr);
+    if (!result.second) platon_addr = result.first;
   }
 
   StorageType<"platonowner"_n, Address> owner_addr;
@@ -92,8 +99,9 @@ bool is_owner(const std::string &addr = std::string()) {
  *
  * @tparam Name Whitelist name, in the same contract, the name should be unique
  */
-template <Name::Raw TableName> class WhiteList {
-public:
+template <Name::Raw TableName>
+class WhiteList {
+ public:
   /**
    * @brief Construct a new whitlist.
    */
@@ -104,7 +112,10 @@ public:
    *
    * @param addr Accounts address
    */
-  void Add(const std::string &addr) { Add(Address(addr)); }
+  void Add(const std::string &addr) {
+    auto result = make_address(addr);
+    if (!result.second) Add(result.first);
+  }
 
   /**
    * @brief Add the address to whitelist
@@ -118,7 +129,10 @@ public:
    *
    * @param addr Accounts address
    */
-  void Delete(const std::string &addr) { Delete(Address(addr)); }
+  void Delete(const std::string &addr) {
+    auto result = make_address(addr);
+    if (!result.second) Delete(result.first);
+  }
 
   /**
    * @brief Delete the address from whitelist
@@ -133,7 +147,11 @@ public:
    * @param addr Accounts address
    * @return true if exists, false otherwise
    */
-  bool Exists(const std::string &addr) { return Exists(Address(addr)); }
+  bool Exists(const std::string &addr) {
+    auto result = make_address(addr);
+    if (!result.second) return Exists(result.first);
+    return false;
+  }
 
   /**
    * @brief Whether the address exists in whitelist
@@ -145,7 +163,7 @@ public:
     return whitelist_.self().find(addr) != whitelist_.self().end();
   }
 
-private:
+ private:
   Set<TableName, Address> whitelist_;
 };
 
@@ -154,4 +172,4 @@ private:
  */
 using SysWhitelist = WhiteList<"pwhitelist"_n>;
 
-} // namespace platon
+}  // namespace platon

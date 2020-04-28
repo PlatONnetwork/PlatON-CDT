@@ -1,5 +1,7 @@
+#define TESTNET
 #include "platon/fixedhash.hpp"
 #include "platon/print.hpp"
+#include "platon/bech32.hpp"
 #include "unit_test.hpp"
 
 TEST_CASE(constexpr, u128) {
@@ -21,17 +23,18 @@ TEST_CASE(constexpr, u128) {
 }
 
 TEST_CASE(constexpr, Address) {
-  Address arrr_1 = make_address("0x43355c787c50b647c425f594b441d4bd751951c1");
-  println(arrr_1.toString());
-  std::string info = "0x43355c787c50b647c425f594b441d4bd751951c1";
-  std::string fetch_data = arrr_1.toString();
-  ASSERT_EQ(info, fetch_data);
+  auto arrr_1 = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
+  std::string info = "0x7cB0f5D66D07472A835C97e288931BE2518f7b21";
+  ASSERT_EQ(Address(info), arrr_1.first)
+  ASSERT_EQ(get_string_address(arrr_1.first), "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt")
 
-  char test_add[] = "0x43355c787c50b647c425f594b441d4bd751951c1";
+  char test_add[] = "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt";
   arrr_1 = make_address(test_add);
-  println(arrr_1.toString());
-  fetch_data = arrr_1.toString();
-  ASSERT_EQ(info, fetch_data);
+  ASSERT_EQ(Address(info), arrr_1.first)
+
+  std::string str_address = "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt";
+  arrr_1 = make_address(str_address);
+  ASSERT_EQ(Address(info), arrr_1.first)
 }
 
 UNITTEST_MAIN() {

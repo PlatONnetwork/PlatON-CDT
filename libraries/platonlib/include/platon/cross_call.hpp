@@ -1,12 +1,13 @@
 #pragma once
-#include "boost/fusion/algorithm/iteration/for_each.hpp"
-#include "boost/preprocessor/seq/for_each.hpp"
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/std_tuple.hpp>
 #include <boost/mp11/tuple.hpp>
 #include <map>
 #include <tuple>
+#include "boost/fusion/algorithm/iteration/for_each.hpp"
+#include "boost/preprocessor/seq/for_each.hpp"
+
 
 #include "RLP.h"
 #include "chain.hpp"
@@ -48,13 +49,13 @@ inline bytes cross_call_args(const std::string &method, const Args &... args) {
  *
  * @return A byte array of data
  */
-template <typename T> inline bytes value_to_bytes(T value) {
+template <typename T>
+inline bytes value_to_bytes(T value) {
   unsigned byte_count = bytesRequired(value);
   bytes result;
   result.resize(byte_count);
   byte *b = &result.back();
-  for (; value; value >>= 8)
-    *(b--) = (byte)value;
+  for (; value; value >>= 8) *(b--) = (byte)value;
   return result;
 }
 
@@ -113,7 +114,8 @@ inline bool platon_delegate_call(const Address &addr, const bytes &paras,
  *
  * @return void
  */
-template <typename T> inline void get_call_output(T &t) {
+template <typename T>
+inline void get_call_output(T &t) {
   bytes result;
   size_t len = ::platon_get_call_output_length();
   result.resize(len);
@@ -137,8 +139,9 @@ template <typename T> inline void get_call_output(T &t) {
  *
  * @code
  *
-  auto result =
- platon_call<int>(Address("0xEC081ab45BE978A4A630eB8cbcBffA50E747971B"),
+  auto address_pair =
+ make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt"); auto result =
+ platon_call<int>(address_pair.first,
   uint32_t(100), uint32_t(100), "add", 1,2,3);
   if(!result.secod){
     platon_throw("cross call fail");
@@ -147,9 +150,10 @@ template <typename T> inline void get_call_output(T &t) {
  */
 template <typename return_type, typename value_type, typename gas_type,
           typename... Args>
-inline decltype(auto)
-platon_call(const Address &addr, const value_type &value, const gas_type &gas,
-            const std::string &method, const Args &... args) {
+inline decltype(auto) platon_call(const Address &addr, const value_type &value,
+                                  const gas_type &gas,
+                                  const std::string &method,
+                                  const Args &... args) {
   bytes paras = cross_call_args(method, args...);
   bytes value_bytes = value_to_bytes(value);
   bytes gas_bytes = value_to_bytes(gas);
@@ -180,8 +184,9 @@ platon_call(const Address &addr, const value_type &value, const gas_type &gas,
  *
  * @code
  *
-  auto result =
- platon_delegate_call<int>(Address("0xEC081ab45BE978A4A630eB8cbcBffA50E747971B"),
+  auto address_pair =
+ make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt"); auto result =
+ platon_delegate_call<int>(address_pair.first,
   uint32_t(100), "add", 1,2,3);
   if(!result.secod){
     platon_throw("cross call fail");
@@ -190,9 +195,10 @@ platon_call(const Address &addr, const value_type &value, const gas_type &gas,
  * @endcode
  */
 template <typename return_type, typename gas_type, typename... Args>
-inline decltype(auto)
-platon_delegate_call(const Address &addr, const gas_type &gas,
-                     const std::string &method, const Args &... args) {
+inline decltype(auto) platon_delegate_call(const Address &addr,
+                                           const gas_type &gas,
+                                           const std::string &method,
+                                           const Args &... args) {
   bytes paras = cross_call_args(method, args...);
   bytes gas_bytes = value_to_bytes(gas);
   int32_t result =
@@ -207,4 +213,4 @@ platon_delegate_call(const Address &addr, const gas_type &gas,
   return std::pair<return_type, bool>(return_value, true);
 }
 
-} // namespace platon
+}  // namespace platon

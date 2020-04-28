@@ -143,9 +143,7 @@ func ExecFile(filePath string) error {
 	// invoke
 	exportInvoke := wasmModule.Export.Entries["invoke"]
 	index := int64(exportInvoke.Index)
-	fidx := wasmModule.Function.Types[int(index)]
-	ftype := wasmModule.Types.Entries[int(fidx)]
-	result, err := vm.ExecCode(index)
+	_, err = vm.ExecCode(index)
 
 	// gas result
 	fmt.Fprintf(os.Stdin, "gas cost:%d, opcodes:%d\n", gasCost, opCodes)
@@ -154,24 +152,5 @@ func ExecFile(filePath string) error {
 		return err
 	}
 
-	// result
-	if len(ftype.ReturnTypes) == 0 {
-		fmt.Fprintf(os.Stderr, "%s invoke do not have return value\n", file)
-		return err
-	}
-
-	returnCode, ok := result.(uint32)
-	if !ok {
-		fmt.Fprintf(os.Stderr, "%s the return value is not uint32\n", file)
-		return err
-	}
-
-	if 0 != returnCode {
-		fmt.Fprintf(os.Stderr, "%s the return value is not 0, test failed!!!\n", file)
-
-		return fmt.Errorf("%s the return value is not 0, test failed!!!\n", file)
-	} else {
-		fmt.Fprintf(os.Stdin, "%s test success!!!\n", file)
-		return nil
-	}
+	return nil
 }
