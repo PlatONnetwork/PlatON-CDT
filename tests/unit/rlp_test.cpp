@@ -449,71 +449,71 @@ TEST_CASE(rlp, uint64_t_reserve) {
   ASSERT_EQ(uint64_t_data, 4, uint64_t_data);
 }
 
-TEST_CASE(rlp, float) {
-  const char* fn = "float";
-  float float_data = 1.23;
-  auto size = pack_size(float_data);
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  RLPStream stream;
-  stream << float_data;
-  bytesRef result = stream.out();
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  ASSERT_EQ(size, result.size());
-  print_rlp_code("float", float_data, result);
-  float_data = 0;
-  fetch(RLP(result), float_data);
-  platon::println(float_data);
-}
+// TEST_CASE(rlp, float) {
+//   const char* fn = "float";
+//   float float_data = 1.23;
+//   auto size = pack_size(float_data);
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   RLPStream stream;
+//   stream << float_data;
+//   bytesRef result = stream.out();
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   ASSERT_EQ(size, result.size());
+//   print_rlp_code("float", float_data, result);
+//   float_data = 0;
+//   fetch(RLP(result), float_data);
+//   platon::println(float_data);
+// }
 
-TEST_CASE(rlp, float_reserve) {
-  const char* fn = "float_reserve";
-  float float_data = 1.23;
-  auto size = pack_size(float_data);
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  RLPStream stream;
-  stream.reserve(size);
-  stream << float_data;
-  bytesRef result = stream.out();
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  ASSERT_EQ(size, result.size());
-  print_rlp_code("float", float_data, result);
-  float_data = 0;
-  fetch(RLP(result), float_data);
-  platon::println(float_data);
-}
+// TEST_CASE(rlp, float_reserve) {
+//   const char* fn = "float_reserve";
+//   float float_data = 1.23;
+//   auto size = pack_size(float_data);
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   RLPStream stream;
+//   stream.reserve(size);
+//   stream << float_data;
+//   bytesRef result = stream.out();
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   ASSERT_EQ(size, result.size());
+//   print_rlp_code("float", float_data, result);
+//   float_data = 0;
+//   fetch(RLP(result), float_data);
+//   platon::println(float_data);
+// }
 
-TEST_CASE(rlp, double) {
-  const char* fn = "double";
-  double double_data = 4.56;
-  auto size = pack_size(double_data);
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  RLPStream stream;
-  stream << double_data;
-  bytesRef result = stream.out();
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  ASSERT_EQ(size, result.size());
-  print_rlp_code("double", double_data, result);
-  double_data = 0;
-  fetch(RLP(result), double_data);
-  platon::println(double_data);
-}
+// TEST_CASE(rlp, double) {
+//   const char* fn = "double";
+//   double double_data = 4.56;
+//   auto size = pack_size(double_data);
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   RLPStream stream;
+//   stream << double_data;
+//   bytesRef result = stream.out();
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   ASSERT_EQ(size, result.size());
+//   print_rlp_code("double", double_data, result);
+//   double_data = 0;
+//   fetch(RLP(result), double_data);
+//   platon::println(double_data);
+// }
 
-TEST_CASE(rlp, double_reserve) {
-  const char* fn = "double_reserve";
-  double double_data = 4.56;
-  auto size = pack_size(double_data);
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  RLPStream stream;
-  stream.reserve(size);
-  stream << double_data;
-  bytesRef result = stream.out();
-  platon_debug_gas(__LINE__, fn, strlen(fn));
-  ASSERT_EQ(size, result.size());
-  print_rlp_code("double", double_data, result);
-  double_data = 0;
-  fetch(RLP(result), double_data);
-  platon::println(double_data);
-}
+// TEST_CASE(rlp, double_reserve) {
+//   const char* fn = "double_reserve";
+//   double double_data = 4.56;
+//   auto size = pack_size(double_data);
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   RLPStream stream;
+//   stream.reserve(size);
+//   stream << double_data;
+//   bytesRef result = stream.out();
+//   platon_debug_gas(__LINE__, fn, strlen(fn));
+//   ASSERT_EQ(size, result.size());
+//   print_rlp_code("double", double_data, result);
+//   double_data = 0;
+//   fetch(RLP(result), double_data);
+//   platon::println(double_data);
+// }
 
 TEST_CASE(rlp, u128) {
   const char* fn = "u128";
@@ -857,10 +857,10 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, uint32_t_reserve);
   RUN_TEST(rlp, uint64_t);
   RUN_TEST(rlp, uint64_t_reserve);
-  RUN_TEST(rlp, float);
-  RUN_TEST(rlp, float_reserve);
-  RUN_TEST(rlp, double);
-  RUN_TEST(rlp, double_reserve);
+  // RUN_TEST(rlp, float);
+  // RUN_TEST(rlp, float_reserve);
+  // RUN_TEST(rlp, double);
+  // RUN_TEST(rlp, double_reserve);
   RUN_TEST(rlp, u128);
   RUN_TEST(rlp, u128_reserve);
   RUN_TEST(rlp, string);

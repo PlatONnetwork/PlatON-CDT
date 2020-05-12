@@ -22,11 +22,14 @@ CONTRACT hello : public platon::Contract{
               Address platon_address = platon_caller();
               contract_ower.self() = platon_address;
           } else {
-              contract_ower.self() = Address(address);
+              auto result = make_address(address);
+              if(result.second){
+                  contract_ower.self() = result.first;
+              }  
           }
           
           DEBUG("init ower address:", contract_ower.self().toString())
-          return contract_ower.self().toString();
+          return get_string_address(contract_ower.self());
       }
 
       ACTION std::vector<my_message> add_message(const my_message &one_message){
@@ -40,17 +43,17 @@ CONTRACT hello : public platon::Contract{
 
       ACTION std::string get_ower() {
           Address platon_address = contract_ower.self();
-          return platon_address.toString();
+          return get_string_address(platon_address);
       }
 
       ACTION std::string destroy() {
           Address platon_address = platon_origin();
-          DEBUG("destroy ower address:", contract_ower.self().toString(), ", caller address:", platon_address.toString())
+          DEBUG("destroy ower address:", get_string_address(contract_ower.self()), ", caller address:", platon_address.toString())
           if (contract_ower.self() != platon_address){
               return "invalid address";
           }
           platon_destroy(platon_address);
-          return platon_address.toString();
+          return get_string_address(platon_address);
       }
 
       ACTION std::string migrate(const bytes &init_arg, uint64_t transfer_value, uint64_t gas_value){
@@ -61,8 +64,8 @@ CONTRACT hello : public platon::Contract{
 
             Address return_address;
             platon_migrate_contract(return_address, init_arg, transfer_value, gas_value);
-            DEBUG("return_address", return_address.toString())
-            return return_address.toString();
+            DEBUG("return_address", get_string_address(return_address));
+            return get_string_address(return_address);
       }
 
    private:

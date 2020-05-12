@@ -135,6 +135,7 @@ class StorageType {
 
   T get() const { return t_; }
   T &self() { return t_; }
+  const T &self() const { return t_; }
 
  private:
   /**

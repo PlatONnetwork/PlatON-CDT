@@ -148,6 +148,7 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
   lldArgs.push_back("--lto-O3");
   lldArgs.push_back("--gc-sections");
   lldArgs.push_back("--merge-data-segments");
+  lldArgs.push_back("--compress-relocations");
   // std::string max_memory = "--max-memory=" + std::to_string(16*1024*1024);
   // lldArgs.push_back(max_memory.c_str());
   lldArgs.push_back("--entry");

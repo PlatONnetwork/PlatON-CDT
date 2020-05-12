@@ -94,17 +94,21 @@ CONTRACT TestResult : public platon::Contract {
 //    void testSuit(TestResult &testResult)
 
 #define UNITTEST_MAIN()                                                     \
-void testSuit(TestResult &testResult);                                    \
+void testSuit(TestResult &testResult);                                      \
 extern "C" {                                                                \
-void __wasm_call_ctors(); \
-    int invoke() {                                                          \
-        __wasm_call_ctors();                  \
-        TestResult testResult;                                              \
-        testResult.isContinue = true;                                       \
-        testSuit(testResult);                                               \
-        println("all test case", testResult.testcases, "assertions",    \
-          testResult.assertions, "failures", testResult.failures);    \
-        return 0;                                                           \
-    }                                                                       \
+void __wasm_call_ctors();                                                   \
+void __funcs_on_exit();                                                     \
+void _invoke() {                                                            \
+    TestResult testResult;                                                  \
+    testResult.isContinue = true;                                           \
+    testSuit(testResult);                                                   \
+    println("all test case", testResult.testcases, "assertions",            \
+      testResult.assertions, "failures", testResult.failures);              \
+}                                                                           \
+void invoke() {                                                             \
+    __wasm_call_ctors();                                                    \
+    _invoke();                                                              \
+    __funcs_on_exit();                                                      \
+}                                                                           \
 }                                                                           \
 void testSuit(TestResult &testResult)
