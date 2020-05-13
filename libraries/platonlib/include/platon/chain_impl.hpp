@@ -113,24 +113,20 @@ int32_t platon_ecrecover(const h256 &hash, const bytes &signature,
  * @brief ripemd160 algorithm
  *
  * @param data Binary data
- * @return The Hash of the data
+ * @param result The Hash of the data
  */
-h160 platon_ripemd160(const bytes &data) {
-  h160 result;
-  ::platon_ripemd160(data.data(), data.size(), result.data());
-  return result;
+void platon_ripemd160(const bytes &data, byte result[20]) {
+  ::platon_ripemd160(data.data(), data.size(), result);
 }
 
 /**
  * @brief sha256 algorithm
  *
  * @param data Binary data
- * @return The Hash of the data
+ * @param result The Hash of the data
  */
-h256 platon_sha256(const bytes &data) {
-  h256 result;
-  ::platon_sha256(data.data(), data.size(), result.data());
-  return result;
+void platon_sha256(const bytes &data, byte result[32]) {
+  ::platon_sha256(data.data(), data.size(), result);
 }
 
 /**

@@ -583,31 +583,31 @@ TEST_CASE(rlp, string_reserve) {
 
 TEST_CASE(rlp, address) {
   const char* fn = "address";
-  Address addr("0x43355c787c50b647c425f594b441d4bd751951c1");
-  auto size = pack_size(addr);
+  auto address_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
+  auto size = pack_size(address_info.first);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
-  stream << addr;
+  stream << address_info.first;
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, stream.out().size());
   Address addr1;
   fetch(RLP(stream.out()), addr1);
-  ASSERT_EQ(addr, addr1, addr.toString(), addr1.toString());
+  ASSERT_EQ(address_info.first, addr1, address_info.first.toString(), addr1.toString());
 }
 
 TEST_CASE(rlp, address_reserve) {
   const char* fn = "address_reserve";
-  Address addr("0x43355c787c50b647c425f594b441d4bd751951c1");
-  auto size = pack_size(addr);
+  auto address_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
+  auto size = pack_size(address_info.first);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream.reserve(size);
-  stream << addr;
+  stream << address_info.first;
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, stream.out().size());
   Address addr1;
   fetch(RLP(stream.out()), addr1);
-  ASSERT_EQ(addr, addr1, addr.toString(), addr1.toString());
+  ASSERT_EQ(address_info.first, addr1, address_info.first.toString(), addr1.toString());
 }
 
 TEST_CASE(rlp, array) {

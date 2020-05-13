@@ -51,6 +51,13 @@ TEST_CASE(print, u128) {
   platon::println(info);
 }
 
+TEST_CASE(debug, h64){
+    h64 h64_data("0x0102030405060708");
+    printf("h64_data:%s\t\n", h64_data.toString().c_str());
+    auto address_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
+    printf("address:%s\t\n", address_info.first.toString().c_str());
+}
+
 UNITTEST_MAIN() {
   RUN_TEST(print, char);
   RUN_TEST(print, int);
@@ -58,4 +65,5 @@ UNITTEST_MAIN() {
   // RUN_TEST(print, double);
   RUN_TEST(print, string);
   RUN_TEST(print, u128);
+  RUN_TEST(debug, h64);
 }

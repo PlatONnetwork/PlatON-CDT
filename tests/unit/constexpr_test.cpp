@@ -24,17 +24,17 @@ TEST_CASE(constexpr, u128) {
 
 TEST_CASE(constexpr, Address) {
   auto arrr_1 = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
-  std::string info = "0x7cB0f5D66D07472A835C97e288931BE2518f7b21";
-  ASSERT_EQ(Address(info), arrr_1.first)
-  ASSERT_EQ(get_string_address(arrr_1.first), "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt")
+  // std::string info = "0x7cB0f5D66D07472A835C97e288931BE2518f7b21";
+  // ASSERT_EQ(Address(info), arrr_1.first)
+  ASSERT_EQ(arrr_1.first.toString(), "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt")
 
   char test_add[] = "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt";
-  arrr_1 = make_address(test_add);
-  ASSERT_EQ(Address(info), arrr_1.first)
+  auto arrr_2 = make_address(test_add);
+  ASSERT_EQ(arrr_2.first, arrr_1.first)
 
   std::string str_address = "lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt";
-  arrr_1 = make_address(str_address);
-  ASSERT_EQ(Address(info), arrr_1.first)
+  arrr_2 = make_address(str_address);
+  ASSERT_EQ(arrr_2.first, arrr_1.first)
 }
 
 UNITTEST_MAIN() {
