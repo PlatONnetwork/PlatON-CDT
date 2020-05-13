@@ -19,7 +19,7 @@ contract writing for the PlatON platform.
 
 ### Ubuntu
 
-**Required:** 16.04+
+**Required:** 18.04
 
 - **Install Dependencies**
 

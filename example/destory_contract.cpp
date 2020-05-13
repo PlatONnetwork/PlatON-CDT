@@ -29,7 +29,7 @@ CONTRACT hello : public platon::Contract{
           }
           
           DEBUG("init ower address:", contract_ower.self().toString())
-          return get_string_address(contract_ower.self());
+          return contract_ower.self().toString();
       }
 
       ACTION std::vector<my_message> add_message(const my_message &one_message){
@@ -43,17 +43,17 @@ CONTRACT hello : public platon::Contract{
 
       ACTION std::string get_ower() {
           Address platon_address = contract_ower.self();
-          return get_string_address(platon_address);
+          return platon_address.toString();
       }
 
       ACTION std::string destroy() {
           Address platon_address = platon_origin();
-          DEBUG("destroy ower address:", get_string_address(contract_ower.self()), ", caller address:", platon_address.toString())
+          DEBUG("destroy ower address:", contract_ower.self().toString(), ", caller address:", platon_address.toString())
           if (contract_ower.self() != platon_address){
               return "invalid address";
           }
           platon_destroy(platon_address);
-          return get_string_address(platon_address);
+          return platon_address.toString();
       }
 
       ACTION std::string migrate(const bytes &init_arg, uint64_t transfer_value, uint64_t gas_value){
@@ -65,7 +65,7 @@ CONTRACT hello : public platon::Contract{
             Address return_address;
             platon_migrate_contract(return_address, init_arg, transfer_value, gas_value);
             DEBUG("return_address", get_string_address(return_address));
-            return get_string_address(return_address);
+            return return_address.toString();
       }
 
    private:
