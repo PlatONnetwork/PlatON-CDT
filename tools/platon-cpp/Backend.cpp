@@ -19,8 +19,10 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Target/TargetMachine.h"
 #include "lld/Common/Driver.h"
+#include "llvm/Bitcode/BitcodeWriter.h"
 #include <string>
 #include "Option.h"
+#include <iostream>
 
 using namespace llvm;
 
@@ -127,12 +129,25 @@ int compileModule(Module* M, SmallString<128> &TempPath){
   return 0;
 }
 
+int writeIR(Module* M, SmallString<128> &TempPath){
+  std::error_code EC;
+  ToolOutputFile Out(TempPath, EC, sys::fs::F_None);
+  if (EC) {
+    errs() << EC.message() << '\n';
+    return 1;
+  }
+  WriteBitcodeToFile(*M, Out.os());
+  Out.keep();
+  return 0;
+}
+
 int GenerateWASM(PCCOption &Option, llvm::Module* M){
 
   SmallString<128> TempPath;
+  
   llvm::sys::fs::createTemporaryFile("platon-cpp", "wasm", TempPath);
 
-  if(compileModule(M, TempPath))
+  if(writeIR(M, TempPath))
     return 1;
 
   std::vector<const char*> lldArgs;
@@ -149,6 +164,7 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
   lldArgs.push_back("--gc-sections");
   lldArgs.push_back("--merge-data-segments");
   lldArgs.push_back("--compress-relocations");
+  lldArgs.push_back("-O3");
   // std::string max_memory = "--max-memory=" + std::to_string(16*1024*1024);
   // lldArgs.push_back(max_memory.c_str());
   lldArgs.push_back("--entry");
@@ -161,5 +177,7 @@ int GenerateWASM(PCCOption &Option, llvm::Module* M){
   lldArgs.push_back("-o");
   lldArgs.push_back(Option.Output.data());
 
-  return !lld::wasm::link(lldArgs, false, llvm::outs(), llvm::errs());
+  bool success = lld::wasm::link(lldArgs, false, llvm::outs(), llvm::errs());
+  remove(TempPath.c_str());
+  return !success;
 }
