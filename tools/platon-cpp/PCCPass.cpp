@@ -50,18 +50,19 @@ void PCCPass(llvm::Module &M){
   initializeInstrumentation(Registry);
   initializeTarget(Registry);
 
+  // previous pass
   legacy::PassManager PrePasses;
-  legacy::PassManager Passes;
-  legacy::FunctionPassManager FPasses(&M);
-
   PrePasses.add(createRemoveAttrsPass());
   auto PreserveMain = [=](const GlobalValue &GV) { return GV.getName() == "invoke";};
   PrePasses.add(createInternalizePass(PreserveMain));
-
   PrePasses.run(M);
 
+  // normal pass
+  legacy::PassManager Passes;
+  legacy::FunctionPassManager FPasses(&M);
+
   FPasses.add(createTargetTransformInfoWrapperPass(TargetIRAnalysis()));
-  
+
   AddOptimizationPasses(Passes, FPasses, 2, 2);
 
   FPasses.doInitialization();
@@ -69,10 +70,13 @@ void PCCPass(llvm::Module &M){
     FPasses.run(F);
   FPasses.doFinalization();
 
-  Passes.add(createDisableFloatsPass());
+  Passes.add(createCodeGenPreparePass());
+  Passes.add(createDisableFloatsPass());  
 
   Passes.add(createVerifierPass());
   Passes.run(M);
 
   StripDebugInfo(M);
 }
+
+

@@ -64,7 +64,7 @@ CONTRACT hello : public platon::Contract{
 
             Address return_address;
             platon_migrate_contract(return_address, init_arg, transfer_value, gas_value);
-            DEBUG("return_address", get_string_address(return_address));
+            DEBUG("return_address", return_address.toString());
             return return_address.toString();
       }
 
