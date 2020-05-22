@@ -57,7 +57,7 @@ void set_owner(const std::string &address = std::string()) {
     platon_addr = platon_caller();
   } else {
     auto result = make_address(address);
-    if (!result.second) platon_addr = result.first;
+    if (result.second) platon_addr = result.first;
   }
 
   StorageType<"platonowner"_n, Address> owner_addr;
@@ -87,7 +87,7 @@ bool is_owner(const std::string &addr = std::string()) {
     platon_addr = platon_origin();
   } else {
     auto result = make_address(addr);
-    if (!result.second) platon_addr = result.first;
+    if (result.second) platon_addr = result.first;
   }
 
   StorageType<"platonowner"_n, Address> owner_addr;
@@ -114,7 +114,7 @@ class WhiteList {
    */
   void Add(const std::string &addr) {
     auto result = make_address(addr);
-    if (!result.second) Add(result.first);
+    if (result.second) Add(result.first);
   }
 
   /**
@@ -131,7 +131,7 @@ class WhiteList {
    */
   void Delete(const std::string &addr) {
     auto result = make_address(addr);
-    if (!result.second) Delete(result.first);
+    if (result.second) Delete(result.first);
   }
 
   /**
@@ -149,7 +149,7 @@ class WhiteList {
    */
   bool Exists(const std::string &addr) {
     auto result = make_address(addr);
-    if (!result.second) return Exists(result.first);
+    if (result.second) return Exists(result.first);
     return false;
   }
 
