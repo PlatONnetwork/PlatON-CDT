@@ -214,6 +214,7 @@ class RLP {
   explicit operator int() const { return toSignedInt<int>(); }
   explicit operator int32_t() const { return toSignedInt<int32_t>(); }
   explicit operator int64_t() const { return toSignedInt<int64_t>(); }
+  explicit operator int128_t() const { return toSignedInt<int128_t>(); }
   explicit operator float() const { return toFloat(); }
   explicit operator double() const { return toDouble(); }
   template <unsigned N>
@@ -358,10 +359,10 @@ class RLP {
 
   template <typename _T>
   _T toSignedInt(int _flags = Strict) const {
-    uint64_t u64_data = toInt<uint64_t>(_flags);
-    int64_t int64_data =
-        static_cast<int64_t>((u64_data >> 1) ^ -(u64_data & 1));
-    return static_cast<_T>(int64_data);
+    uint64_t u128_data = toInt<uint128_t>(_flags);
+    int128_t int128_data =
+        static_cast<int128_t>((u128_data >> 1) ^ -(u128_data & 1));
+    return static_cast<_T>(int128_data);
   }
 
   float toFloat(int _flags = Strict) const {
@@ -611,12 +612,13 @@ class RLPStream {
   RLPStream& append(uint32_t _s) { return append(bigint(_s)); }
   RLPStream& append(uint64_t _s) { return append(bigint(_s)); }
   RLPStream& append(bigint _i);
-  RLPStream& append(int8_t _c) { return append(int64_t(_c)); }
-  RLPStream& append(int16_t _s) { return append(int64_t(_s)); }
-  RLPStream& append(int _c) { return append(int64_t(_c)); }
-  RLPStream& append(int32_t _s) { return append(int64_t(_s)); }
-  RLPStream& append(int64_t _l) {
-    uint64_t _i = uint64_t((_l << 1) ^ (_l >> 63));
+  RLPStream& append(int8_t _c) { return append(int128_t(_c)); }
+  RLPStream& append(int16_t _s) { return append(int128_t(_s)); }
+  RLPStream& append(int _c) { return append(int128_t(_c)); }
+  RLPStream& append(int32_t _s) { return append(int128_t(_s)); }
+  RLPStream& append(int64_t _s) { return append(int128_t(_s)); }
+  RLPStream& append(int128_t _l) {
+    uint128_t _i = uint128_t((_l << 1) ^ (_l >> 127));
     return append(_i);
   }
   RLPStream& append(float _f) {

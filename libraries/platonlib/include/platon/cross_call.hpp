@@ -8,7 +8,6 @@
 #include "boost/fusion/algorithm/iteration/for_each.hpp"
 #include "boost/preprocessor/seq/for_each.hpp"
 
-
 #include "RLP.h"
 #include "chain.hpp"
 #include "common.h"
@@ -143,7 +142,7 @@ inline void get_call_output(T &t) {
  make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt"); auto result =
  platon_call<int>(address_pair.first,
   uint32_t(100), uint32_t(100), "add", 1,2,3);
-  if(!result.secod){
+  if(!result.second){
     platon_throw("cross call fail");
   }
  * @endcode
@@ -188,7 +187,7 @@ inline decltype(auto) platon_call(const Address &addr, const value_type &value,
  make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt"); auto result =
  platon_delegate_call<int>(address_pair.first,
   uint32_t(100), "add", 1,2,3);
-  if(!result.secod){
+  if(!result.secnod){
     platon_throw("cross call fail");
   }
 

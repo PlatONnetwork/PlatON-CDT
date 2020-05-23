@@ -26,6 +26,12 @@ inline byte* get_input(size_t& len) {
 
 template <typename... Args>
 void get_para(RLP& rlp, std::tuple<Args...>& t) {
+  using tuple_args = typename std::remove_reference<decltype(t)>::type;
+  if (std::tuple_size<tuple_args>::value != rlp.itemCount() - 1) {
+    platon::internal::platon_throw(
+        "The number of method parameters does not match\n");
+  }
+
   int vect_index = 1;
   boost::fusion::for_each(t, [&](auto& i) {
     fetch(rlp[vect_index], i);
@@ -118,7 +124,7 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
     uint64_t method = 0;                                     \
     fetch(rlp[0], method);                                   \
     if (0 == method) {                                       \
-      platon::internal::platon_throw("valid method\n");      \
+      platon::internal::platon_throw("invalid method\n");    \
     }                                                        \
     PLATON_DISPATCH_HELPER(TYPE, MEMBERS)                    \
     else {                                                   \

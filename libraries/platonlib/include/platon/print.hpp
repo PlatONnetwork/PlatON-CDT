@@ -16,20 +16,30 @@ string to_string(uint128_t value) {
   reverse(result.begin(), result.end());
   return result;
 }
+
+string to_string(int128_t value) {
+  std::string prefix;
+  uint128_t absolute_value = value;
+  if (value < 0) {
+    absolute_value = static_cast<uint128_t>(0 - value);
+    prefix = "-";
+  }
+  return prefix + to_string(absolute_value);
+}
+
 }  // namespace std
+
 namespace platon {
 
-std::string all_info;
+inline void print(std::string& all_info, const char* ptr) { all_info += ptr; }
 
-inline void print(const char* ptr) { all_info += ptr; }
-
-inline void print(std::string info) { all_info += info; }
+inline void print(std::string& all_info, std::string info) { all_info += info; }
 
 template <typename T,
           class = typename std::enable_if<
               std::numeric_limits<std::decay_t<T>>::is_integer ||
               std::numeric_limits<std::decay_t<T>>::is_iec559>::type>
-inline void print(const T num) {
+inline void print(std::string& all_info, const T num) {
   if constexpr (std::is_same<T, char>::value) {
     all_info += num;
   } else if constexpr (std::is_same<T, bool>::value) {
@@ -45,29 +55,23 @@ inline void print(const T num) {
 }
 
 template <typename Arg, typename... Args>
-void print(Arg&& a, Args&&... args) {
-  print(std::forward<Arg>(a));
-  print(" ");
-  print(std::forward<Args>(args)...);
+void print(std::string& all_info, Arg&& a, Args&&... args) {
+  print(all_info, std::forward<Arg>(a));
+  print(all_info, " ");
+  print(all_info, std::forward<Args>(args)...);
 }
 
 template <typename Arg, typename... Args>
 void println(Arg&& a, Args&&... args) {
-  all_info = "";
-  print(std::forward<Arg>(a), std::forward<Args>(args)...);
+#ifndef NDEBUG
+  std::string all_info;
+  print(all_info, std::forward<Arg>(a), std::forward<Args>(args)...);
   printf("%s\t\n", all_info.c_str());
+#endif
 }
 
-#ifdef NDEBUG
-
-  #define DEBUG(...) ((void)0);
-
-#else
-
-  #define DEBUG(...)                                                      \
-    platon::println("line", __LINE__, "file", __FILE__, "func", __func__, \
-                    ##__VA_ARGS__);
-
-#endif
+#define DEBUG(...)                                                      \
+  platon::println("line", __LINE__, "file", __FILE__, "func", __func__, \
+                  ##__VA_ARGS__);
 
 }  // namespace platon

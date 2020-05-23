@@ -131,16 +131,18 @@ class RLPSize {
     return *this;
   }
 
-  RLPSize& append(int8_t s) { return append(int64_t(s)); }
+  RLPSize& append(int8_t s) { return append(int128_t(s)); }
 
-  RLPSize& append(int16_t s) { return append(int64_t(s)); }
+  RLPSize& append(int16_t s) { return append(int128_t(s)); }
 
-  RLPSize& append(int c) { return append(int64_t(c)); }
+  RLPSize& append(int c) { return append(int128_t(c)); }
 
-  RLPSize& append(int32_t c) { return append(int64_t(c)); }
+  RLPSize& append(int32_t c) { return append(int128_t(c)); }
 
-  RLPSize& append(int64_t c) {
-    uint64_t i = uint64_t((c << 1) ^ (c >> 63));
+  RLPSize& append(int64_t c) { return append(int128_t(c));}
+
+  RLPSize& append(int128_t c) {
+    uint128_t i = uint128_t((c << 1) ^ (c >> 127));
     return append(i);
   }
 

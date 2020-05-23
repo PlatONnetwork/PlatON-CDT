@@ -45,6 +45,14 @@ CONTRACT user : public platon::Contract {
             return return_value;
         }
 
+         ACTION std::vector<my_message> call_direct(const std::string &target_address, const my_message &one_message,
+            uint64_t gas_value) {
+            auto result = make_address(target_address);
+            if(!result.second) return std::vector<my_message>();
+            std::vector<my_message> return_value;
+            auto call_result = platon_delegate_call<std::vector<my_message>>(result.first, gas_value, "add_message", one_message);
+            return call_result.first;
+         }
 };
 
-PLATON_DISPATCH(user, (init)(call_add_message)(delegate_call_add_message))
+PLATON_DISPATCH(user, (init)(call_add_message)(delegate_call_add_message)(call_direct))

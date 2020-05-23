@@ -284,6 +284,41 @@ TEST_CASE(rlp, int64_t_reserve) {
   ASSERT_EQ(int64_t_data, 9223372036854775807, int64_t_data);
 }
 
+TEST_CASE(rlp, int128_t) {
+  const char* fn = "int128_t";
+  int128_t int128_t_data = 0x7fffffffffffffff;
+  size_t size = pack_size(int128_t_data);
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  RLPStream stream;
+  stream << int128_t_data;
+  bytesRef result = stream.out();
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  ASSERT_EQ(size, result.size());
+  print_rlp_code("int128_t", int128_t_data, result);
+  int128_t_data = 0;
+  fetch(RLP(result), int128_t_data);
+  platon::println(int128_t_data);
+  ASSERT_EQ(int128_t_data, 9223372036854775807, int128_t_data);
+}
+
+TEST_CASE(rlp, int128_t_reserve) {
+  const char* fn = "int128_t_reserve";
+  int128_t int128_t_data = 0x7fffffffffffffff;
+  size_t size = pack_size(int128_t_data);
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  RLPStream stream;
+  stream.reserve(size);
+  stream << int128_t_data;
+  bytesRef result = stream.out();
+  platon_debug_gas(__LINE__, fn, strlen(fn));
+  ASSERT_EQ(size, result.size());
+  print_rlp_code("int128_t", int128_t_data, result);
+  int128_t_data = 0;
+  fetch(RLP(result), int128_t_data);
+  platon::println(int128_t_data);
+  ASSERT_EQ(int128_t_data, 9223372036854775807, int128_t_data);
+}
+
 TEST_CASE(rlp, bool) {
   const char* fn = "bool";
   bool bool_data = true;
@@ -847,6 +882,8 @@ UNITTEST_MAIN() {
   RUN_TEST(rlp, int32_t_reserve);
   RUN_TEST(rlp, int64_t);
   RUN_TEST(rlp, int64_t_reserve);
+  RUN_TEST(rlp, int128_t);
+  RUN_TEST(rlp, int128_t_reserve);
   RUN_TEST(rlp, bool);
   RUN_TEST(rlp, bool_reserve);
   RUN_TEST(rlp, uint8_t);
