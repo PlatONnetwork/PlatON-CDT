@@ -61,7 +61,7 @@ if(NOT DEFINED WASM_OPT)
 endif()
 
 if(WASM_OPT_LOCAL)
-  message("wasm-opt Is already installed to: ${WASM_OPT_LOCAL}")
+  message(STATUS "wasm-opt Is already installed to: ${WASM_OPT_LOCAL}")
 else()
   install(PROGRAMS ${WASM_OPT} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 endif()
