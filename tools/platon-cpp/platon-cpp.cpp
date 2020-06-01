@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
   int result = GenerateWASM(Option, M.get());
   if (0 == result) {
     std::string command =
-        "wasm-opt -Oz -o " + Option.Output + " " + Option.Output;
+        "wasm-opt -O2 -o " + Option.Output + " " + Option.Output;
     system(command.c_str());
   }
 
