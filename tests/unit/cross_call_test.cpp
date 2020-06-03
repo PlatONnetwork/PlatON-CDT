@@ -34,6 +34,12 @@ TEST_CASE(cross_call, args) {
   ASSERT_EQ(std::get<0>(call_paras), init);
   ASSERT_EQ(std::get<1>(call_paras), "jatel");
   ASSERT_EQ(std::get<2>(call_paras), 56);
+
+  // void 
+  platon::bytes void_paras = platon::cross_call_args("init");
+  std::tuple<uint64_t> void_call_paras;
+  platon::fetch(platon::RLP(paras), void_call_paras);
+  ASSERT_EQ(std::get<0>(void_call_paras), init);
 }
 
 TEST_CASE(cross_call, values) {
