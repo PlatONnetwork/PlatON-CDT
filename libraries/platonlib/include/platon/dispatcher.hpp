@@ -87,7 +87,7 @@ void execute_action(RLP& rlp, void (T::*func)(Args...)) {
   boost::mp11::tuple_apply(f2, args);
 }
 
-// Helper macro for EOSIO_DISPATCH_INTERNAL
+// Helper macro for PLATON_DISPATCH_INTERNAL
 #define PLATON_DISPATCH_INTERNAL(r, OP, elem)                        \
   else if (method == platon::name_value(BOOST_PP_STRINGIZE(elem))) { \
     platon::execute_action(rlp, &OP::elem);                          \

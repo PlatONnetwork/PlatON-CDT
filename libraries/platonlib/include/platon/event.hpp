@@ -158,24 +158,24 @@
 
 #define PLATON_EMIT_EVENT0(NAME, ...) NAME(__VA_ARGS__)
 
-#define PLATON_EVENT1(NAME, TOPIC_TYPE, ...)                     \
-  EVENT1 void NAME(const TOPIC_TYPE &topic _VA_F(__VA_ARGS__)) { \
-    platon::emit_event1(#NAME, topic PA_F(__VA_ARGS__));         \
+#define PLATON_EVENT1(NAME, TOPIC_TYPE, ...)              \
+  EVENT1 void NAME(TOPIC_TYPE topic _VA_F(__VA_ARGS__)) { \
+    platon::emit_event1(#NAME, topic PA_F(__VA_ARGS__));  \
   }
 
 #define PLATON_EMIT_EVENT1(NAME, ...) NAME(__VA_ARGS__)
 
-#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)         \
-  EVENT2 void NAME(const TOPIC_TYPE1 &topic1,                      \
-                   const TOPIC_TYPE2 &topic2 _VA_F(__VA_ARGS__)) { \
-    platon::emit_event2(#NAME, topic1, topic2 PA_F(__VA_ARGS__));  \
+#define PLATON_EVENT2(NAME, TOPIC_TYPE1, TOPIC_TYPE2, ...)        \
+  EVENT2 void NAME(TOPIC_TYPE1 topic1,                            \
+                   TOPIC_TYPE2 topic2 _VA_F(__VA_ARGS__)) {       \
+    platon::emit_event2(#NAME, topic1, topic2 PA_F(__VA_ARGS__)); \
   }
 
 #define PLATON_EMIT_EVENT2(NAME, ...) NAME(__VA_ARGS__)
 
 #define PLATON_EVENT3(NAME, TOPIC_TYPE1, TOPIC_TYPE2, TOPIC_TYPE3, ...)   \
-  EVENT3 void NAME(const TOPIC_TYPE1 &topic1, const TOPIC_TYPE2 &topic2,  \
-                   const TOPIC_TYPE3 &topic3 _VA_F(__VA_ARGS__)) {        \
+  EVENT3 void NAME(TOPIC_TYPE1 topic1, TOPIC_TYPE2 topic2,                \
+                   TOPIC_TYPE3 topic3 _VA_F(__VA_ARGS__)) {               \
     platon::emit_event3(#NAME, topic1, topic2, topic3 PA_F(__VA_ARGS__)); \
   }
 
