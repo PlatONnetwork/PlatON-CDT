@@ -359,7 +359,7 @@ class RLP {
 
   template <typename _T>
   _T toSignedInt(int _flags = Strict) const {
-    uint64_t u128_data = toInt<uint128_t>(_flags);
+    uint128_t u128_data = toInt<uint128_t>(_flags);
     int128_t int128_data =
         static_cast<int128_t>((u128_data >> 1) ^ -(u128_data & 1));
     return static_cast<_T>(int128_data);
