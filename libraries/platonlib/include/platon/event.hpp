@@ -183,32 +183,121 @@
 
 namespace platon {
 
+// topic data type
 template <typename T, bool>
-struct event_type {
+struct event_topic_type {
   using type = bytes;
-  static type event_data_convert(const T &data) {
-    RLPStream stream;
-    stream.reserve(pack_size(data));
-    stream << data;
-    const bytesRef result = stream.out();
-    std::vector<byte> hash;
+};
+
+template <typename T>
+struct event_topic_type<T, true> {
+  using type = typename std::decay<T>::type;
+};
+
+// bytes convert function
+template <typename T>
+bytes event_bytes_data_convert(const T &data) {
+  bytes result(data.cbegin(), data.cend());
+  if (result.size() <= 32) {
+    return result;
+  }
+
+  bytes hash;
+  hash.resize(32);
+  ::platon_sha3(result.data(), result.size(), hash.data(), hash.size());
+  return hash;
+}
+
+template <typename T>
+bytes event_other_data_convert(const T &data) {
+  RLPStream stream;
+  stream.reserve(pack_size(data));
+  stream << data;
+  const bytesRef rlp_result = stream.out();
+  bytes result = rlp_result.toBytes();
+  if (result.size() > 32) {
+    result.resize(32);
+    ::platon_sha3(rlp_result.data(), rlp_result.size(), result.data(),
+                  result.size());
+  }
+  return result;
+}
+
+// convert dispatch class
+template <bool>
+struct dispatch_convert_type {
+  template <typename T>
+  static bytes dispatch_convert(const T &one_data) {
+    return event_other_data_convert(one_data);
+  }
+
+  template <std::size_t N>
+  static bytes dispatch_convert(const std::array<int8_t, N> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  template <std::size_t N>
+  static bytes dispatch_convert(const std::array<uint8_t, N> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  static bytes dispatch_convert(const std::vector<int8_t> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  static bytes dispatch_convert(const std::vector<uint8_t> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  static bytes dispatch_convert(const std::list<int8_t> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  static bytes dispatch_convert(const std::list<uint8_t> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  template <unsigned N>
+  static bytes dispatch_convert(const FixedHash<N> &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  static bytes dispatch_convert(const std::string &one_data) {
+    return event_bytes_data_convert(one_data);
+  }
+
+  static bytes dispatch_convert(const char *one_data) {
+    bytes result(one_data, one_data + strlen(one_data));
+    if (result.size() <= 32) {
+      return result;
+    }
+
+    bytes hash;
     hash.resize(32);
     ::platon_sha3(result.data(), result.size(), hash.data(), hash.size());
     return hash;
   }
 };
 
-template <typename T>
-struct event_type<T, true> {
-  using type = const T &;
-  static type event_data_convert(const T &data) { return data; }
+template <>
+struct dispatch_convert_type<true> {
+  template <typename T>
+  static typename std::decay<T>::type dispatch_convert(const T &one_data) {
+    return one_data;
+  }
 };
 
-template <typename T,
-          bool is_number = std::numeric_limits<std::decay_t<T>>::is_integer ||
-                           std::numeric_limits<std::decay_t<T>>::is_iec559>
-typename event_type<T, is_number>::type event_data_convert(const T &data) {
-  return event_type<T, is_number>::event_data_convert(data);
+// real convert function
+template <typename T>
+constexpr bool is_data_number() {
+  return std::numeric_limits<std::decay_t<T>>::is_integer ||
+         std::numeric_limits<std::decay_t<T>>::is_iec559;
+}
+
+template <typename T, bool is_number = is_data_number<T>()>
+typename event_topic_type<T, is_number>::type event_data_convert(
+    const T &data) {
+  return dispatch_convert_type<is_number>::dispatch_convert(data);
 }
 
 /**
