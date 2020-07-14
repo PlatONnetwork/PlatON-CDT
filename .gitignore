@@ -37,11 +37,10 @@
 build/*
 
 # llvm
-depends/clang_llvm_8.0/*
-depends/clang_llvm_10.0.0/*
+depends/clang_llvm_*
 
 # binaryen
-depends/binaryen-version_91/*
+depends/binaryen-version_*
 
 # test
 tests/unit/*.wasm

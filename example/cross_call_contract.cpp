@@ -50,7 +50,7 @@ CONTRACT user : public platon::Contract {
             auto result = make_address(target_address);
             if(!result.second) return std::vector<my_message>();
             std::vector<my_message> return_value;
-            auto call_result = platon_delegate_call<std::vector<my_message>>(result.first, gas_value, "add_message", one_message);
+            auto call_result = platon_delegate_call_with_return_value<std::vector<my_message>>(result.first, gas_value, "add_message", one_message);
             return call_result.first;
          }
 
