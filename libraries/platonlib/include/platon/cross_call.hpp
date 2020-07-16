@@ -178,7 +178,7 @@ inline bool platon_call(const Address &addr, const value_type &value,
  *
   auto address_pair =
  make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt"); auto result =
- platon_call<int>(address_pair.first,
+ platon_call_with_return_value<int>(address_pair.first,
   uint32_t(100), uint32_t(100), "add", 1,2,3);
   if(!result.second){
     platon_throw("cross call fail");
@@ -187,7 +187,7 @@ inline bool platon_call(const Address &addr, const value_type &value,
  */
 template <typename return_type, typename value_type, typename gas_type,
           typename... Args>
-inline auto platon_call(const Address &addr, const value_type &value,
+inline auto platon_call_with_return_value(const Address &addr, const value_type &value,
                         const gas_type &gas, const std::string &method,
                         const Args &... args) {
   bool result = platon_call(addr, value, gas, method, args...);
@@ -251,7 +251,7 @@ inline bool platon_delegate_call(const Address &addr, const gas_type &gas,
  *
   auto address_pair =
  make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt"); auto result =
- platon_delegate_call<int>(address_pair.first,
+ platon_delegate_call_with_return_value<int>(address_pair.first,
   uint32_t(100), "add", 1,2,3);
   if(!result.secnod){
     platon_throw("cross call fail");
@@ -260,7 +260,7 @@ inline bool platon_delegate_call(const Address &addr, const gas_type &gas,
  * @endcode
  */
 template <typename return_type, typename gas_type, typename... Args>
-inline auto platon_delegate_call(const Address &addr, const gas_type &gas,
+inline auto platon_delegate_call_with_return_value(const Address &addr, const gas_type &gas,
                                  const std::string &method,
                                  const Args &... args) {
   bool result = platon_delegate_call(addr, gas, method, args...);

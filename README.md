@@ -50,14 +50,14 @@ git checkout feature/wasm
     ``` sh
     mkdir build && cd build
 
-    make -j$(nproc --all)
+    make -j
     sudo make install
     ```
 
     Some common options:
     - `-DTEST=ON` To build a unit test module, you need to install go1.13 and above first (the unit test module is not built by default).
     - `-DCMAKE_INSTALL_PREFIX=directory` Specify the directory to install cdt related tools and dependent libraries (default `/ usr / local`).
-    - `-CDT_BUILD_TYPE=type` The valid options for the build type are Debug and Release. Debug mode assertion checking will be enabled, and the log file will print debugging and error information. (The default is Release).
+    - `-DCDT_BUILD_TYPE=type` The valid options for the build type are Debug and Release. Debug mode assertion checking will be enabled, and the log file will print debugging and error information. (The default is Release).
 
 ## Usage
 

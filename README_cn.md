@@ -49,14 +49,14 @@ git checkout feature/wasm
     ``` sh
     mkdir build && cd build
 
-    make -j$(nproc --all)
+    make -j
     sudo make install
     ```
 
     一些常用选项:
     - `-DTEST=ON` 构建单元测试模块，你需要首先安装go1.13及以上版本（默认不构建单元测试模块）。
     - `-DCMAKE_INSTALL_PREFIX=directory` 指定目录安装cdt相关工具和依赖库（默认`/usr/local`）。
-    - `-CDT_BUILD_TYPE=type` 构建类型的有效选项是Debug，Release。Debug模式断言检查会被启用，日志文件会打印调试和错误信息。（默认是Release）。
+    - `-DCDT_BUILD_TYPE=type` 构建类型的有效选项是Debug，Release。Debug模式断言检查会被启用，日志文件会打印调试和错误信息。（默认是Release）。
 
 ## 使用
 
