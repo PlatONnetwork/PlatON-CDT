@@ -629,58 +629,19 @@ class RLPStream {
     uint64_t _i = *reinterpret_cast<uint64_t*>(&_d);
     return append(_i);
   }
-  RLPStream& append(bytesConstRef _s, bool _compact = false);
+  RLPStream& append(bytesConstRef _s);
   RLPStream& append(bytes const& _s) { return append(bytesConstRef(&_s)); }
   RLPStream& append(std::string const& _s) { return append(bytesConstRef(_s)); }
   RLPStream& append(char const* _s) { return append(std::string(_s)); }
   template <unsigned N>
-  RLPStream& append(FixedHash<N> _s, bool _compact = false,
-                    bool _allOrNothing = false) {
-    return _allOrNothing && !_s ? append(bytesConstRef())
-                                : append(_s.ref(), _compact);
+  RLPStream& append(FixedHash<N> _s, bool _allOrNothing = false) {
+    return _allOrNothing && !_s ? append(bytesConstRef()) : append(_s.ref());
   }
 
   /// Appends an arbitrary RLP fragment - this *must* be a single item unless @a
   /// _itemCount is given.
   RLPStream& append(RLP const& _rlp, size_t _itemCount = 1) {
     return appendRaw(_rlp.data(), _itemCount);
-  }
-
-  /// Appends a sequence of data to the stream as a list.
-  template <class _T>
-  RLPStream& append(std::vector<_T> const& _s) {
-    return appendVector(_s);
-  }
-  template <class _T>
-  RLPStream& appendVector(std::vector<_T> const& _s) {
-    appendList(_s.size());
-    for (auto const& i : _s) append(i);
-    return *this;
-  }
-  template <class _T, size_t S>
-  RLPStream& append(std::array<_T, S> const& _s) {
-    appendList(_s.size());
-    for (auto const& i : _s) append(i);
-    return *this;
-  }
-  template <class _T>
-  RLPStream& append(std::set<_T> const& _s) {
-    appendList(_s.size());
-    for (auto const& i : _s) append(i);
-    return *this;
-  }
-  template <class _T>
-  RLPStream& append(std::unordered_set<_T> const& _s) {
-    appendList(_s.size());
-    for (auto const& i : _s) append(i);
-    return *this;
-  }
-  template <class T, class U>
-  RLPStream& append(std::pair<T, U> const& _s) {
-    appendList(2);
-    append(_s.first);
-    append(_s.second);
-    return *this;
   }
 
   /// Appends a list.
@@ -765,10 +726,7 @@ class RLPStream {
  private:
   void noteAppended(size_t _itemCount = 1);
 
-  /// Push the node-type byte (using @a _base) along with the item count @a
-  /// _count.
-  /// @arg _count is number of characters for strings, data-bytes for ints, or
-  /// items for lists.
+  #ifdef OLD
   void pushCount(size_t _count, byte _base);
 
   /// Push an integer as a raw big-endian byte-stream.
@@ -778,6 +736,7 @@ class RLPStream {
     byte* b = &m_out.back();
     for (; _i; _i >>= 8) *(b--) = (byte)_i;
   }
+  #endif
 
   /// Our output byte stream.
   BytesBuffer m_out;

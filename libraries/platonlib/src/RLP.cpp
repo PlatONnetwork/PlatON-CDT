@@ -1,10 +1,11 @@
 #include "platon/RLP.h"
+#include "platon/chain.hpp"
 using namespace std;
 
 namespace platon {
 
-//bytes RLPNull = rlp("");
-//bytes RLPEmptyList = rlpList();
+// bytes RLPNull = rlp("");
+// bytes RLPEmptyList = rlpList();
 
 RLP::RLP(bytesConstRef _d, Strictness _s) : m_data(_d) {
   if ((_s & FailIfTooBig) && actualSize() < _d.size()) {
@@ -147,6 +148,7 @@ size_t RLP::items() const {
   return 0;
 }
 
+// RLPStream
 RLPStream& RLPStream::appendRaw(bytesConstRef _s, size_t _itemCount) {
   m_out.append(_s.begin(), _s.end());
   noteAppended(_itemCount);
@@ -155,7 +157,6 @@ RLPStream& RLPStream::appendRaw(bytesConstRef _s, size_t _itemCount) {
 
 void RLPStream::noteAppended(size_t _itemCount) {
   if (!_itemCount) return;
-  //	cdebug << "noteAppended(" << _itemCount << ")";
   while (m_listStack.size()) {
     if (m_listStack.back().first < _itemCount)
       internal::platon_throw("itemCount too large");
@@ -166,22 +167,11 @@ void RLPStream::noteAppended(size_t _itemCount) {
       auto p = m_listStack.back().second;
       m_listStack.pop_back();
       size_t s = m_out.size() - p;  // list size
-      auto brs = bytesRequired(s);
-      unsigned encodeSize = s < c_rlpListImmLenCount ? 1 : (1 + brs);
-      //			cdebug << "s: " << s << ", p: " << p << ",
-      // m_out.size(): " << m_out.size() << ", encodeSize: " << encodeSize << "
-      //(br: " << brs << ")";
-      auto os = m_out.size();
-      m_out.resize(os + encodeSize);
-      memmove(m_out.data() + p + encodeSize, m_out.data() + p, os - p);
-      if (s < c_rlpListImmLenCount)
-        m_out[p] = (byte)(c_rlpListStart + s);
-      else if (c_rlpListIndLenZero + brs <= 0xff) {
-        m_out[p] = (byte)(c_rlpListIndLenZero + brs);
-        byte* b = &(m_out[p + brs]);
-        for (; s; s >>= 8) *(b--) = (byte)s;
-      } else
-        internal::platon_throw("itemCount too large for RLP");
+
+      size_t appned_length = rlp_list_size(s);
+      m_out.resize(p + appned_length);
+      byte* data = m_out.data() + p;
+      platon_rlp_list(data, s, data);
     }
     _itemCount = 1;  // for all following iterations, we've effectively appended
                      // a single item only since we completed a list.
@@ -198,61 +188,36 @@ RLPStream& RLPStream::appendList(size_t _items) {
 }
 
 RLPStream& RLPStream::appendList(bytesConstRef _rlp) {
-  if (_rlp.size() < c_rlpListImmLenCount)
-    m_out.push_back((byte)(_rlp.size() + c_rlpListStart));
-  else
-    pushCount(_rlp.size(), c_rlpListIndLenZero);
-  appendRaw(_rlp, 1);
+  size_t length = _rlp.size();
+  byte const* data = _rlp.data();
+  size_t appned_length = rlp_list_size(length);
+  size_t old_size = m_out.size();
+  m_out.resize(old_size + appned_length);
+  platon_rlp_list(data, length, m_out.data() + old_size);
+  noteAppended();
   return *this;
 }
 
-RLPStream& RLPStream::append(bytesConstRef _s, bool _compact) {
-  size_t s = _s.size();
-  byte const* d = _s.data();
-  if (_compact)
-    for (size_t i = 0; i < _s.size() && !*d; ++i, --s, ++d) {
-    }
-
-  if (s == 1 && *d < c_rlpDataImmLenStart)
-    m_out.push_back(*d);
-  else {
-    if (s < c_rlpDataImmLenCount)
-      m_out.push_back((byte)(s + c_rlpDataImmLenStart));
-    else
-      pushCount(s, c_rlpDataIndLenZero);
-    appendRaw(bytesConstRef(d, s), 0);
-  }
+RLPStream& RLPStream::append(bytesConstRef _s) {
+  size_t length = _s.size();
+  byte const* data = _s.data();
+  size_t appned_length = rlp_bytes_size(data, length);
+  size_t old_size = m_out.size();
+  m_out.resize(old_size + appned_length);
+  platon_rlp_bytes(data, length, m_out.data() + old_size);
   noteAppended();
   return *this;
 }
 
 RLPStream& RLPStream::append(bigint _i) {
-  if (!_i)
-    m_out.push_back(c_rlpDataImmLenStart);
-  else if (_i < c_rlpDataImmLenStart)
-    m_out.push_back((byte)_i);
-  else {
-    unsigned br = bytesRequired(_i);
-    if (br < c_rlpDataImmLenCount)
-      m_out.push_back((byte)(br + c_rlpDataImmLenStart));
-    else {
-      auto brbr = bytesRequired(br);
-      if (c_rlpDataIndLenZero + brbr > 0xff)
-        internal::platon_throw("Number too large for RLP");
-      m_out.push_back((byte)(c_rlpDataIndLenZero + brbr));
-      pushInt(br, brbr);
-    }
-    pushInt(_i, br);
-  }
+  uint64_t low = _i;
+  uint64_t heigh = _i >> 64;
+  size_t appned_length = rlp_u128_size(heigh, low);
+  size_t old_size = m_out.size();
+  m_out.resize(old_size + appned_length);
+  platon_rlp_u128(heigh, low, m_out.data() + old_size);
   noteAppended();
   return *this;
-}
-
-void RLPStream::pushCount(size_t _count, byte _base) {
-  auto br = bytesRequired(_count);
-  if (int(br) + _base > 0xff) internal::platon_throw("Count too large for RLP");
-  m_out.push_back((byte)(br + _base));  // max 8 bytes.
-  pushInt(_count, br);
 }
 }  // namespace platon
 

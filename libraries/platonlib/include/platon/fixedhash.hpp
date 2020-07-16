@@ -16,7 +16,7 @@ class FixedHash {
   enum { size = N };
 
   /// Construct an empty hash.
-  FixedHash() { m_data.fill(0); }
+  FixedHash() {}
 
   template <unsigned M>
   explicit FixedHash(FixedHash<M> const &h) {
@@ -140,7 +140,7 @@ class FixedHash {
   bool contains(FixedHash const &_c) const { return (*this & _c) == _c; }
 
  private:
-  std::array<byte, N> m_data;
+  std::array<byte, N> m_data = {};
 };
 
 using h256 = FixedHash<32>;
