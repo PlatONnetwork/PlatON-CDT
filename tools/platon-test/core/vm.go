@@ -209,37 +209,31 @@ func RlpBytes(proc *exec.Process, src uint32, length uint32, dest uint32) {
 		panic(err)
 	}
 
-	// get result
-	var (
-		bAppendData bool = true
-		result      []byte
-	)
+	// get prefixData
+	var prefixData []byte
 	if 1 == length && data[0] < rlpDataImmLenStart {
-		bAppendData = false
-		result = append(result, data[0])
+		prefixData = []byte{}
 	} else if length < rlpDataImmLenCount {
-		result = append(result, byte(rlpDataImmLenStart+length))
+		prefixData = append(prefixData, byte(rlpDataImmLenStart+length))
 	} else {
 		lengthBytes := bigEndian(uint64(length))
 		if len(lengthBytes)+rlpDataIndLenZero > 0xff {
 			panic(ErrWASMRlpItemCountTooLarge)
 		}
-		result = append(result, byte(len(lengthBytes)+rlpDataIndLenZero))
-		result = append(result, lengthBytes...)
+		prefixData = append(prefixData, byte(len(lengthBytes)+rlpDataIndLenZero))
+		prefixData = append(prefixData, lengthBytes...)
 	}
 
 	// write prefix
-	_, err = proc.WriteAt(result, int64(dest))
+	_, err = proc.WriteAt(prefixData, int64(dest))
 	if nil != err {
 		panic(err)
 	}
 
 	// write data
-	if bAppendData {
-		_, err = proc.WriteAt(data, int64(dest)+int64(len(result)))
-		if nil != err {
-			panic(err)
-		}
+	_, err = proc.WriteAt(data, int64(dest)+int64(len(prefixData)))
+	if nil != err {
+		panic(err)
 	}
 }
 
@@ -262,26 +256,26 @@ func RlpList(proc *exec.Process, src uint32, length uint32, dest uint32) {
 	}
 
 	// get result
-	var result []byte
+	var prefixData []byte
 	if length < rlpListImmLenCount {
-		result = append(result, byte(rlpListStart+length))
+		prefixData = append(prefixData, byte(rlpListStart+length))
 	} else {
 		lengthBytes := bigEndian(uint64(length))
 		if len(lengthBytes)+rlpDataIndLenZero > 0xff {
 			panic(ErrWASMRlpItemCountTooLarge)
 		}
-		result = append(result, byte(len(lengthBytes)+rlpListIndLenZero))
-		result = append(result, lengthBytes...)
+		prefixData = append(prefixData, byte(len(lengthBytes)+rlpListIndLenZero))
+		prefixData = append(prefixData, lengthBytes...)
 	}
 
 	// write prefix
-	_, err = proc.WriteAt(result, int64(dest))
+	_, err = proc.WriteAt(prefixData, int64(dest))
 	if nil != err {
 		panic(err)
 	}
 
 	// write data
-	_, err = proc.WriteAt(data, int64(dest)+int64(len(result)))
+	_, err = proc.WriteAt(data, int64(dest)+int64(len(prefixData)))
 	if nil != err {
 		panic(err)
 	}
