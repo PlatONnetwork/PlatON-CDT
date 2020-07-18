@@ -312,6 +312,18 @@ size_t platon_get_state_length(const uint8_t *key, size_t klen);
 int32_t platon_get_state(const uint8_t *key, size_t klen, uint8_t *value,
                          size_t vlen);
 
+// u128
+size_t rlp_u128_size(uint64_t heigh, uint64_t low);
+void platon_rlp_u128(uint64_t heigh, uint64_t low, void * dest);
+
+// bytes
+size_t rlp_bytes_size(const void *data, size_t len);
+void platon_rlp_bytes(const void *data, size_t len, void * dest);
+
+// list
+size_t rlp_list_size(size_t len);
+void platon_rlp_list(const void *data, size_t len, void * dest);
+
 #ifdef __cplusplus
 }
 #endif

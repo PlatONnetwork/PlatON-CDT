@@ -37,3 +37,9 @@ platon_debug_gas
 platon_ecrecover
 platon_ripemd160
 platon_sha256
+rlp_u128_size
+platon_rlp_u128
+rlp_bytes_size
+platon_rlp_bytes
+rlp_list_size
+platon_rlp_list

@@ -76,6 +76,20 @@ TEST_CASE(print, address){
     platon::println("check not same:", address_info.first != address_other_info.first ? "true" : "false");
 }
 
+TEST_CASE(print, fixedhash){
+  bytes zero_bytes;
+  for(int i = 0; i < 32; i ++)
+    zero_bytes.push_back(0);
+  h256 data_256;
+  ASSERT_EQ(data_256, h256(zero_bytes));
+  h128 data_128;
+  ASSERT_EQ(data_128, h128(zero_bytes));
+  h64 data_64;
+  ASSERT_EQ(data_64, h64(zero_bytes));
+  Address data_160;
+  ASSERT_EQ(data_160, Address(zero_bytes));
+}
+
 UNITTEST_MAIN() {
   RUN_TEST(print, char);
   RUN_TEST(print, int);
