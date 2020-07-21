@@ -10,6 +10,8 @@
 #include "clang/Driver/Options.h"
 
 #include "Option.h"
+#include <algorithm>
+#include <iterator>
 
 using namespace std;
 using namespace llvm;
@@ -63,7 +65,7 @@ bool PCCOption::ParseArgs(int argc, char** argv) {
       ArgStringList ASL;
       A->render(Args, ASL);
       for (auto it : ASL)
-        clangArgs.push_back(it);
+        clangUserArgs.push_back(it);
     }
   }
 
@@ -121,6 +123,8 @@ void PCCOption::AdjustClangArgs(bool NoStdlib){
     clangArgs.push_back("-I");
     clangArgs.push_back(includedir);
   }
+
+  std::copy(clangUserArgs.begin(), clangUserArgs.end(), std::back_inserter(clangArgs));
 }
 
 void PCCOption::AdjustLLDArgs(bool NoStdlib){

@@ -2,8 +2,9 @@ package core
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"path"
+
+	"github.com/urfave/cli"
 )
 
 var TestCmd = cli.Command{
@@ -15,41 +16,44 @@ var TestCmd = cli.Command{
 	Flags:       compileCmdFlags,
 }
 
-var testCmdFlags = []cli.Flag{
-	WasmDirFlag,
-	WasmFileFlag,
-	OutputFlag,
-	BinPathFlag,
-}
+// var testCmdFlags = []cli.Flag{
+// 	WasmDirFlag,
+// 	WasmFileFlag,
+// 	OutputFlag,
+// 	BinPathFlag,
+// }
 
 func test(c *cli.Context) error {
 	bin := c.String(BinPathFlag.Name)
 	output := c.String(OutputFlag.Name)
 	dir := c.String(WasmDirFlag.Name)
+	define := c.String(DefineMacroFlag.Name)
+	undefine := c.String(UndefineMacroFlag.Name)
+
 	if output == "" {
 		output = "./"
 	}
 	if dir != "" {
-		return TestDir(bin, dir, output)
+		return TestDir(bin, dir, output, define, undefine)
 	}
 	file := c.String(WasmFileFlag.Name)
 	if file == "" {
 		cli.ShowCommandHelp(c, "test")
 		return fmt.Errorf("command args error")
 	}
-	return TestFile(bin, file, output)
+	return TestFile(bin, file, output, define, undefine)
 }
 
-func TestDir(bin, dir, output string) error {
-	if err := CompileDir(bin, dir, output); err != nil {
+func TestDir(bin, dir, output, define, undefine string) error {
+	if err := CompileDir(bin, dir, output, define, undefine); err != nil {
 		return err
 	}
 
 	return ExecDir(output)
 }
 
-func TestFile(binPath, filePath, outPath string) error {
-	if err := CompileFile(binPath, filePath, outPath); err != nil {
+func TestFile(binPath, filePath, outPath, define, undefine string) error {
+	if err := CompileFile(binPath, filePath, outPath, define, undefine); err != nil {
 		return err
 	}
 	_, file := path.Split(filePath)
