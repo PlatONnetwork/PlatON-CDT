@@ -21,3 +21,13 @@ var BinPathFlag = cli.StringFlag{
 	Name:  "bin",
 	Usage: "bin path",
 }
+
+var DefineMacroFlag = cli.StringFlag{
+	Name:  "define",
+	Usage: "Define conditional compilation macros.",
+}
+
+var UndefineMacroFlag = cli.StringFlag{
+	Name:  "undefine",
+	Usage: "Undefine conditional compilation macros.",
+}

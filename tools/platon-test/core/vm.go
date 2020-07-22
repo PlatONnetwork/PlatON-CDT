@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/PlatONnetwork/wagon/exec"
 	"github.com/PlatONnetwork/wagon/wasm"
@@ -281,6 +282,11 @@ func RlpList(proc *exec.Process, src uint32, length uint32, dest uint32) {
 	}
 }
 
+// int64_t platon_nano_time()
+func PlatonNanoTime(proc *exec.Process) int64 {
+	return time.Now().UnixNano()
+}
+
 func NewHostModule() *wasm.Module {
 	m := wasm.NewModule()
 	m.Export.Entries = make(map[string]wasm.ExportEntry)
@@ -520,6 +526,20 @@ func NewHostModule() *wasm.Module {
 		},
 		wasm.ExportEntry{
 			FieldStr: "platon_rlp_list",
+			Kind:     wasm.ExternalFunction,
+		},
+	)
+
+	addFuncExport(m,
+		wasm.FunctionSig{
+			ReturnTypes: []wasm.ValueType{wasm.ValueTypeI64},
+		},
+		wasm.Function{
+			Host: reflect.ValueOf(PlatonNanoTime),
+			Body: &wasm.FunctionBody{},
+		},
+		wasm.ExportEntry{
+			FieldStr: "platon_nano_time",
 			Kind:     wasm.ExternalFunction,
 		},
 	)

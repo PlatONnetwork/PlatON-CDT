@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -143,13 +144,20 @@ func ExecFile(filePath string) error {
 	// invoke
 	exportInvoke := wasmModule.Export.Entries["invoke"]
 	index := int64(exportInvoke.Index)
-	_, err = vm.ExecCode(index)
+	rtrns, err := vm.ExecCode(index)
 
 	// gas result
 	fmt.Fprintf(os.Stdin, "gas cost:%d, opcodes:%d\n", gasCost, opCodes)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "execute code failed!!! err=%v\n", err)
 		return err
+	}
+
+	// result
+	if res, ok := rtrns.(uint32); ok && 0 != res {
+		info := fmt.Sprintf("%s has %d failed assertions\n", file, res)
+		fmt.Fprintf(os.Stderr, info)
+		return errors.New(info)
 	}
 
 	return nil

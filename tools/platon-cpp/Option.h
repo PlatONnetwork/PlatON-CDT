@@ -10,6 +10,7 @@ public:
   bool Help;
   bool OutputIR;
   std::vector<std::string> ldArgs;
+  std::vector<std::string> clangUserArgs;
   std::vector<std::string> clangArgs;
 
   bool ParseArgs(int, char**);
