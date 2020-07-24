@@ -12,6 +12,15 @@ namespace platon {
 template <unsigned N>
 class FixedHash {
  public:
+  using iterator = typename std::array<byte, N>::iterator;
+  iterator begin() noexcept {return m_data.begin();}
+  iterator end() noexcept {return m_data.end();}
+
+  using const_iterator = typename std::array<byte, N>::const_iterator;
+  const_iterator cbegin() const noexcept {return m_data.cbegin();}
+  const_iterator cend() const noexcept {return m_data.cend();}
+  
+ public:
   /// The size of the container.
   enum { size = N };
 
