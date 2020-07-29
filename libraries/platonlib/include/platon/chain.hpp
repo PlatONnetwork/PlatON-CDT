@@ -207,6 +207,10 @@ int32_t platon_migrate(uint8_t new_addr[20], const uint8_t *args,
                        size_t args_len, const uint8_t *value, size_t value_len,
                        const uint8_t *call_cost, size_t call_cost_len);
 
+int32_t platon_clone_migrate(const uint8_t old_addr[20], uint8_t new_addr[20],
+                             const uint8_t *args, size_t args_len,
+                             const uint8_t *value, size_t value_len,
+                             const uint8_t *call_cost, size_t call_cost_len);
 /**
  * @brief Cross contract call
  *
@@ -326,6 +330,24 @@ void platon_rlp_list(const void *data, size_t len, void *dest);
 
 // test
 int64_t platon_nano_time();
+
+// get code length
+size_t platon_contract_code_length(const uint8_t addr[20]);
+
+// get code
+int32_t platon_contract_code(const uint8_t addr[20], uint8_t *code,
+                             size_t code_length);
+
+// deploy new contract
+int32_t platon_deploy(uint8_t new_addr[20], const uint8_t *args,
+                      size_t args_len, const uint8_t *value, size_t value_len,
+                      const uint8_t *call_cost, size_t call_cost_len);
+
+// clone new contract
+int32_t platon_clone(const uint8_t old_addr[20], uint8_t new_addr[20],
+                     const uint8_t *args, size_t args_len, const uint8_t *value,
+                     size_t value_len, const uint8_t *call_cost,
+                     size_t call_cost_len);
 
 #ifdef __cplusplus
 }

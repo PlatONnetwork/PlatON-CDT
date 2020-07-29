@@ -49,3 +49,12 @@ tests/unit/*.json
 # example
 example/*.wasm
 example/*.json
+
+# vscode
+.vscode
+
+# test contract
+tests/deploy/build/
+
+# node modules
+tests/deploy/node_modules/

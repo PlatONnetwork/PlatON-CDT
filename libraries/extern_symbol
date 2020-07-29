@@ -28,11 +28,9 @@ platon_event
 platon_call
 platon_delegate_call
 platon_static_call
-platon_origin
-platon_caller
-platon_address
 platon_destroy
 platon_migrate
+platon_clone_migrate
 platon_debug_gas
 platon_ecrecover
 platon_ripemd160
@@ -44,3 +42,7 @@ platon_rlp_bytes
 rlp_list_size
 platon_rlp_list
 platon_nano_time
+platon_contract_code_length
+platon_contract_code
+platon_deploy
+platon_clone
