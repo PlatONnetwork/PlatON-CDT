@@ -31,7 +31,6 @@ platon_static_call
 platon_destroy
 platon_migrate
 platon_clone_migrate
-platon_debug_gas
 platon_ecrecover
 platon_ripemd160
 platon_sha256
@@ -41,8 +40,11 @@ rlp_bytes_size
 platon_rlp_bytes
 rlp_list_size
 platon_rlp_list
-platon_nano_time
 platon_contract_code_length
 platon_contract_code
 platon_deploy
 platon_clone
+
+
+platon_nano_time
+platon_debug_gas

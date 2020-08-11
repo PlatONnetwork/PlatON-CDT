@@ -328,9 +328,6 @@ void platon_rlp_bytes(const void *data, size_t len, void *dest);
 size_t rlp_list_size(size_t len);
 void platon_rlp_list(const void *data, size_t len, void *dest);
 
-// test
-int64_t platon_nano_time();
-
 // get code length
 size_t platon_contract_code_length(const uint8_t addr[20]);
 
