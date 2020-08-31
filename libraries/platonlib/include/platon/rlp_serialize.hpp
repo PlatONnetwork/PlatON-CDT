@@ -29,24 +29,26 @@
  * defined
  *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
  */
-#define PLATON_SERIALIZE(TYPE, MEMBERS)                                             \
-  friend RLPStream& operator<<(RLPStream& rlp, const TYPE& t) {                     \
-    size_t items_number = 0;                                                        \
-    BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS)                \
-    rlp.appendList(items_number);                                                   \
-    RLPSize rlps;                                                                   \
-    rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS);        \
-    rlp.reserve(rlps.size());                                                       \
-    return rlp BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS);  \
+#define PLATON_SERIALIZE(TYPE, MEMBERS)                                      \
+  friend platon::RLPStream& operator<<(platon::RLPStream& rlp,               \
+                                       const TYPE& t) {                      \
+    size_t items_number = 0;                                                 \
+    BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS)         \
+    rlp.appendList(items_number);                                            \
+    platon::RLPSize rlps;                                                    \
+    rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS); \
+    rlp.reserve(rlps.size());                                                \
+    return rlp BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<,     \
+                                     MEMBERS);                               \
   }                                                                          \
-  friend void fetch(const RLP& rlp, TYPE& t) {                               \
+  friend void fetch(const platon::RLP& rlp, TYPE& t) {                       \
     size_t vect_index = 0;                                                   \
     BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS)   \
   }                                                                          \
-  friend RLPSize& operator<<(RLPSize& rlps, const TYPE& t) {                 \
-    rlps << RLPSize::list_start();                                           \
+  friend platon::RLPSize& operator<<(platon::RLPSize& rlps, const TYPE& t) { \
+    rlps << platon::RLPSize::list_start();                                   \
     rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS); \
-    return rlps << RLPSize::list_end();                                      \
+    return rlps << platon::RLPSize::list_end();                              \
   }
 
 /**
@@ -62,11 +64,12 @@
  *  @param MEMBERS - a sequence of member names.  (field1)(field2)(field3)
  */
 #define PLATON_SERIALIZE_DERIVED(TYPE, BASE, MEMBERS)                        \
-  friend RLPStream& operator<<(RLPStream& rlp, const TYPE& t) {              \
+  friend platon::RLPStream& operator<<(platon::RLPStream& rlp,               \
+                                       const TYPE& t) {                      \
     size_t items_number = 1;                                                 \
     BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_NUMBER, <<, MEMBERS)         \
     rlp.appendList(items_number);                                            \
-    RLPSize rlps;                                                            \
+    platon::RLPSize rlps;                                                    \
     rlps << static_cast<const BASE&>(t);                                     \
     rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS); \
     rlp.reserve(rlps.size());                                                \
@@ -74,14 +77,14 @@
     return rlp BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<,     \
                                      MEMBERS);                               \
   }                                                                          \
-  friend void fetch(const RLP& rlp, TYPE& t) {                               \
+  friend void fetch(const platon::RLP& rlp, TYPE& t) {                       \
     size_t vect_index = 0;                                                   \
     fetch(rlp[vect_index], static_cast<BASE&>(t));                           \
     vect_index++;                                                            \
     BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS);  \
   }                                                                          \
-  friend RLPSize& operator<<(RLPSize& rlps, const TYPE& t) {                 \
-    rlps << RLPSize::list_start() << static_cast<const BASE&>(t);            \
+  friend platon::RLPSize& operator<<(platon::RLPSize& rlps, const TYPE& t) { \
+    rlps << platon::RLPSize::list_start() << static_cast<const BASE&>(t);    \
     rlps BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_INPUT, <<, MEMBERS); \
-    return rlps << RLPSize::list_end();                                      \
+    return rlps << platon::RLPSize::list_end();                              \
   }
