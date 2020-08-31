@@ -14,6 +14,9 @@ extern "C" {
 
 void platon_debug_gas(uint32_t line, const char* dst, size_t len);
 
+// Get the current time accurate to nanoseconds
+int64_t platon_nano_time();
+
 #ifdef __cplusplus
 }
 #endif
