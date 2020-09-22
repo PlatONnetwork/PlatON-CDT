@@ -15,12 +15,21 @@ enum class EnergonUnit : u128 {
   kVON = 1000,
   mVON = 1000000,
   gVON = 1000000000,
-  microLAT = 1000000000000,
-  milliLAT = 1000000000000000,
-  LAT = 1000000000000000000,
-  kLAT = LAT * 1000,
-  mLAT = kLAT * 1000,
-  gLAT = mLAT * 1000,
+#ifdef TESTNET
+  microATX = 1000000000000,
+  milliATX = 1000000000000000,
+  ATX = 1000000000000000000,
+  kATX = ATX * 1000,
+  mATX = kATX * 1000,
+  gATX = mATX * 1000,
+#else
+  microATP = 1000000000000,
+  milliATP = 1000000000000000,
+  ATP = 1000000000000000000,
+  kATP = ATP * 1000,
+  mATP = kATP * 1000,
+  gATP = mATP * 1000,
+#endif
 };
 
 /**
@@ -161,83 +170,163 @@ Energon operator""_gVON(uint64_t gvon) {
   return Energon(u128(gvon) * u128(EnergonUnit::gVON));
 }
 
+#ifdef TESTNET
 /**
  * string-literal operator
  *
- * @brief 1_microLAT representing 1e12 VON
- * @param mircolat Amount of microLAT
+ * @brief 1_microATX representing 1e12 VON
+ * @param mircoatx Amount of microATX
  * @return Energon
  *
- * Energon e = 1_microLAT;
+ * Energon e = 1_microATX;
  */
-Energon operator""_microLAT(uint64_t microlat) {
-  return Energon(u128(microlat) * u128(EnergonUnit::microLAT));
+Energon operator""_microATX(uint64_t microatx) {
+  return Energon(u128(microatx) * u128(EnergonUnit::microATX));
 }
 
 /**
  * string-literal operator
  *
- * @brief 1_milliLAT representing 1e15 VON
- * @param milllat Amount of milliLAT
+ * @brief 1_milliATX representing 1e15 VON
+ * @param milliatx Amount of milliATX
  * @return Energon
  *
- * Energon e = 6_milliLAT;
+ * Energon e = 6_milliATX;
  */
-Energon operator""_milliLAT(uint64_t millilat) {
-  return Energon(u128(millilat) * u128(EnergonUnit::milliLAT));
+Energon operator""_milliATX(uint64_t milliatx) {
+  return Energon(u128(milliatx) * u128(EnergonUnit::milliATX));
 }
 
 /**
  * string-literal operator
  *
- * @brief 1_LAT representing 1e18 Von
- * @param lat Amount of LAT
+ * @brief 1_ATX representing 1e18 Von
+ * @param atx Amount of ATX
  * @return Energon
  *
- * Energon e = 33_LAT;
+ * Energon e = 33_ATX;
  */
-Energon operator""_LAT(uint64_t lat) {
-  return Energon(u128(lat) * u128(EnergonUnit::LAT));
+Energon operator""_ATX(uint64_t atx) {
+  return Energon(u128(atx) * u128(EnergonUnit::ATX));
 }
 
 /**
  * string-literal operator
  *
- * @brief 1_kLAT representing 1e21 VON
- * @param klat Aomount of kLAT
+ * @brief 1_kATX representing 1e21 VON
+ * @param katx Aomount of kATX
  * @return Energon
  *
- * Engergon e = 10_kLAT;
+ * Engergon e = 10_kATX;
  */
-Energon operator""_kLAT(uint64_t klat) {
-  return Energon(u128(klat) * u128(EnergonUnit::kLAT));
+Energon operator""_kATX(uint64_t katx) {
+  return Energon(u128(katx) * u128(EnergonUnit::kATX));
 }
 
 /**
  * string-literal operator
  *
- * @brief 1_mLAT representing 1e24 VON
- * @param mlat Aomount of mLAT
+ * @brief 1_mATX representing 1e24 VON
+ * @param matx Aomount of mATX
  * @return Energon
  *
- * Engergon e = 10_mLAT;
+ * Engergon e = 10_mATX;
  */
-Energon operator""_mLAT(uint64_t mlat) {
-  return Energon(u128(mlat) * u128(EnergonUnit::mLAT));
+Energon operator""_mATX(uint64_t matx) {
+  return Energon(u128(matx) * u128(EnergonUnit::mATX));
 }
 
 /**
  * string-literal operator
  *
- * @brief 1_gLAT representing 1e27 VON
- * @param glat Aomount of gLAT
+ * @brief 1_gATX representing 1e27 VON
+ * @param gatx Aomount of gATX
  * @return Energon
  *
- * Engergon e = 10_gLAT;
+ * Engergon e = 10_gATX;
  */
-Energon operator""_gLAT(uint64_t glat) {
-  return Energon(u128(glat) * u128(EnergonUnit::gLAT));
+Energon operator""_gATX(uint64_t gatx) {
+  return Energon(u128(gatx) * u128(EnergonUnit::gATX));
 }
+#else
+/**
+ * string-literal operator
+ *
+ * @brief 1_microATP representing 1e12 VON
+ * @param mircoatp Amount of microATP
+ * @return Energon
+ *
+ * Energon e = 1_microATP;
+ */
+Energon operator""_microATP(uint64_t microatp) {
+  return Energon(u128(microatp) * u128(EnergonUnit::microATP));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_milliATP representing 1e15 VON
+ * @param milliatp Amount of milliATP
+ * @return Energon
+ *
+ * Energon e = 6_milliATP;
+ */
+Energon operator""_milliATP(uint64_t milliatp) {
+  return Energon(u128(milliatp) * u128(EnergonUnit::milliATP));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_ATP representing 1e18 Von
+ * @param atp Amount of ATP
+ * @return Energon
+ *
+ * Energon e = 33_ATP;
+ */
+Energon operator""_ATP(uint64_t atp) {
+  return Energon(u128(atp) * u128(EnergonUnit::ATP));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_kATP representing 1e21 VON
+ * @param katp Aomount of kATP
+ * @return Energon
+ *
+ * Engergon e = 10_kATP;
+ */
+Energon operator""_kATP(uint64_t katp) {
+  return Energon(u128(katp) * u128(EnergonUnit::kATP));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_mATP representing 1e24 VON
+ * @param matp Aomount of mATP
+ * @return Energon
+ *
+ * Engergon e = 10_mATP;
+ */
+Energon operator""_mATP(uint64_t matp) {
+  return Energon(u128(matp) * u128(EnergonUnit::mATP));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_gATP representing 1e27 VON
+ * @param gatp Aomount of gATP
+ * @return Energon
+ *
+ * Engergon e = 10_gATP;
+ */
+Energon operator""_gATP(uint64_t gatp) {
+  return Energon(u128(gatp) * u128(EnergonUnit::gATP));
+}
+#endif
 
 /**
  * @brief Compare two optional objects lhs and rhs is equal
@@ -291,7 +380,7 @@ bool operator<(const Energon& lhs, const Energon& rhs) {
  * @param b Amount of VON
  * @return Energon
  *
- * Energon energon = 1_VON + 1_LAT;
+ * Energon energon = 1_VON + 1_ATP;
  */
 Energon operator+(const Energon& lhs, const Energon& rhs) {
   return Energon(0).Add(lhs).Add(rhs);

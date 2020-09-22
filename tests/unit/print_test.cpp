@@ -1,9 +1,9 @@
 #undef NDEBUG
-#define TESTNET
+#include "platon/print.hpp"
 #include "platon/common.h"
 #include "platon/fixedhash.hpp"
-#include "platon/print.hpp"
 #include "unit_test.hpp"
+
 
 TEST_CASE(print, char) {
   char test_char = 'a';
@@ -62,24 +62,58 @@ TEST_CASE(print, int128_t) {
   platon::println(signed_info);
 }
 
-TEST_CASE(print, address){
-    h64 h64_data("0x0102030405060708");
-    platon::println("h64_data:", h64_data.toString());
-    auto address_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
-    platon::println("check result:", address_info.second ? "true" : "false");
-    platon::println("address:", address_info.first.toString());
-    auto address_same_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
-    platon::println("check same:", address_info.first == address_same_info.first ? "true" : "false");
-    platon::println("check not same:", address_info.first != address_same_info.first ? "true" : "false");
-    auto address_other_info = make_address("lax1uqug0zq7rcxddndleq4ux2ft3tv6dqljphydrl");
-    platon::println("check same:", address_info.first == address_other_info.first ? "true" : "false");
-    platon::println("check not same:", address_info.first != address_other_info.first ? "true" : "false");
+TEST_CASE(print, address) {
+  h64 h64_data("0x0102030405060708");
+  platon::println("h64_data:", h64_data.toString());
+
+#ifdef TESTNET
+  auto address_info =
+      make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
+  platon::println("check result:", address_info.second ? "true" : "false");
+  platon::println("address:", address_info.first.toString());
+  auto address_same_info =
+      make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
+  platon::println("check same:", address_info.first == address_same_info.first
+                                     ? "true"
+                                     : "false");
+  platon::println(
+      "check not same:",
+      address_info.first != address_same_info.first ? "true" : "false");
+  auto address_other_info =
+      make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgec7epra7lt8");
+  platon::println("check same:", address_info.first == address_other_info.first
+                                     ? "true"
+                                     : "false");
+  platon::println(
+      "check not same:",
+      address_info.first != address_other_info.first ? "true" : "false");
+#else
+  auto address_info =
+      make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
+  platon::println("check result:", address_info.second ? "true" : "false");
+  platon::println("address:", address_info.first.toString());
+  auto address_same_info =
+      make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
+  platon::println("check same:", address_info.first == address_same_info.first
+                                     ? "true"
+                                     : "false");
+  platon::println(
+      "check not same:",
+      address_info.first != address_same_info.first ? "true" : "false");
+  auto address_other_info =
+      make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgec7epfmz4cd");
+  platon::println("check same:", address_info.first == address_other_info.first
+                                     ? "true"
+                                     : "false");
+  platon::println(
+      "check not same:",
+      address_info.first != address_other_info.first ? "true" : "false");
+#endif
 }
 
-TEST_CASE(print, fixedhash){
+TEST_CASE(print, fixedhash) {
   bytes zero_bytes;
-  for(int i = 0; i < 32; i ++)
-    zero_bytes.push_back(0);
+  for (int i = 0; i < 32; i++) zero_bytes.push_back(0);
   h256 data_256;
   ASSERT_EQ(data_256, h256(zero_bytes));
   h128 data_128;

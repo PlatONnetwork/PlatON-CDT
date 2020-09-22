@@ -2,7 +2,6 @@
 // old rlp
 //#define OLD
 #undef NDEBUG
-#define TESTNET
 #include "platon/RLP.h"
 
 #include <stdio.h>
@@ -670,39 +669,55 @@ TEST_CASE(rlp, string_reserve) {
 
 TEST_CASE(rlp, address) {
   const char* fn = "address";
-  auto address_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
+#ifdef TESTNET
+  auto address_info =
+      make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
+#else
+  auto address_info =
+      make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
+#endif
   auto size = pack_size(address_info.first);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream << address_info.first;
   bytesRef result = stream.out();
-  bytes old_result = {148, 124, 176, 245, 214, 109, 7, 71, 42, 131, 92, 151, 226, 136, 147, 27, 226, 81, 143, 123, 33};
+  bytes old_result = {148, 124, 176, 245, 214, 109, 7,  71,  42,  131, 92,
+                      151, 226, 136, 147, 27,  226, 81, 143, 123, 33};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("address", address_info.first.toString(), result);
   Address addr1;
   fetch(RLP(result), addr1);
-  ASSERT_EQ(address_info.first, addr1, address_info.first.toString(), addr1.toString());
+  ASSERT_EQ(address_info.first, addr1, address_info.first.toString(),
+            addr1.toString());
 }
 
 TEST_CASE(rlp, address_reserve) {
   const char* fn = "address_reserve";
-  auto address_info = make_address("lax10jc0t4ndqarj4q6ujl3g3ycmufgc77epxg02lt");
+#ifdef TESTNET
+  auto address_info =
+      make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
+#else
+  auto address_info =
+      make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
+#endif
   auto size = pack_size(address_info.first);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   RLPStream stream;
   stream.reserve(size);
   stream << address_info.first;
   bytesRef result = stream.out();
-  bytes old_result = {148, 124, 176, 245, 214, 109, 7, 71, 42, 131, 92, 151, 226, 136, 147, 27, 226, 81, 143, 123, 33};
+  bytes old_result = {148, 124, 176, 245, 214, 109, 7,  71,  42,  131, 92,
+                      151, 226, 136, 147, 27,  226, 81, 143, 123, 33};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
   print_rlp_code("address", address_info.first.toString(), result);
   Address addr1;
   fetch(RLP(result), addr1);
-  ASSERT_EQ(address_info.first, addr1, address_info.first.toString(), addr1.toString());
+  ASSERT_EQ(address_info.first, addr1, address_info.first.toString(),
+            addr1.toString());
 }
 
 TEST_CASE(rlp, array) {
@@ -713,7 +728,8 @@ TEST_CASE(rlp, array) {
   RLPStream stream;
   stream << arr;
   bytesRef result = stream.out();
-  bytes old_result = {212, 129, 194, 129, 196, 129, 198, 129, 200, 129, 202, 129, 204, 129, 206, 129, 208, 129, 210, 129, 212};
+  bytes old_result = {212, 129, 194, 129, 196, 129, 198, 129, 200, 129, 202,
+                      129, 204, 129, 206, 129, 208, 129, 210, 129, 212};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   print_rlp_code("array", "abcdefghij", result);
@@ -731,7 +747,8 @@ TEST_CASE(rlp, array_reserve) {
   stream.reserve(size);
   stream << arr;
   bytesRef result = stream.out();
-  bytes old_result = {212, 129, 194, 129, 196, 129, 198, 129, 200, 129, 202, 129, 204, 129, 206, 129, 208, 129, 210, 129, 212};
+  bytes old_result = {212, 129, 194, 129, 196, 129, 198, 129, 200, 129, 202,
+                      129, 204, 129, 206, 129, 208, 129, 210, 129, 212};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   print_rlp_code("array", "abcdefghij", result);
@@ -748,7 +765,8 @@ TEST_CASE(rlp, list) {
   RLPStream stream;
   stream << list_data;
   bytesRef result = stream.out();
-  bytes old_result = {204, 131, 97, 98, 99, 131, 100, 101, 102, 131, 103, 104, 105};
+  bytes old_result = {204, 131, 97,  98,  99,  131, 100,
+                      101, 102, 131, 103, 104, 105};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
@@ -767,7 +785,8 @@ TEST_CASE(rlp, list_reserve) {
   stream.reserve(size);
   stream << list_data;
   bytesRef result = stream.out();
-  bytes old_result = {204, 131, 97, 98, 99, 131, 100, 101, 102, 131, 103, 104, 105};
+  bytes old_result = {204, 131, 97,  98,  99,  131, 100,
+                      101, 102, 131, 103, 104, 105};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
@@ -794,7 +813,8 @@ TEST_CASE(rlp, append) {
   vect_result.push_back(data_32);
   auto size = pack_size(vect_result);
   bytesRef result = stream.out();
-  bytes old_result = {211, 132, 1, 2, 3, 4, 132, 5, 6, 7, 8, 132, 9, 10, 11, 12, 131, 13, 14, 15};
+  bytes old_result = {211, 132, 1, 2,  3,  4,  132, 5,  6,  7,
+                      8,   132, 9, 10, 11, 12, 131, 13, 14, 15};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   ASSERT_EQ(size, result.size());
   print_rlp_code("append", "test", result);
@@ -812,7 +832,9 @@ TEST_CASE(rlp, map) {
   RLPStream stream;
   stream << m;
   auto result = stream.out();
-  bytes old_result = {223, 200, 131, 97, 98, 99, 131, 97, 98, 99, 202, 132, 97, 98, 99, 49, 132, 97, 98, 99, 49, 202, 132, 97, 98, 99, 50, 132, 97, 98, 99, 50};
+  bytes old_result = {223, 200, 131, 97, 98, 99,  131, 97, 98, 99, 202,
+                      132, 97,  98,  99, 49, 132, 97,  98, 99, 49, 202,
+                      132, 97,  98,  99, 50, 132, 97,  98, 99, 50};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
@@ -835,7 +857,9 @@ TEST_CASE(rlp, map_reserve) {
   stream.reserve(size);
   stream << m;
   auto result = stream.out();
-  bytes old_result = {223, 200, 131, 97, 98, 99, 131, 97, 98, 99, 202, 132, 97, 98, 99, 49, 132, 97, 98, 99, 49, 202, 132, 97, 98, 99, 50, 132, 97, 98, 99, 50};
+  bytes old_result = {223, 200, 131, 97, 98, 99,  131, 97, 98, 99, 202,
+                      132, 97,  98,  99, 49, 132, 97,  98, 99, 49, 202,
+                      132, 97,  98,  99, 50, 132, 97,  98, 99, 50};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
@@ -894,7 +918,8 @@ TEST_CASE(rlp, group) {
   RLPStream wht_stream;
   wht_stream << group;
   bytesRef result = wht_stream.out();
-  bytes old_result = {209, 133, 103, 114, 111, 117, 112, 3, 201, 133, 106, 97, 116, 101, 108, 30, 129, 160};
+  bytes old_result = {209, 133, 103, 114, 111, 117, 112, 3,   201,
+                      133, 106, 97,  116, 101, 108, 30,  129, 160};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size(), size, result.size());
@@ -914,7 +939,8 @@ TEST_CASE(rlp, group_reserve) {
   wht_stream.reserve(size);
   wht_stream << group;
   bytesRef result = wht_stream.out();
-  bytes old_result = {209, 133, 103, 114, 111, 117, 112, 3, 201, 133, 106, 97, 116, 101, 108, 30, 129, 160};
+  bytes old_result = {209, 133, 103, 114, 111, 117, 112, 3,   201,
+                      133, 106, 97,  116, 101, 108, 30,  129, 160};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size(), size, result.size());
@@ -933,7 +959,9 @@ TEST_CASE(rlp, Derived) {
   RLPStream wht_stream;
   wht_stream << test_derived;
   bytesRef result = wht_stream.out();
-  bytes old_result = {224, 209, 133, 103, 114, 111, 117, 112, 3, 201, 133, 106, 97, 116, 101, 108, 30, 129, 160, 141, 106, 97, 116, 101, 108, 95, 100, 101, 114, 105, 118, 101, 100};
+  bytes old_result = {224, 209, 133, 103, 114, 111, 117, 112, 3,   201, 133,
+                      106, 97,  116, 101, 108, 30,  129, 160, 141, 106, 97,
+                      116, 101, 108, 95,  100, 101, 114, 105, 118, 101, 100};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
@@ -953,7 +981,9 @@ TEST_CASE(rlp, Derived_reserve) {
   wht_stream.reserve(size);
   wht_stream << test_derived;
   bytesRef result = wht_stream.out();
-  bytes old_result = {224, 209, 133, 103, 114, 111, 117, 112, 3, 201, 133, 106, 97, 116, 101, 108, 30, 129, 160, 141, 106, 97, 116, 101, 108, 95, 100, 101, 114, 105, 118, 101, 100};
+  bytes old_result = {224, 209, 133, 103, 114, 111, 117, 112, 3,   201, 133,
+                      106, 97,  116, 101, 108, 30,  129, 160, 141, 106, 97,
+                      116, 101, 108, 95,  100, 101, 114, 105, 118, 101, 100};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   platon_debug_gas(__LINE__, fn, strlen(fn));
   ASSERT_EQ(size, result.size());
@@ -963,7 +993,7 @@ TEST_CASE(rlp, Derived_reserve) {
   ASSERT_EQ(test_derived, one_test_derived);
 }
 
-TEST_CASE(rlp, bigint_limit){
+TEST_CASE(rlp, bigint_limit) {
   uint128_t left = 0;
   uint128_t right = 0xffffffffffffffffULL;
   right <<= 64;
@@ -977,15 +1007,16 @@ TEST_CASE(rlp, bigint_limit){
   stream.clear();
   stream << right;
   result = stream.out();
-  old_result = {144, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+  old_result = {144, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255};
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   print_rlp_code("bigint_limit", "right", result);
 }
 
-TEST_CASE(rlp, bytes_limit){
+TEST_CASE(rlp, bytes_limit) {
   bytes left;
   bytes right = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    RLPStream stream;
+  RLPStream stream;
   stream << left;
   bytesRef result = stream.out();
   bytes old_result = {128};
@@ -999,7 +1030,7 @@ TEST_CASE(rlp, bytes_limit){
   print_rlp_code("bytes_limit", "right", result);
 }
 
-TEST_CASE(rlp, list_limit){
+TEST_CASE(rlp, list_limit) {
   bytes left;
   bytes right = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   RLPStream stream;
@@ -1017,7 +1048,6 @@ TEST_CASE(rlp, list_limit){
   ASSERT_EQ(bytes(result.begin(), result.end()), old_result);
   print_rlp_code("list_limit", "right", result);
 }
-
 
 UNITTEST_MAIN() {
   RUN_TEST(rlp, int8_t);
