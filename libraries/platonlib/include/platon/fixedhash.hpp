@@ -13,13 +13,13 @@ template <unsigned N>
 class FixedHash {
  public:
   using iterator = typename std::array<byte, N>::iterator;
-  iterator begin() noexcept {return m_data.begin();}
-  iterator end() noexcept {return m_data.end();}
+  iterator begin() noexcept { return m_data.begin(); }
+  iterator end() noexcept { return m_data.end(); }
 
   using const_iterator = typename std::array<byte, N>::const_iterator;
-  const_iterator cbegin() const noexcept {return m_data.cbegin();}
-  const_iterator cend() const noexcept {return m_data.cend();}
-  
+  const_iterator cbegin() const noexcept { return m_data.cbegin(); }
+  const_iterator cend() const noexcept { return m_data.cend(); }
+
  public:
   /// The size of the container.
   enum { size = N };
@@ -248,9 +248,9 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
   static_assert(M - 1 == 42, "Incorrect string length");
 
 #ifdef TESTNET
-  std::string hrp = "lax";
+  std::string hrp = "atx";
 #else
-  std::string hrp = "lat";
+  std::string hrp = "atp";
 #endif
 
   return decode(str_address, hrp);
@@ -268,9 +268,9 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
  */
 inline std::pair<Address, bool> make_address(const std::string &str_address) {
 #ifdef TESTNET
-  std::string hrp = "lax";
+  std::string hrp = "atx";
 #else
-  std::string hrp = "lat";
+  std::string hrp = "atp";
 #endif
 
   return decode(str_address, hrp);
@@ -279,9 +279,9 @@ inline std::pair<Address, bool> make_address(const std::string &str_address) {
 template <>
 std::string FixedHash<20>::toString() const {
 #ifdef TESTNET
-  std::string hrp = "lax";
+  std::string hrp = "atx";
 #else
-  std::string hrp = "lat";
+  std::string hrp = "atp";
 #endif
   return encode(*this, hrp);
 }
