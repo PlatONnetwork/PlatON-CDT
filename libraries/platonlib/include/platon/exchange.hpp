@@ -15,12 +15,21 @@ enum class EnergonUnit : u128 {
   kVON = 1000,
   mVON = 1000000,
   gVON = 1000000000,
+#ifdef TESTNET
+  microLAX = 1000000000000,
+  milliLAX = 1000000000000000,
+  LAX = 1000000000000000000,
+  kLAX = LAX * 1000,
+  mLAX = kLAX * 1000,
+  gLAX = mLAX * 1000,
+#else
   microLAT = 1000000000000,
   milliLAT = 1000000000000000,
   LAT = 1000000000000000000,
   kLAT = LAT * 1000,
   mLAT = kLAT * 1000,
   gLAT = mLAT * 1000,
+#endif
 };
 
 /**
@@ -161,6 +170,85 @@ Energon operator""_gVON(uint64_t gvon) {
   return Energon(u128(gvon) * u128(EnergonUnit::gVON));
 }
 
+#ifdef TESTNET
+/**
+ * string-literal operator
+ *
+ * @brief 1_microLAX representing 1e12 VON
+ * @param mircolax Amount of microLAX
+ * @return Energon
+ *
+ * Energon e = 1_microLAX;
+ */
+Energon operator""_microLAX(uint64_t microlax) {
+  return Energon(u128(microlax) * u128(EnergonUnit::microLAX));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_milliLAX representing 1e15 VON
+ * @param millilax Amount of milliLAX
+ * @return Energon
+ *
+ * Energon e = 6_milliLAX;
+ */
+Energon operator""_milliLAX(uint64_t millilax) {
+  return Energon(u128(millilax) * u128(EnergonUnit::milliLAX));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_LAX representing 1e18 Von
+ * @param lax Amount of LAX
+ * @return Energon
+ *
+ * Energon e = 33_LAX;
+ */
+Energon operator""_LAX(uint64_t lax) {
+  return Energon(u128(lax) * u128(EnergonUnit::LAX));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_kLAX representing 1e21 VON
+ * @param klax Aomount of kLAX
+ * @return Energon
+ *
+ * Engergon e = 10_kLAX;
+ */
+Energon operator""_kLAX(uint64_t klax) {
+  return Energon(u128(klax) * u128(EnergonUnit::kLAX));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_mLAX representing 1e24 VON
+ * @param mlax Aomount of mLAX
+ * @return Energon
+ *
+ * Engergon e = 10_mLAX;
+ */
+Energon operator""_mLAX(uint64_t mlax) {
+  return Energon(u128(mlax) * u128(EnergonUnit::mLAX));
+}
+
+/**
+ * string-literal operator
+ *
+ * @brief 1_gLAX representing 1e27 VON
+ * @param glax Aomount of gLAX
+ * @return Energon
+ *
+ * Engergon e = 10_gLAX;
+ */
+Energon operator""_gLAX(uint64_t glax) {
+  return Energon(u128(glax) * u128(EnergonUnit::gLAX));
+}
+#else
 /**
  * string-literal operator
  *
@@ -178,7 +266,7 @@ Energon operator""_microLAT(uint64_t microlat) {
  * string-literal operator
  *
  * @brief 1_milliLAT representing 1e15 VON
- * @param milllat Amount of milliLAT
+ * @param millilat Amount of milliLAT
  * @return Energon
  *
  * Energon e = 6_milliLAT;
@@ -238,6 +326,8 @@ Energon operator""_mLAT(uint64_t mlat) {
 Energon operator""_gLAT(uint64_t glat) {
   return Energon(u128(glat) * u128(EnergonUnit::gLAT));
 }
+
+#endif
 
 /**
  * @brief Compare two optional objects lhs and rhs is equal
