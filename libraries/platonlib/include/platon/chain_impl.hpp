@@ -87,7 +87,8 @@ u128 platon_call_value() {
  * @param data Binary data
  * @return The Hash of the data
  */
-h256 platon_sha3(const bytes &data) {
+template <typename T>
+h256 platon_sha3(const T &data) {
   byte hash[32];
   ::platon_sha3(data.data(), data.size(), hash, sizeof(hash));
   return h256(hash, sizeof(hash));
@@ -102,7 +103,8 @@ h256 platon_sha3(const bytes &data) {
  * @param result the signature address
  * @return Getting the signature address returns 0 on success and -1 on failure
  */
-int32_t platon_ecrecover(const h256 &hash, const bytes &signature,
+template <typename T>
+int32_t platon_ecrecover(const h256 &hash, const T &signature,
                          Address &result) {
   int32_t ret = ::platon_ecrecover(hash.data(), signature.data(),
                                    signature.size(), result.data());
@@ -134,7 +136,8 @@ void platon_sha256(const bytes &data, byte result[32]) {
  *
  * @tparam T Value type
  */
-template <typename T> void platon_return(const T &t);
+template <typename T>
+void platon_return(const T &t);
 
 /**
  * @brief Get the input value
@@ -173,8 +176,8 @@ bool platon_destroy(const Address &addr) {
  * @param gas Pay amount of gas for this transaction
  * @return true if migration successfully, false otherwise
  */
-template <typename value_type, typename gas_type>
-bool platon_migrate_contract(Address &addr, const bytes &init_args,
+template <typename args_type, typename value_type, typename gas_type>
+bool platon_migrate_contract(Address &addr, const args_type &init_args,
                              value_type value, gas_type gas);
 
 /**
@@ -211,7 +214,8 @@ bool platon_delegate_call(const Address &addr, const bytes &paras,
  * @tparam T The output value type
  * @return The value of call output
  */
-template <typename T> void get_call_output(T &t);
+template <typename T>
+void get_call_output(T &t);
 
 /**
  * @brief Get the address of original caller
@@ -256,4 +260,4 @@ void set_state(const KEY &key, const VALUE &value);
  */
 template <typename KEY, typename VALUE>
 size_t get_state(const KEY &key, VALUE &value);
-} // namespace platon
+}  // namespace platon

@@ -1,27 +1,30 @@
 
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Metadata.h"
-#include "llvm/IR/DebugInfoMetadata.h"
-#include "llvm/IR/Intrinsics.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/Format.h"
 #include "MakeAbi.h"
-
+#include "llvm/IR/DebugInfoMetadata.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Intrinsics.h"
+#include "llvm/IR/Metadata.h"
+#include "llvm/IR/Type.h"
+#include "llvm/Support/Format.h"
+#include "llvm/Support/raw_ostream.h"
 #include <string>
 
 using namespace llvm;
 
-bool isFixedHash(DICompositeType *CT){
+bool isVectorRef(DICompositeType* CT) {
+  return CT->getIdentifier().startswith("_ZTSN6platon10vector_refIKhEE");
+  
+}
+
+bool isFixedHash(DICompositeType* CT) {
   return CT->getIdentifier().startswith("_ZTSN6platon9FixedHash");
 }
 
 DIType* getTypeParam(DICompositeType* CT, unsigned i);
 Value* getValueParam(DICompositeType* CT, unsigned i);
 
-
-StringRef MakeAbi::handleFixedHash(DINode* Node, DICompositeType* CT){
-  Value* V  = getValueParam(CT, 0);
+StringRef MakeAbi::handleFixedHash(DINode* Node, DICompositeType* CT) {
+  Value* V = getValueParam(CT, 0);
   ConstantInt* CI = cast<ConstantInt>(V);
 
   std::string str;
@@ -31,4 +34,3 @@ StringRef MakeAbi::handleFixedHash(DINode* Node, DICompositeType* CT){
 
   return SSaver.save(str);
 }
-

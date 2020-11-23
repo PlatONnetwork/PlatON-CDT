@@ -99,6 +99,9 @@ inline void fetch(const RLP& rlp, bool& value) { value = rlp.toBool(); }
 
 inline void fetch(const RLP& rlp, bytes& value) { value = rlp.toBytes(); }
 
+inline void fetch(const RLP& rlp, bytesConstRef& value) { value = rlp.toBytesConstRef(); }
+
+
 template <class T>
 inline void fetch(const RLP& rlp, std::vector<T>& ret) {
   if (rlp.isList()) {
@@ -106,7 +109,7 @@ inline void fetch(const RLP& rlp, std::vector<T>& ret) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
-      ret.push_back(std::move(one));
+      ret.emplace_back(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
@@ -119,7 +122,7 @@ inline void fetch(const RLP& rlp, std::list<T>& ret) {
     for (auto const& i : rlp) {
       T one;
       fetch(i, one);
-      ret.push_back(std::move(one));
+      ret.emplace_back(std::move(one));
     }
   } else {
     internal::platon_throw("bad cast");
