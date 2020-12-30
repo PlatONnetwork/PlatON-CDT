@@ -29,10 +29,10 @@ class FixedHash {
 
   template <unsigned M>
   explicit FixedHash(FixedHash<M> const &h) {
-    m_data.fill(0);
     unsigned c = std::min(M, N);
-    for (unsigned i = 0; i < c; ++i) {
-      m_data[i] = h[i];
+    memcpy(m_data.data(), h.m_data.data(), c);
+    for (;c < N; ++c) {
+        m_data[c] = 0;
     }
   }
 

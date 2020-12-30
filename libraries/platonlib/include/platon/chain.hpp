@@ -346,6 +346,12 @@ int32_t platon_clone(const uint8_t old_addr[20], uint8_t new_addr[20],
                      size_t value_len, const uint8_t *call_cost,
                      size_t call_cost_len);
 
+// platon_confidential_tx_verify
+int32_t platon_confidential_tx_verify(const uint8_t *tx_data, size_t tx_len);
+
+// platon_variable_length_result
+int32_t platon_variable_length_result(uint8_t *result, size_t result_len);
+
 #ifdef __cplusplus
 }
 #endif

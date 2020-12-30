@@ -20,6 +20,9 @@
   OP(rlp[vect_index], t.elem);                       \
   vect_index++;
 
+#define PLATON_REFLECT_MEMBER_OP_OUTPUT_ITER(r, OP, elem) \
+  OP(*iter, t.elem);                                      \
+  ++iter;
 /**
  *  Defines serialization and deserialization for a class
  *
@@ -42,8 +45,9 @@
                                      MEMBERS);                               \
   }                                                                          \
   friend void fetch(const platon::RLP& rlp, TYPE& t) {                       \
-    size_t vect_index = 0;                                                   \
-    BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_OUTPUT, fetch, MEMBERS)   \
+    auto iter = rlp.begin();                                                 \
+    BOOST_PP_SEQ_FOR_EACH(PLATON_REFLECT_MEMBER_OP_OUTPUT_ITER, fetch,       \
+                          MEMBERS)                                           \
   }                                                                          \
   friend platon::RLPSize& operator<<(platon::RLPSize& rlps, const TYPE& t) { \
     rlps << platon::RLPSize::list_start();                                   \

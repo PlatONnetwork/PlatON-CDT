@@ -139,7 +139,7 @@ class RLPSize {
 
   RLPSize& append(int32_t c) { return append(int128_t(c)); }
 
-  RLPSize& append(int64_t c) { return append(int128_t(c));}
+  RLPSize& append(int64_t c) { return append(int128_t(c)); }
 
   RLPSize& append(int128_t c) {
     uint128_t i = uint128_t((c << 1) ^ (c >> 127));
@@ -156,31 +156,12 @@ class RLPSize {
     return append(i);
   }
 
-  RLPSize& append(const bytes& s) {
-    size_t total = 0;
-    if (s.empty()) {
-      total = 1;
-    } else {
-      const byte* d = s.data();
-      size_t size = s.size();
-      if (size == 1 && *d < c_rlpDataImmLenStart) {
-        total = 1;
-      } else if (size < c_rlpDataImmLenCount) {
-        total = size + 1;
-      } else {
-        total = size + bytesRequired(size) + 1;
-      }
-    }
-
-    if (pending_.size() > 0) {
-      pending_.top() += total;
-    } else {
-      size_ += total;
-    }
-    return *this;
-  }
-
-  RLPSize& append(const std::string& s) {
+  template <
+      typename T,
+      typename = typename std::enable_if<
+          std::is_same_v<T, bytes> || std::is_same_v<T, bytesConstRef> ||
+          std::is_same_v<T, bytesRef> || std::is_same_v<T, std::string>>::type>
+  RLPSize& append(const T& s) {
     size_t total = 0;
     if (s.empty()) {
       total = 1;

@@ -44,7 +44,8 @@ platon_contract_code_length
 platon_contract_code
 platon_deploy
 platon_clone
-
+platon_confidential_tx_verify
+platon_variable_length_result
 
 platon_nano_time
 platon_debug_gas
