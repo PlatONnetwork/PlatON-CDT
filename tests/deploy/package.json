@@ -1,5 +1,5 @@
 {
-  "name": "platon-contract",
+  "name": "alaya-contract",
   "version": "1.0.0",
   "description": "deploy contract and call contract method",
   "main": "contract.js",
@@ -11,6 +11,6 @@
   "dependencies": {
     "fs-extra": "^9.0.1",
     "json2csv": "^5.0.1",
-    "web3": "git+https://github.com/PlatONnetwork/client-sdk-js.git#develop"
+    "web3": "git+https://github.com/PlatONnetwork/client-sdk-js.git#alaya-dev"
   }
 }

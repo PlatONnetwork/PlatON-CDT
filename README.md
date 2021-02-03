@@ -59,6 +59,15 @@ git checkout feature/wasm
     - `-DCMAKE_INSTALL_PREFIX=directory` Specify the directory to install cdt related tools and dependent libraries (default `/ usr / local`).
     - `-DCDT_BUILD_TYPE=type` The valid options for the build type are Debug and Release. Debug mode assertion checking will be enabled, and the log file will print debugging and error information. (The default is Release).
 
+    If you are building a unit test module, you need to download platon-go in the ./tools/platon-test/node directory, and compile it after the download is complete.
+
+    ```shell
+    cd tools/platon-test && mkdir node && cd node
+    git clone https://github.com/PlatONnetwork/PlatON-Go.git
+    cd PlatON-Go
+    git checkout ${BRANCH}
+    make all
+    ```
 ## Usage
 
 ``` bash

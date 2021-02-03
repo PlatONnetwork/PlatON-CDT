@@ -214,7 +214,7 @@ class RLP {
   explicit operator int8_t() const { return toSignedInt<int8_t>(); }
   explicit operator int16_t() const { return toSignedInt<int16_t>(); }
   explicit operator int() const { return toSignedInt<int>(); }
-  //  explicit operator int32_t() const { return toSignedInt<int32_t>(); }
+  explicit operator int32_t() const { return toSignedInt<int32_t>(); }
   explicit operator int64_t() const { return toSignedInt<int64_t>(); }
   explicit operator int128_t() const { return toSignedInt<int128_t>(); }
   explicit operator float() const { return toFloat(); }
@@ -647,7 +647,7 @@ class RLPStream {
   RLPStream& append(int8_t _c) { return append(int128_t(_c)); }
   RLPStream& append(int16_t _s) { return append(int128_t(_s)); }
   RLPStream& append(int _c) { return append(int128_t(_c)); }
-  //  RLPStream& append(int32_t _s) { return append(int128_t(_s)); }
+  RLPStream& append(int32_t _s) { return append(int128_t(_s)); }
   RLPStream& append(int64_t _s) { return append(int128_t(_s)); }
   RLPStream& append(int128_t _l) {
     uint128_t _i = uint128_t((_l << 1) ^ (_l >> 127));
