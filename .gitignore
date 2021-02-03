@@ -58,3 +58,6 @@ tests/deploy/build/
 
 # node modules
 tests/deploy/node_modules/
+
+# go dependencies
+tools/platon-test/node/

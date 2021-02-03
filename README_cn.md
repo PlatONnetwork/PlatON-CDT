@@ -58,6 +58,16 @@ git checkout feature/wasm
     - `-DCMAKE_INSTALL_PREFIX=directory` 指定目录安装cdt相关工具和依赖库（默认`/usr/local`）。
     - `-DCDT_BUILD_TYPE=type` 构建类型的有效选项是Debug，Release。Debug模式断言检查会被启用，日志文件会打印调试和错误信息。（默认是Release）。
 
+    如果构建单元测试模块，需要在 ./tools/platon-test/node 目录中下载 platon-go，并在下载完成后编译。
+
+    ```shell
+    cd tools/platon-test && mkdir node && cd node
+    git clone https://github.com/PlatONnetwork/PlatON-Go.git
+    cd PlatON-Go
+    git checkout ${BRANCH}
+    make all
+    ```
+
 ## 使用
 
 在使用PlatON-CDT之前必须将PlatON-CDT编译生成的执行文件路径加到PATH环境变量中.

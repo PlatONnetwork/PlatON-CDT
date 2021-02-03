@@ -4,11 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"os"
 	"path"
 
+	"github.com/PlatONnetwork/PlatON-Go/common"
+	wvm "github.com/PlatONnetwork/PlatON-Go/core/vm"
+	"github.com/PlatONnetwork/PlatON-Go/log"
+	"github.com/PlatONnetwork/PlatON-Go/params"
 	"github.com/PlatONnetwork/wagon/exec"
-	"github.com/PlatONnetwork/wagon/wasm"
 	"github.com/urfave/cli"
 )
 
@@ -40,6 +44,16 @@ func execTest(c *cli.Context) error {
 	}
 	return ExecFile(file)
 }
+
+type testContract struct{}
+
+func (testContract) Address() common.Address {
+	return common.Address{}
+}
+
+var contractCtx *wvm.Contract
+
+var initGas = uint64(1000000000)
 
 func ExecDir(dir string) error {
 	stat, err := os.Stat(dir)
@@ -94,28 +108,17 @@ func ExecFile(filePath string) error {
 		return err
 	}
 	defer wasmFile.Close()
-
+	code := make([]byte, 1024*1024)
+	size, _ := wasmFile.Read(code)
 	// read module
-	wasmModule, err := wasm.ReadModule(wasmFile, importer)
+	wasmModule, err := ReadWasmModule(code[:size], false)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "wasm file %s could not read module: %v\n", file, err)
 		return err
 	}
 
-	if wasmModule.Export == nil {
-		fmt.Fprintf(os.Stderr, "module %s has no export section\n", file)
-		return err
-	}
-
-	//compile
-	compiled, err := exec.CompileModule(wasmModule)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not compile module: %v\n", err)
-		return err
-	}
-
 	// create vm
-	vm, err := exec.NewVMWithCompiled(compiled, memoryLimit)
+	vm, err := exec.NewVMWithCompiled(wasmModule, memoryLimit)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not create VM: %v\n", err)
 		return err
@@ -130,19 +133,16 @@ func ExecFile(filePath string) error {
 	})
 
 	// set context
-	ctx := &VMContext{
-		Input:   nil,
-		CallOut: nil,
-		Output:  nil,
-		Gas:     &gasCost,
-		OpCode:  &opCodes,
-		Db:      NewDB(),
-	}
+	contractCtx = wvm.NewContract(&testContract{}, &testContract{}, big.NewInt(0), initGas)
+
+	db := NewMockStateDB()
+	ctx := wvm.NewVMContext(&wvm.EVM{StateDB: db}, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
+	ctx.Log = wvm.NewWasmLogger(wvm.Config{Debug: true}, log.WasmRoot())
 
 	vm.SetHostCtx(ctx)
 
 	// invoke
-	exportInvoke := wasmModule.Export.Entries["invoke"]
+	exportInvoke := wasmModule.RawModule.Export.Entries["invoke"]
 	index := int64(exportInvoke.Index)
 	rtrns, err := vm.ExecCode(index)
 
