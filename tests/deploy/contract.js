@@ -7,10 +7,10 @@ var Web3 = require('web3')
 let contractDirectory = path.join(__dirname, "./build/");
 
 // deploy address
-var deployFrom = "lax1l0sm6ath520sa8tsq499ya8a5j9qkzh2zxgddm";
+var deployFrom = "lxg1ghvqzvmpxwarcqhkmd6d5f3lrzept59wehh4a4";
 
 // send transaction address
-var from = "lax1gutkc403f9fh57xa8skelk43znyjjgp0wn3q4d";
+var from = "lxg1ghvqzvmpxwarcqhkmd6d5f3lrzept59wehh4a4";
 
 // configuration
 var gas = 2000000;
@@ -18,7 +18,7 @@ var gasPrice = 50000000004;
 
 // web3 object
 var provider = new Web3.providers.HttpProvider(
-    `http://10.1.1.10:36789`,
+    `http://192.168.120.121:6789`,
     { keepAlive: false }
 );
 var web3 = new Web3(provider);
@@ -29,11 +29,11 @@ var gasJson = [];
 //import private key and unlock account.
 // The private key only needs to be imported once. 
 // After importing, comment out the code for importing the private key, and don’t comment out the code for the unlocked wallet.
-// web3.platon.personal.importRawKey("16e80ad4079462cc7f9748af2f9cf03e8f7384bed597c086db4f11a98c3b08f0", "123456");
-web3.platon.personal.unlockAccount("lax1l0sm6ath520sa8tsq499ya8a5j9qkzh2zxgddm", "123456", 99999);
+// web3.platon.personal.importRawKey("ad296b67d8e9bd226189efd9ae2f637645360e784c725bf03d1a1a0fe5d45ec6", "123456");
+web3.platon.personal.unlockAccount("lxg1ghvqzvmpxwarcqhkmd6d5f3lrzept59wehh4a4", "123456", 99999);
 
 // web3.platon.personal.importRawKey("e53e05953b3d1992b7d3d27a6ef9554c797088d68eed114d1c8bfe2a80ff29b5", "123456");
-web3.platon.personal.unlockAccount("lax1gutkc403f9fh57xa8skelk43znyjjgp0wn3q4d", "123456", 99999);
+// web3.platon.personal.unlockAccount("lax1gutkc403f9fh57xa8skelk43znyjjgp0wn3q4d", "123456", 99999);
 
 function changeDeploy(addr) {deployFrom = addr;}
 
