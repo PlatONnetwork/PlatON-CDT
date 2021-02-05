@@ -21,3 +21,5 @@
 #include "platon/storage.hpp"
 #include "platon/storagetype.hpp"
 #include "platon/create.hpp"
+#include "platon/bigint.hpp"
+#include "platon/crypto/bn256/bn256.hpp"

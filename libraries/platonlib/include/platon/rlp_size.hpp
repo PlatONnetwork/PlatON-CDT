@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "RLP.h"
+#include "bigint.hpp"
 #include "common.h"
 
 namespace platon {
@@ -154,6 +155,18 @@ class RLPSize {
   RLPSize& append(double d) {
     uint64_t i = *reinterpret_cast<uint64_t*>(&d);
     return append(i);
+  }
+
+  template <size_t Bits, bool Signed>
+  RLPSize& append(const std::WideInteger<Bits, Signed>& s) {
+    if (!Signed) {
+      size_ += s.ValidBytes();
+    } else {
+      size_t rsh = Bits - 1;
+      std::WideInteger<Bits, Signed> r = (s << 1) ^ (s >> rsh);
+      size_ += r.ValidBytes();
+    }
+    return *this;
   }
 
   template <

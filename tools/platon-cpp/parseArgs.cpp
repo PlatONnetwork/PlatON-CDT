@@ -99,7 +99,7 @@ void PCCOption::AdjustClangArgs(bool NoStdlib) {
   clangArgs.push_back("-fno-exceptions");
   clangArgs.push_back("-flto");
   clangArgs.push_back("-Werror=return-type");
-  clangArgs.push_back("-std=c++17");
+  clangArgs.push_back("-std=c++20");
   clangArgs.push_back("-g");
   clangArgs.push_back("-DNDEBUG");
   clangArgs.push_back("-DBOOST_DISABLE_ASSERTS");

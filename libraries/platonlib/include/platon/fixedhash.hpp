@@ -31,8 +31,8 @@ class FixedHash {
   explicit FixedHash(FixedHash<M> const &h) {
     unsigned c = std::min(M, N);
     memcpy(m_data.data(), h.m_data.data(), c);
-    for (;c < N; ++c) {
-        m_data[c] = 0;
+    for (; c < N; ++c) {
+      m_data[c] = 0;
     }
   }
 
@@ -74,6 +74,10 @@ class FixedHash {
     static_assert(
         20 != N,
         "Converting hexadecimal strings to addresses is not supported");
+  }
+
+  constexpr explicit FixedHash(const std::string_view &s) {
+    fromHex<N>(s, m_data);
   }
 
   std::string toString() const { return "0x" + toHex(m_data); }

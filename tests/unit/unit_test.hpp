@@ -14,12 +14,44 @@ extern "C" {
 
 void platon_debug_gas(uint32_t line, const char* dst, size_t len);
 
+// Get the currently consumed gas
+uint64_t platon_gas();
+
 // Get the current time accurate to nanoseconds
 int64_t platon_nano_time();
 
 #ifdef __cplusplus
 }
 #endif
+
+class GasUsed{
+  public:
+  GasUsed(){start_ = platon_gas();}
+  GasUsed(uint32_t line) : line_(line) {start_ = platon_gas();}
+  GasUsed(uint32_t line, const char * info) : line_(line), info_(info) {start_ = platon_gas();}
+
+  ~GasUsed(){
+    uint64_t end = platon_gas();
+    std::string result;
+    if(nullptr != info_){
+      result += "info: " + std::string(info_);
+    }
+
+    if(0 != line_){
+      result += " line: " + std::to_string(line_);
+    }
+
+    result += " gas used: " + std::to_string(start_ - end);
+
+    printf("%s\t\n", result.c_str());
+  }
+
+  private:
+  uint32_t line_ = 0;
+  const char * info_ = nullptr;
+  uint64_t start_ = 0;
+
+};
 
 CONTRACT TestResult : public platon::Contract {
  public:

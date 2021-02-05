@@ -46,6 +46,17 @@ platon_deploy
 platon_clone
 platon_confidential_tx_verify
 platon_variable_length_result
+bigint_binary_operator
+bigint_exp_mod
+bigint_cmp
+bigint_sh
+string_convert_operator
+
+bn256_g1_add
+bn256_g1_mul
+bn256_g2_add
+bn256_g2_mul
+bn256_pairing
 
 platon_nano_time
 platon_debug_gas

@@ -352,6 +352,70 @@ int32_t platon_confidential_tx_verify(const uint8_t *tx_data, size_t tx_len);
 // platon_variable_length_result
 int32_t platon_variable_length_result(uint8_t *result, size_t result_len);
 
+// Operation result flag
+enum BigintResultFlag {
+  NEGATIVE = 0x01,
+  OVERFLOW = 0x02,
+};
+
+// External functions for large integers
+enum BinaryOperator {
+  ADD = 0x01,
+  SUB = 0x02,
+  MUL = 0x04,
+  DIV = 0x08,
+  MOD = 0x10,
+  AND = 0x20,
+  OR = 0x40,
+  XOR = 0x80,
+};
+
+uint32_t bigint_binary_operator(const uint8_t *left, uint8_t left_negative,
+                                size_t left_arr_size, const uint8_t *right,
+                                uint8_t right_negative, size_t right_arr_size,
+                                uint8_t *result, size_t result_arr_size,
+                                BinaryOperator binary_operator);
+
+uint32_t bigint_exp_mod(const uint8_t *left, uint8_t left_negative,
+                        size_t left_arr_size, const uint8_t *right,
+                        uint8_t right_negative, size_t right_arr_size,
+                        const uint8_t *mod, uint8_t mod_negative,
+                        size_t mod_arr_size, uint8_t *result,
+                        size_t result_arr_siz);
+
+int32_t bigint_cmp(const uint8_t *left, uint8_t left_negative,
+                   size_t left_arr_size, const uint8_t *right,
+                   uint8_t right_negative, size_t right_arr_size);
+
+enum ShiftDirection {
+  LEFT = 0x01,
+  RIGHT = 0x02,
+};
+
+uint32_t bigint_sh(const uint8_t *origin, uint8_t origin_negative,
+                   size_t origin_arr_size, uint8_t *result,
+                   size_t result_arr_size, uint32_t shift_num,
+                   ShiftDirection direction);
+
+uint32_t string_convert_operator(const uint8_t *str, size_t str_len,
+                                 uint8_t *result, size_t result_arr_size);
+
+int bn256_g1_add(const uint8_t x1[32], const uint8_t y1[32],
+                 const uint8_t x2[32], const uint8_t y2[32], uint8_t x3[32],
+                 uint8_t y3[32]);
+int bn256_g1_mul(const uint8_t x1[32], const uint8_t y1[32],
+                 const uint8_t bigint[32], uint8_t x2[32], uint8_t y2[32]);
+int bn256_g2_add(const uint8_t x11[32], const uint8_t x12[32],
+                 const uint8_t y11[32], const uint8_t y12[32],
+                 const uint8_t x21[32], const uint8_t x22[32],
+                 const uint8_t y21[32], const uint8_t y22[32], uint8_t x31[32],
+                 uint8_t x32[32], uint8_t y31[32], uint8_t y32[32]);
+int bn256_g2_mul(const uint8_t x11[32], const uint8_t x12[32],
+                 const uint8_t y11[32], const uint8_t y12[32],
+                 const uint8_t bigint[32], uint8_t x21[32], uint8_t x22[32],
+                 uint8_t y21[32], uint8_t y22[32]);
+int bn256_pairing(uint8_t *x1[], uint8_t *y1[], uint8_t *x21[], uint8_t *x22[],
+                  uint8_t *y21[], uint8_t *y22[], size_t len);
 #ifdef __cplusplus
 }
 #endif

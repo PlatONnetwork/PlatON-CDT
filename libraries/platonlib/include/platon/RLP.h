@@ -19,6 +19,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include "bigint.hpp"
 #include "bytes_buffer.hpp"
 #include "common.h"
 #include "fixedhash.hpp"
@@ -720,6 +721,20 @@ class RLPStream {
 
   template <typename... Args>
   RLPStream& operator<<(const std::tuple<Args...>& t);
+
+  template <size_t Bits, bool Signed>
+  RLPStream& operator<<(const std::WideInteger<Bits, Signed>& s) {
+    if (!Signed) {
+      size_t size = s.ValidBytes();
+      *this << bytesConstRef(s.Values() + s.arr_size - size, size);
+    } else {
+      size_t rsh = Bits - 1;
+      std::WideInteger<Bits, Signed> r = (s << 1) ^ (s >> rsh);
+      size_t size = r.ValidBytes();
+      *this << bytesConstRef(r.Values() + r.arr_size - size, size);
+    }
+    return *this;
+  }
 
   /// Clear the output stream so far.
   void clear() {
