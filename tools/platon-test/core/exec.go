@@ -137,8 +137,13 @@ func ExecFile(filePath string) error {
 
 	db := NewMockStateDB()
 	ctx := wvm.NewVMContext(&wvm.EVM{StateDB: db}, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
-	ctx.Log = wvm.NewWasmLogger(wvm.Config{Debug: true}, log.WasmRoot())
 
+	logger := log.WasmRoot()
+	logger.SetHandler(log.LvlFilterHandler(log.LvlDebug,
+		log.StreamHandler(os.Stdout, log.FormatFunc(func(r *log.Record) []byte {
+			return []byte(r.Msg)
+		}))))
+	ctx.Log = wvm.NewWasmLogger(wvm.Config{Debug: true}, logger)
 	vm.SetHostCtx(ctx)
 
 	// invoke
