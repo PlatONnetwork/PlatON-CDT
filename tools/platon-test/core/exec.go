@@ -136,7 +136,8 @@ func ExecFile(filePath string) error {
 	contractCtx = wvm.NewContract(&testContract{}, &testContract{}, big.NewInt(0), initGas)
 
 	db := NewMockStateDB()
-	ctx := wvm.NewVMContext(&wvm.EVM{StateDB: db}, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
+	context := wvm.Context{GasPrice : big.NewInt(1), Time : big.NewInt(1), BlockNumber: big.NewInt(1)}
+	ctx := wvm.NewVMContext(&wvm.EVM{StateDB: db, Context: context}, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
 
 	logger := log.WasmRoot()
 	logger.SetHandler(log.LvlFilterHandler(log.LvlDebug,
@@ -144,6 +145,7 @@ func ExecFile(filePath string) error {
 			return []byte(r.Msg)
 		}))))
 	ctx.Log = wvm.NewWasmLogger(wvm.Config{Debug: true}, logger)
+
 	vm.SetHostCtx(ctx)
 
 	// invoke
@@ -164,6 +166,5 @@ func ExecFile(filePath string) error {
 		fmt.Fprintf(os.Stderr, info)
 		return errors.New(info)
 	}
-
 	return nil
 }

@@ -30,7 +30,7 @@ bool isPair(DICompositeType*);
 
 bool isFixedHash(DICompositeType*);
 bool isVectorRef(DICompositeType*);
-
+bool isBigInt(DICompositeType*);
 StringRef getName(DINode* Node) {
   if (DILocalVariable* LV = dyn_cast<DILocalVariable>(Node)) {
     return LV->getName();
@@ -129,6 +129,24 @@ StringRef MakeAbi::handleDerivedType(DINode* Node, DIDerivedType* DevT) {
 }
 
 StringRef MakeAbi::handleStructType(DINode* Node, DICompositeType* CT) {
+  {
+    auto getValueParam = [](DICompositeType* CT, unsigned i) -> llvm::Value* {
+      if (CT->getTemplateParams().get() == nullptr)
+        report_fatal_error("has not value params");
+
+      const MDOperand& Op = CT->getTemplateParams()->getOperand(i);
+      const DITemplateValueParameter* VP =
+          cast<const DITemplateValueParameter>(Op);
+      ValueAsMetadata* MV = cast<ValueAsMetadata>(VP->getValue());
+      return MV->getValue();
+    };
+    llvm::Value* V1 = getValueParam(CT, 0);
+    ConstantInt* CI1 = cast<ConstantInt>(V1);
+    llvm::Value* V2 = getValueParam(CT, 1);
+    ConstantInt* CI2 = cast<ConstantInt>(V2);
+    printf("CT->getIdentifier():%s-%lu-%lu\n", CT->getIdentifier().data(),
+           CI1->getZExtValue(), CI2->getZExtValue());
+  }
   json::Value Elems = {};
   json::Value BaseClass = {};
 
@@ -186,7 +204,10 @@ StringRef MakeAbi::handleCompositeType(DINode* Node, DICompositeType* CT) {
   } else if (isVectorRef(CT)) {
     return "uint8[]";
 
+  } else if (isBigInt(CT)) {
+    return handleBigint(Node, CT);
   } else if (CT->getTag() == dwarf::DW_TAG_structure_type ||
+
              CT->getTag() == dwarf::DW_TAG_class_type) {
     return handleStructType(Node, CT);
 
