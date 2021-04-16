@@ -70,7 +70,7 @@ class WideInteger {
 
     // Signed on the left, unsigned on the right
     if (Signed && !Signed2) {
-      std::copy(rhs.arr_.begin() - copy_size, rhs.arr_.end(),
+      std::copy(rhs.arr_.end() - copy_size, rhs.arr_.end(),
                 arr_.end() - copy_size);
     }
   }
