@@ -90,7 +90,7 @@ u128 platon_call_value() {
 template <typename T>
 h256 platon_sha3(const T &data) {
   byte hash[32];
-  ::platon_sha3(data.data(), data.size(), hash, sizeof(hash));
+  ::platon_sha3(reinterpret_cast<const byte*>(data.data()), data.size(), hash, sizeof(hash));
   return h256(hash, sizeof(hash));
 }
 
