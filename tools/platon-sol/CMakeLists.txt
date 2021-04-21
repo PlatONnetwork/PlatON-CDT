@@ -1,4 +1,4 @@
-execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build_test.sh)
+execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build.sh)
 
 file(COPY platon-sol DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
