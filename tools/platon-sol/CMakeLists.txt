@@ -1,0 +1,7 @@
+execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build_test.sh)
+
+file(COPY platon-sol DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+
+file(REMOVE_RECURSE platon-sol)
+
+install(PROGRAMS ${EXECUTABLE_OUTPUT_PATH}/platon-sol DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

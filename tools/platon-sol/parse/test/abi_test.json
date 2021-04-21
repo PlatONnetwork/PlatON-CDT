@@ -1,0 +1,1351 @@
+[
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "a",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "string",
+            "name": "b",
+            "type": "string"
+          },
+          {
+            "internalType": "int256[]",
+            "name": "c",
+            "type": "int256[]"
+          },
+          {
+            "internalType": "bytes24",
+            "name": "d",
+            "type": "bytes24"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "e",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes12",
+            "name": "f",
+            "type": "bytes12"
+          },
+          {
+            "internalType": "uint128",
+            "name": "g",
+            "type": "uint128"
+          },
+          {
+            "internalType": "int8[]",
+            "name": "h",
+            "type": "int8[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "i",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct AbiTest.SA",
+        "name": "v",
+        "type": "tuple"
+      }
+    ],
+    "name": "setA",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "a",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "string",
+            "name": "b",
+            "type": "string"
+          },
+          {
+            "internalType": "int256[]",
+            "name": "c",
+            "type": "int256[]"
+          },
+          {
+            "internalType": "bytes24",
+            "name": "d",
+            "type": "bytes24"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "e",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes12",
+            "name": "f",
+            "type": "bytes12"
+          },
+          {
+            "internalType": "uint128",
+            "name": "g",
+            "type": "uint128"
+          },
+          {
+            "internalType": "int8[]",
+            "name": "h",
+            "type": "int8[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "i",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct AbiTest.SA",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "a",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "string",
+            "name": "b",
+            "type": "string"
+          },
+          {
+            "internalType": "int256[]",
+            "name": "c",
+            "type": "int256[]"
+          },
+          {
+            "internalType": "bytes24",
+            "name": "d",
+            "type": "bytes24"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "e",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes12",
+            "name": "f",
+            "type": "bytes12"
+          },
+          {
+            "internalType": "uint128",
+            "name": "g",
+            "type": "uint128"
+          },
+          {
+            "internalType": "int8[]",
+            "name": "h",
+            "type": "int8[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "i",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct AbiTest.SA",
+        "name": "v",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "int32[]",
+            "name": "a",
+            "type": "int32[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "b",
+            "type": "string[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int32",
+                "name": "a",
+                "type": "int32"
+              },
+              {
+                "internalType": "int64",
+                "name": "b",
+                "type": "int64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int16",
+                    "name": "a",
+                    "type": "int16"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256[]",
+                        "name": "a",
+                        "type": "uint256[]"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "b",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "int256[]",
+                        "name": "c",
+                        "type": "int256[]"
+                      },
+                      {
+                        "internalType": "bytes24",
+                        "name": "d",
+                        "type": "bytes24"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "e",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes12",
+                        "name": "f",
+                        "type": "bytes12"
+                      },
+                      {
+                        "internalType": "uint128",
+                        "name": "g",
+                        "type": "uint128"
+                      },
+                      {
+                        "internalType": "int8[]",
+                        "name": "h",
+                        "type": "int8[]"
+                      },
+                      {
+                        "internalType": "bool",
+                        "name": "i",
+                        "type": "bool"
+                      }
+                    ],
+                    "internalType": "struct AbiTest.SA",
+                    "name": "b",
+                    "type": "tuple"
+                  }
+                ],
+                "internalType": "struct AbiTest.SB",
+                "name": "c",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SC[]",
+            "name": "c",
+            "type": "tuple[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int32",
+                "name": "a",
+                "type": "int32"
+              },
+              {
+                "internalType": "int64",
+                "name": "b",
+                "type": "int64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int16",
+                    "name": "a",
+                    "type": "int16"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256[]",
+                        "name": "a",
+                        "type": "uint256[]"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "b",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "int256[]",
+                        "name": "c",
+                        "type": "int256[]"
+                      },
+                      {
+                        "internalType": "bytes24",
+                        "name": "d",
+                        "type": "bytes24"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "e",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes12",
+                        "name": "f",
+                        "type": "bytes12"
+                      },
+                      {
+                        "internalType": "uint128",
+                        "name": "g",
+                        "type": "uint128"
+                      },
+                      {
+                        "internalType": "int8[]",
+                        "name": "h",
+                        "type": "int8[]"
+                      },
+                      {
+                        "internalType": "bool",
+                        "name": "i",
+                        "type": "bool"
+                      }
+                    ],
+                    "internalType": "struct AbiTest.SA",
+                    "name": "b",
+                    "type": "tuple"
+                  }
+                ],
+                "internalType": "struct AbiTest.SB",
+                "name": "c",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SC[2]",
+            "name": "d",
+            "type": "tuple[2]"
+          }
+        ],
+        "internalType": "struct AbiTest.SD",
+        "name": "v2",
+        "type": "tuple"
+      }
+    ],
+    "name": "setAD",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes12",
+        "name": "a",
+        "type": "bytes12"
+      },
+      {
+        "internalType": "bytes18",
+        "name": "b",
+        "type": "bytes18"
+      }
+    ],
+    "name": "setArray",
+    "outputs": [
+      {
+        "internalType": "bytes24",
+        "name": "",
+        "type": "bytes24"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "int16",
+            "name": "a",
+            "type": "int16"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256[]",
+                "name": "a",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "string",
+                "name": "b",
+                "type": "string"
+              },
+              {
+                "internalType": "int256[]",
+                "name": "c",
+                "type": "int256[]"
+              },
+              {
+                "internalType": "bytes24",
+                "name": "d",
+                "type": "bytes24"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "e",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes12",
+                "name": "f",
+                "type": "bytes12"
+              },
+              {
+                "internalType": "uint128",
+                "name": "g",
+                "type": "uint128"
+              },
+              {
+                "internalType": "int8[]",
+                "name": "h",
+                "type": "int8[]"
+              },
+              {
+                "internalType": "bool",
+                "name": "i",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct AbiTest.SA",
+            "name": "b",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct AbiTest.SB",
+        "name": "v",
+        "type": "tuple"
+      }
+    ],
+    "name": "setB",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "int16",
+            "name": "a",
+            "type": "int16"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256[]",
+                "name": "a",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "string",
+                "name": "b",
+                "type": "string"
+              },
+              {
+                "internalType": "int256[]",
+                "name": "c",
+                "type": "int256[]"
+              },
+              {
+                "internalType": "bytes24",
+                "name": "d",
+                "type": "bytes24"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "e",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes12",
+                "name": "f",
+                "type": "bytes12"
+              },
+              {
+                "internalType": "uint128",
+                "name": "g",
+                "type": "uint128"
+              },
+              {
+                "internalType": "int8[]",
+                "name": "h",
+                "type": "int8[]"
+              },
+              {
+                "internalType": "bool",
+                "name": "i",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct AbiTest.SA",
+            "name": "b",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct AbiTest.SB",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "a",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "b",
+        "type": "bytes"
+      }
+    ],
+    "name": "setBytes",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "int32",
+            "name": "a",
+            "type": "int32"
+          },
+          {
+            "internalType": "int64",
+            "name": "b",
+            "type": "int64"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int16",
+                "name": "a",
+                "type": "int16"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint256[]",
+                    "name": "a",
+                    "type": "uint256[]"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "b",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "int256[]",
+                    "name": "c",
+                    "type": "int256[]"
+                  },
+                  {
+                    "internalType": "bytes24",
+                    "name": "d",
+                    "type": "bytes24"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "e",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes12",
+                    "name": "f",
+                    "type": "bytes12"
+                  },
+                  {
+                    "internalType": "uint128",
+                    "name": "g",
+                    "type": "uint128"
+                  },
+                  {
+                    "internalType": "int8[]",
+                    "name": "h",
+                    "type": "int8[]"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "i",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct AbiTest.SA",
+                "name": "b",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SB",
+            "name": "c",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct AbiTest.SC",
+        "name": "v",
+        "type": "tuple"
+      }
+    ],
+    "name": "setC",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "int32",
+            "name": "a",
+            "type": "int32"
+          },
+          {
+            "internalType": "int64",
+            "name": "b",
+            "type": "int64"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int16",
+                "name": "a",
+                "type": "int16"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint256[]",
+                    "name": "a",
+                    "type": "uint256[]"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "b",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "int256[]",
+                    "name": "c",
+                    "type": "int256[]"
+                  },
+                  {
+                    "internalType": "bytes24",
+                    "name": "d",
+                    "type": "bytes24"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "e",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes12",
+                    "name": "f",
+                    "type": "bytes12"
+                  },
+                  {
+                    "internalType": "uint128",
+                    "name": "g",
+                    "type": "uint128"
+                  },
+                  {
+                    "internalType": "int8[]",
+                    "name": "h",
+                    "type": "int8[]"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "i",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct AbiTest.SA",
+                "name": "b",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SB",
+            "name": "c",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct AbiTest.SC",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "int32[]",
+            "name": "a",
+            "type": "int32[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "b",
+            "type": "string[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int32",
+                "name": "a",
+                "type": "int32"
+              },
+              {
+                "internalType": "int64",
+                "name": "b",
+                "type": "int64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int16",
+                    "name": "a",
+                    "type": "int16"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256[]",
+                        "name": "a",
+                        "type": "uint256[]"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "b",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "int256[]",
+                        "name": "c",
+                        "type": "int256[]"
+                      },
+                      {
+                        "internalType": "bytes24",
+                        "name": "d",
+                        "type": "bytes24"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "e",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes12",
+                        "name": "f",
+                        "type": "bytes12"
+                      },
+                      {
+                        "internalType": "uint128",
+                        "name": "g",
+                        "type": "uint128"
+                      },
+                      {
+                        "internalType": "int8[]",
+                        "name": "h",
+                        "type": "int8[]"
+                      },
+                      {
+                        "internalType": "bool",
+                        "name": "i",
+                        "type": "bool"
+                      }
+                    ],
+                    "internalType": "struct AbiTest.SA",
+                    "name": "b",
+                    "type": "tuple"
+                  }
+                ],
+                "internalType": "struct AbiTest.SB",
+                "name": "c",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SC[]",
+            "name": "c",
+            "type": "tuple[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int32",
+                "name": "a",
+                "type": "int32"
+              },
+              {
+                "internalType": "int64",
+                "name": "b",
+                "type": "int64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int16",
+                    "name": "a",
+                    "type": "int16"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256[]",
+                        "name": "a",
+                        "type": "uint256[]"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "b",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "int256[]",
+                        "name": "c",
+                        "type": "int256[]"
+                      },
+                      {
+                        "internalType": "bytes24",
+                        "name": "d",
+                        "type": "bytes24"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "e",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes12",
+                        "name": "f",
+                        "type": "bytes12"
+                      },
+                      {
+                        "internalType": "uint128",
+                        "name": "g",
+                        "type": "uint128"
+                      },
+                      {
+                        "internalType": "int8[]",
+                        "name": "h",
+                        "type": "int8[]"
+                      },
+                      {
+                        "internalType": "bool",
+                        "name": "i",
+                        "type": "bool"
+                      }
+                    ],
+                    "internalType": "struct AbiTest.SA",
+                    "name": "b",
+                    "type": "tuple"
+                  }
+                ],
+                "internalType": "struct AbiTest.SB",
+                "name": "c",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SC[2]",
+            "name": "d",
+            "type": "tuple[2]"
+          }
+        ],
+        "internalType": "struct AbiTest.SD",
+        "name": "v",
+        "type": "tuple"
+      }
+    ],
+    "name": "setD",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "int32[]",
+            "name": "a",
+            "type": "int32[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "b",
+            "type": "string[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int32",
+                "name": "a",
+                "type": "int32"
+              },
+              {
+                "internalType": "int64",
+                "name": "b",
+                "type": "int64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int16",
+                    "name": "a",
+                    "type": "int16"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256[]",
+                        "name": "a",
+                        "type": "uint256[]"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "b",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "int256[]",
+                        "name": "c",
+                        "type": "int256[]"
+                      },
+                      {
+                        "internalType": "bytes24",
+                        "name": "d",
+                        "type": "bytes24"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "e",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes12",
+                        "name": "f",
+                        "type": "bytes12"
+                      },
+                      {
+                        "internalType": "uint128",
+                        "name": "g",
+                        "type": "uint128"
+                      },
+                      {
+                        "internalType": "int8[]",
+                        "name": "h",
+                        "type": "int8[]"
+                      },
+                      {
+                        "internalType": "bool",
+                        "name": "i",
+                        "type": "bool"
+                      }
+                    ],
+                    "internalType": "struct AbiTest.SA",
+                    "name": "b",
+                    "type": "tuple"
+                  }
+                ],
+                "internalType": "struct AbiTest.SB",
+                "name": "c",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SC[]",
+            "name": "c",
+            "type": "tuple[]"
+          },
+          {
+            "components": [
+              {
+                "internalType": "int32",
+                "name": "a",
+                "type": "int32"
+              },
+              {
+                "internalType": "int64",
+                "name": "b",
+                "type": "int64"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "int16",
+                    "name": "a",
+                    "type": "int16"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256[]",
+                        "name": "a",
+                        "type": "uint256[]"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "b",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "int256[]",
+                        "name": "c",
+                        "type": "int256[]"
+                      },
+                      {
+                        "internalType": "bytes24",
+                        "name": "d",
+                        "type": "bytes24"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "e",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes12",
+                        "name": "f",
+                        "type": "bytes12"
+                      },
+                      {
+                        "internalType": "uint128",
+                        "name": "g",
+                        "type": "uint128"
+                      },
+                      {
+                        "internalType": "int8[]",
+                        "name": "h",
+                        "type": "int8[]"
+                      },
+                      {
+                        "internalType": "bool",
+                        "name": "i",
+                        "type": "bool"
+                      }
+                    ],
+                    "internalType": "struct AbiTest.SA",
+                    "name": "b",
+                    "type": "tuple"
+                  }
+                ],
+                "internalType": "struct AbiTest.SB",
+                "name": "c",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct AbiTest.SC[2]",
+            "name": "d",
+            "type": "tuple[2]"
+          }
+        ],
+        "internalType": "struct AbiTest.SD",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "a",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint32",
+        "name": "b",
+        "type": "uint32"
+      },
+      {
+        "internalType": "int128",
+        "name": "c",
+        "type": "int128"
+      },
+      {
+        "internalType": "int256",
+        "name": "d",
+        "type": "int256"
+      }
+    ],
+    "name": "setInt",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      },
+      {
+        "internalType": "int128",
+        "name": "",
+        "type": "int128"
+      },
+      {
+        "internalType": "int256",
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint32[]",
+        "name": "a",
+        "type": "uint32[]"
+      },
+      {
+        "internalType": "int256[]",
+        "name": "b",
+        "type": "int256[]"
+      }
+    ],
+    "name": "setIntArray",
+    "outputs": [
+      {
+        "internalType": "uint32[]",
+        "name": "",
+        "type": "uint32[]"
+      },
+      {
+        "internalType": "int256[]",
+        "name": "",
+        "type": "int256[]"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "a",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "b",
+        "type": "string"
+      }
+    ],
+    "name": "setString",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "a",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint32",
+        "name": "b",
+        "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "int16",
+            "name": "a",
+            "type": "int16"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256[]",
+                "name": "a",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "string",
+                "name": "b",
+                "type": "string"
+              },
+              {
+                "internalType": "int256[]",
+                "name": "c",
+                "type": "int256[]"
+              },
+              {
+                "internalType": "bytes24",
+                "name": "d",
+                "type": "bytes24"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "e",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes12",
+                "name": "f",
+                "type": "bytes12"
+              },
+              {
+                "internalType": "uint128",
+                "name": "g",
+                "type": "uint128"
+              },
+              {
+                "internalType": "int8[]",
+                "name": "h",
+                "type": "int8[]"
+              },
+              {
+                "internalType": "bool",
+                "name": "i",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct AbiTest.SA",
+            "name": "b",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct AbiTest.SB",
+        "name": "c",
+        "type": "tuple"
+      }
+    ],
+    "name": "setStruct",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "int16",
+            "name": "a",
+            "type": "int16"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256[]",
+                "name": "a",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "string",
+                "name": "b",
+                "type": "string"
+              },
+              {
+                "internalType": "int256[]",
+                "name": "c",
+                "type": "int256[]"
+              },
+              {
+                "internalType": "bytes24",
+                "name": "d",
+                "type": "bytes24"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "e",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes12",
+                "name": "f",
+                "type": "bytes12"
+              },
+              {
+                "internalType": "uint128",
+                "name": "g",
+                "type": "uint128"
+              },
+              {
+                "internalType": "int8[]",
+                "name": "h",
+                "type": "int8[]"
+              },
+              {
+                "internalType": "bool",
+                "name": "i",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct AbiTest.SA",
+            "name": "b",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct AbiTest.SB",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

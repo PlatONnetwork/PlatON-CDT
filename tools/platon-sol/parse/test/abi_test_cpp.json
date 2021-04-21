@@ -1,0 +1,209 @@
+{
+  "functions": [{
+    "name": "setA",
+    "inputs": [{
+      "name": "v",
+      "type": "AbiTest_SA"
+    }],
+    "output": "AbiTest_SA"
+  },
+    {
+      "name": "setB",
+      "inputs": [{
+        "name": "v",
+        "type": "AbiTest_SB"
+      }],
+      "output": "AbiTest_SB"
+    },
+    {
+      "name": "setC",
+      "inputs": [{
+        "name": "v",
+        "type": "AbiTest_SC"
+      }],
+      "output": "AbiTest_SC"
+    },
+    {
+      "name": "setD",
+      "inputs": [{
+        "name": "v",
+        "type": "AbiTest_SD"
+      }],
+      "output": "AbiTest_SD"
+    },
+    {
+      "name": "setAD",
+      "inputs": [{
+        "name": "v",
+        "type": "AbiTest_SA"
+      },
+        {
+          "name": "v2",
+          "type": "AbiTest_SD"
+        }
+      ],
+      "output": "void"
+    },
+    {
+      "name": "setInt",
+      "inputs": [{
+        "name": "a",
+        "type": "uint8_t"
+      },
+        {
+          "name": "b",
+          "type": "uint32_t"
+        },
+        {
+          "name": "c",
+          "type": "__int128_t"
+        },
+        {
+          "name": "d",
+          "type": "std::int256_t"
+        }
+      ],
+      "output": "std::tuple<uint8_t,uint32_t,__int128_t,std::int256_t>"
+    },
+    {
+      "name": "setIntArray",
+      "inputs": [{
+        "name": "a",
+        "type": "std::vector<uint32_t>"
+      },
+        {
+          "name": "b",
+          "type": "std::vector<std::int256_t>"
+        }
+      ],
+      "output": "std::tuple<std::vector<uint32_t>,std::vector<std::int256_t>>"
+    },
+    {
+      "name": "setArray",
+      "inputs": [{
+        "name": "a",
+        "type": "std::array<uint8_t,12>"
+      },
+        {
+          "name": "b",
+          "type": "std::array<uint8_t,18>"
+        }
+      ],
+      "output": "std::tuple<std::array<uint8_t,24>,std::array<uint8_t,32>>"
+    },
+    {
+      "name": "setString",
+      "inputs": [{
+        "name": "a",
+        "type": "std::string"
+      },
+        {
+          "name": "b",
+          "type": "std::string"
+        }
+      ],
+      "output": "std::tuple<std::string,std::string>"
+    },
+    {
+      "name": "setBytes",
+      "inputs": [{
+        "name": "a",
+        "type": "std::vector<uint8_t>"
+      },
+        {
+          "name": "b",
+          "type": "std::vector<uint8_t>"
+        }
+      ],
+      "output": "std::tuple<std::vector<uint8_t>,std::vector<uint8_t>>"
+    },
+    {
+      "name": "setStruct",
+      "inputs": [{
+        "name": "a",
+        "type": "std::vector<uint8_t>"
+      },
+        {
+          "name": "b",
+          "type": "uint32_t"
+        },
+        {
+          "name": "c",
+          "type": "AbiTest_SB"
+        }
+      ],
+      "output": "std::tuple<AbiTest_SB,std::vector<uint8_t>,uint32_t>"
+    }
+  ],
+  "structs": [{
+    "name": "AbiTest_SA",
+    "fields": [{
+      "name": "a",
+      "type": "std::vector<std::uint256_t>"
+    }, {
+      "name": "b",
+      "type": "std::string"
+    }, {
+      "name": "c",
+      "type": "std::vector<std::int256_t>"
+    }, {
+      "name": "d",
+      "type": "std::array<uint8_t,24>"
+    }, {
+      "name": "e",
+      "type": "std::array<uint8_t,32>"
+    }, {
+      "name": "f",
+      "type": "std::array<uint8_t,12>"
+    }, {
+      "name": "g",
+      "type": "__uint128_t"
+    }, {
+      "name": "h",
+      "type": "std::vector<int8_t>"
+    }, {
+      "name": "i",
+      "type": "bool"
+    }]
+  },
+    {
+      "name": "AbiTest_SB",
+      "fields": [{
+        "name": "a",
+        "type": "int16_t"
+      }, {
+        "name": "b",
+        "type": "AbiTest_SA"
+      }]
+    },
+    {
+      "name": "AbiTest_SC",
+      "fields": [{
+        "name": "a",
+        "type": "int32_t"
+      }, {
+        "name": "b",
+        "type": "int64_t"
+      }, {
+        "name": "c",
+        "type": "AbiTest_SB"
+      }]
+    },
+    {
+      "name": "AbiTest_SD",
+      "fields": [{
+        "name": "a",
+        "type": "std::vector<int32_t>"
+      }, {
+        "name": "b",
+        "type": "std::vector<std::string>"
+      }, {
+        "name": "c",
+        "type": "std::vector<AbiTest_SC>"
+      }, {
+        "name": "d",
+        "type": "std::array<AbiTest_SC,2>"
+      }]
+    }
+  ]
+}
