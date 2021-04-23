@@ -153,7 +153,8 @@ size_t ElementsTypeTotalSize(const T &t) {
 
 template <typename T>
 size_t GetTypeSize(const T &t) {
-  if (IsArrayV<std::decay_t<decltype(t)>> && !IsDynamicTypeContainer(t)) {
+  if (!IsBytesV<std::decay_t<decltype(t)>> &&
+      IsArrayV<std::decay_t<decltype(t)>> && !IsDynamicTypeContainer(t)) {
     if (Elements(t) != 0 &&
         (IsArrayV<std::decay_t<decltype(GetElement(t, 0))>> ||
          IsTupleV<std::decay_t<decltype(GetElement(t, 0))>> ||

@@ -37,7 +37,7 @@ class SolEncode {
       out_.append(num.Values(), num.Values() + num.arr_size);
     }
   }
-
+  void Encode(const std::tuple<> &v) {}
   // bool
   void Encode(bool v) { Encode(uint8_t(v)); }
 
@@ -86,8 +86,8 @@ class SolEncode {
   template <std::size_t size>
   void Encode(const std::array<uint8_t, size> &v) {
     static_assert(size <= 32);
-    out_.append(zeros.data(), zeros.data() + 32 - v.size());
     out_.append(v.data(), v.data() + v.size());
+    out_.append(zeros.data(), zeros.data() + 32 - v.size());
   }
 
   //<type>[M]
