@@ -3,11 +3,12 @@ package parse
 import (
 	"bytes"
 	"fmt"
-	"github.com/goombaio/dag"
-	"github.com/pkg/errors"
-	"platon/abi"
+	"platon/sol/abi"
 	"strings"
 	"text/template"
+
+	"github.com/goombaio/dag"
+	"github.com/pkg/errors"
 )
 
 var (

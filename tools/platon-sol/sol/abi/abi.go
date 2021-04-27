@@ -94,7 +94,7 @@ func (a *ABI) UnmarshalJSON(data []byte) error {
 			}
 
 		case "fallback":
-		case "receive":	
+		case "receive":
 			// do nothing
 
 		default:
@@ -262,11 +262,11 @@ func (a *argument) UnmarshalJSON(data []byte) error {
 
 // ArgumentStr encodes a type object
 type ArgumentStr struct {
-	Name       string
-	Type       string
+	Name         string
+	Type         string
 	InternalType string
-	Indexed    bool
-	Components []*ArgumentStr
+	Indexed      bool
+	Components   []*ArgumentStr
 }
 
 var keccakPool = sync.Pool{
