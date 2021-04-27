@@ -37,6 +37,6 @@
     return size;                                                               \
   }                                                                            \
   template <typename Func>                                                     \
-  void ForEachElement(Func &&f) const {                                        \
-    BOOST_PP_SEQ_FOR_EACH(SOLIDITY_REFLECT_MEMBER_EACH, f, MEMBERS)            \
+  void ForEachElement(Func &&__f) const {                                      \
+    BOOST_PP_SEQ_FOR_EACH(SOLIDITY_REFLECT_MEMBER_EACH, __f, MEMBERS)          \
   }

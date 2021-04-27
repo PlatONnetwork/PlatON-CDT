@@ -29,6 +29,7 @@ type Argument struct {
 
 type FuncDef struct {
 	Name   string
+	Sig string
 	Inputs []Argument
 	Output string
 }
@@ -71,6 +72,7 @@ func Generate(abi *abi.ABI, namespace string) (c string, err error) {
 		out := generateOutputs(m.Outputs)
 		contract.Functions = append(contract.Functions, &FuncDef{
 			Name:   m.Name,
+			Sig: m.Sig(),
 			Inputs: in,
 			Output: out,
 		})
@@ -179,8 +181,6 @@ func generateOutputs(outputs *abi.Type) string {
 	switch len(args) {
 	case 0:
 		return "void"
-	case 1:
-		return args[0]
 	default:
 		res := fmt.Sprintf("std::tuple<%s>", strings.Join(args, ","))
 

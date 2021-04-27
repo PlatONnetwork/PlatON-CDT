@@ -21,7 +21,10 @@ void PrettyPrint(const std::string &name, const vector_ref<uint8_t const> &e) {
 }
 template <typename T, std::size_t size>
 bytesConstRef DecodeElement(std::array<T, size> &v, const bytesConstRef &input);
-
+template <typename T, typename std::enable_if_t<SupportSolV<T>, bool> = true>
+bytesConstRef DecodeElement(T &v, const bytesConstRef &input);
+template <typename T, std::size_t size>
+bytesConstRef DecodeElement(std::array<T, size> &v, const bytesConstRef &input);
 template <typename... Types>
 bytesConstRef DecodeElement(std::tuple<Types...> &v,
                             const bytesConstRef &input);
@@ -77,7 +80,7 @@ template <std::size_t size>
 bytesConstRef DecodeElement(std::array<uint8_t, size> &t,
                             const bytesConstRef &data) {
   static_assert(size <= 32);
-  memcpy(t.data(), data.begin() + 32 - size, size);
+  memcpy(t.data(), data.begin(), size);
   return data.cropped(32);
 }
 
@@ -142,7 +145,7 @@ bytesConstRef DecodeElement(std::tuple<Types...> &v,
   return data;
 }
 
-template <typename T, typename std::enable_if_t<SupportSolV<T>, bool> = true>
+template <typename T, typename std::enable_if_t<SupportSolV<T>, bool>>
 bytesConstRef DecodeElement(T &v, const bytesConstRef &input) {
   auto data = input;
   auto origin = data;

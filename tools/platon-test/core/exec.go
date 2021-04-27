@@ -1,19 +1,19 @@
 package core
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"math/big"
-	"os"
-	"path"
-
 	"github.com/PlatONnetwork/PlatON-Go/common"
 	wvm "github.com/PlatONnetwork/PlatON-Go/core/vm"
 	"github.com/PlatONnetwork/PlatON-Go/log"
 	"github.com/PlatONnetwork/PlatON-Go/params"
 	"github.com/PlatONnetwork/wagon/exec"
 	"github.com/urfave/cli"
+	"io/ioutil"
+	"math/big"
+	"os"
+	"path"
 )
 
 var ExecCmd = cli.Command{
@@ -133,11 +133,24 @@ func ExecFile(filePath string) error {
 	})
 
 	// set context
+	db := NewMockStateDB()
 	contractCtx = wvm.NewContract(&testContract{}, &testContract{}, big.NewInt(0), initGas)
 
-	db := NewMockStateDB()
-	context := wvm.Context{GasPrice : big.NewInt(1), Time : big.NewInt(1), BlockNumber: big.NewInt(1)}
-	ctx := wvm.NewVMContext(&wvm.EVM{StateDB: db, Context: context}, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
+	ct := wvm.Context{
+		CanTransfer: func(db wvm.StateDB, address common.Address, b *big.Int) bool {
+			return true
+		},
+		Transfer: func(db wvm.StateDB, address common.Address, address2 common.Address, b *big.Int) {
+
+		},
+		GetHash: func(u uint64) common.Hash {
+			return common.Hash{}
+		},
+		GasPrice : big.NewInt(1), Time : big.NewInt(1), BlockNumber: big.NewInt(1),
+	}
+	evm := wvm.NewEVM(ct, nil, db, &params.ChainConfig{}, wvm.Config{})
+	evm.Ctx = context.Background()
+	ctx := wvm.NewVMContext(evm, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
 
 	logger := log.WasmRoot()
 	logger.SetHandler(log.LvlFilterHandler(log.LvlDebug,

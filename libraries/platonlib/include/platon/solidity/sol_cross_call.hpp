@@ -1,9 +1,9 @@
 #pragma once
-#include "platon/solidity/encode.hpp"
-#include "platon/solidity/decode.hpp"
-#include "platon/solidity/encode_size.hpp"
-#include "platon/cross_call.hpp"
 #include "platon/chain_impl.hpp"
+#include "platon/cross_call.hpp"
+#include "platon/solidity/decode.hpp"
+#include "platon/solidity/encode.hpp"
+#include "platon/solidity/encode_size.hpp"
 namespace platon {
 namespace solidity {
 namespace abi {
@@ -17,18 +17,21 @@ namespace abi {
  * @return Parameter byte array
  */
 template <typename... Args>
-inline bytes sol_call_args(const std::string &method,
-                             const Args &... args) {
+inline bytes sol_call_args(const std::string &method, const Args &... args) {
   h256 id = platon_sha3(method);
-  RLPStream stream;
-  std::tuple<Args...> tuple_args = std::make_tuple(args...);
-  SolEncodeSize sol_size;
-  sol_size.Encode(tuple_args);
-  size_t size = sol_size.Size();
-  SolEncode sol(size+4, 4);
-  sol.Encode(tuple_args);
-  memcpy(sol.Out().out().begin(), id.data(), 4);
-  return sol.Out().out().toBytes();
+  if (sizeof...(args) != 0) {
+    std::tuple<Args...> tuple_args = std::make_tuple(args...);
+    SolEncodeSize sol_size;
+    sol_size.Encode(tuple_args);
+    size_t size = sol_size.Size();
+    SolEncode sol(size + 4, 4);
+    sol.Encode(tuple_args);
+    memcpy(sol.Out().out().begin(), id.data(), 4);
+    return sol.Out().out().toBytes();
+  }
+  bytes out(4);
+  memcpy(out.data(), id.data(), 4);
+  return out;
 }
 
 /**
@@ -58,8 +61,8 @@ inline bytes sol_call_args(const std::string &method,
  */
 template <typename value_type, typename gas_type, typename... Args>
 inline bool sol_call(const Address &addr, const value_type &value,
-                        const gas_type &gas, const std::string &method,
-                        const Args &... args) {
+                     const gas_type &gas, const std::string &method,
+                     const Args &... args) {
   bytes paras = sol_call_args(method, args...);
   bytes value_bytes = value_to_bytes(value);
   bytes gas_bytes = value_to_bytes(gas);
@@ -111,21 +114,21 @@ inline void get_sol_call_output(T &t) {
  * @endcode
  */
 template <typename return_type, typename value_type, typename gas_type,
-    typename... Args>
+          typename... Args>
 inline auto sol_call_with_return_value(const Address &addr,
-                                          const value_type &value,
-                                          const gas_type &gas,
-                                          const std::string &method,
-                                          const Args &... args) {
+                                       const value_type &value,
+                                       const gas_type &gas,
+                                       const std::string &method,
+                                       const Args &... args) {
   bool result = sol_call(addr, value, gas, method, args...);
   if (!result) {
     return std::pair<return_type, bool>(return_type(), false);
   }
 
   return_type return_value;
-  get_call_output(return_value);
+  get_sol_call_output(return_value);
   return std::pair<return_type, bool>(return_value, true);
 }
-}
-}
-}
+}  // namespace abi
+}  // namespace solidity
+}  // namespace platon

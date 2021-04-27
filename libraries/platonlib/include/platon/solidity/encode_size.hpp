@@ -29,6 +29,7 @@ class SolEncodeSize {
     Encode(v.size());
     RightPad32(v);
   }
+  void Encode(const std::tuple<> &v) {}
   // std::string
   void Encode(const std::string &v) {
     Encode(v.size());
