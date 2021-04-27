@@ -378,5 +378,4 @@ UNITTEST_MAIN() {
   RUN_TEST(solidity, simple);
   RUN_TEST(solidity, tuple);
   RUN_TEST(solidity, tuple_struct);
-  RUN_TEST(solidity, call_args);
 }
