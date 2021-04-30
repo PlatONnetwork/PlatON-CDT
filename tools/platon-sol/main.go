@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	app = cli.App{Usage: "Calling tools across virtual machines"}
+	app = cli.App{Usage: "evm and wasm call each other's code generation tools"}
 )
 
 func init() {

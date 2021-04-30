@@ -708,7 +708,7 @@ library WASM{
 	{{- range .Functions }}
 	{{- if eq .Output "void"}}
 
-    function {{.Name}}(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} {
+    function {{.Name}}_call(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} {
         uint64 methord = RLPEncode.hash("{{.Name}}");
         bytes memory rlpMethord = RLPEncode.encodeUint(uint(methord));
         {{generateRLPEncodeFuncInputs .Inputs}}
@@ -719,7 +719,7 @@ library WASM{
     }
 	{{- else}}
     
-	function {{.Name}}(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} returns ({{generateReturn .Output}}){
+	function {{.Name}}_call(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} returns ({{generateReturn .Output}}){
 		uint64 methord = RLPEncode.hash("{{.Name}}");
 		bytes memory rlpMethord = RLPEncode.encodeUint(uint(methord));
 		{{generateRLPEncodeFuncInputs .Inputs}}
@@ -738,7 +738,7 @@ library WASM{
 	{{- range .Functions }}
 	{{- if eq .Output "void"}}
 
-    function {{.Name}}(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} {
+    function {{.Name}}_delegatecall(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} {
         uint64 methord = RLPEncode.hash("{{.Name}}");
         bytes memory rlpMethord = RLPEncode.encodeUint(uint(methord));
         {{generateRLPEncodeFuncInputs .Inputs}}
@@ -749,7 +749,7 @@ library WASM{
     }
 	{{- else}}
     
-	function {{.Name}}(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} returns ({{generateReturn .Output}}){
+	function {{.Name}}_delegatecall(address wasm{{generateFuncParameter .Inputs}}) {{.Description}} returns ({{generateReturn .Output}}){
 		uint64 methord = RLPEncode.hash("{{.Name}}");
 		bytes memory rlpMethord = RLPEncode.encodeUint(uint(methord));
 		{{generateRLPEncodeFuncInputs .Inputs}}

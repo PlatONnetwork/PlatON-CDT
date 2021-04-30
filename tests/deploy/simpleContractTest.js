@@ -1,6 +1,6 @@
 var contract = require("./contract");
 
-async function createContractTest(){
+async function simpleContractTest(){
     // deploy simple contract and create contract
     var simpleContract = await contract.deployContract("simpleContract");
 
@@ -11,5 +11,5 @@ async function createContractTest(){
     await contract.constMethodCall("simpleContract", simpleContract, 'get');
 }
 
-createContractTest();
+exports.simpleContractTest = simpleContractTest;
 

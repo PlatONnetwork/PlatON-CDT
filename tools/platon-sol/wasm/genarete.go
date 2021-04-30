@@ -72,11 +72,11 @@ func Generate(abi *ABI) (c string, err error) {
 		structDef := NewStructDef()
 		structDef.Name = oneStructName
 		for index, value := range oneStructInfo.Baseclass {
-			structDef.Fields = append(structDef.Fields, &FieldInfo{fmt.Sprintf("baseclass%d", index), convertToSolidityType(value)})
+			structDef.Fields = append(structDef.Fields, &FieldInfo{fmt.Sprintf("baseclass%d", index), convertToSolidityType(value, mapTypeStruct)})
 		}
 
 		for _, value := range oneStructInfo.Fields {
-			structDef.Fields = append(structDef.Fields, &FieldInfo{value.Name, convertToSolidityType(value.Type)})
+			structDef.Fields = append(structDef.Fields, &FieldInfo{value.Name, convertToSolidityType(value.Type, mapTypeStruct)})
 		}
 
 		contract.Structs = append(contract.Structs, structDef)
@@ -96,18 +96,23 @@ func Generate(abi *ABI) (c string, err error) {
 			funcDef.Description = "internal"
 		}
 
-		funcDef.Output = convertToSolidityType(oneFuncInfo.Output)
+		funcDef.Output = convertToSolidityType(oneFuncInfo.Output, mapTypeStruct)
 
 		for _, value := range oneFuncInfo.Input {
-			funcDef.Inputs = append(funcDef.Inputs, &Argument{convertToSolidityType(value.Type), value.Name})
+			funcDef.Inputs = append(funcDef.Inputs, &Argument{convertToSolidityType(value.Type, mapTypeStruct), value.Name})
 		}
 
 		contract.Functions = append(contract.Functions, funcDef)
 	}
 
+	for _, oneStruct := range mapTypeStruct {
+		contract.Structs = append(contract.Structs, oneStruct)
+	}
+
 	analyzeDependency(contract)
 
 	return exportTmpl(contract)
+
 }
 
 func exportTmpl(contract *Contract) (string, error) {
@@ -127,30 +132,20 @@ func exportTmpl(contract *Contract) (string, error) {
 			}
 
 			return result
+
+			// return "generateRLP"
 		},
 
 		"generateFuncParameter": func(args []*Argument) string {
 			var result string
 			for _, oneArg := range args {
-				if memoryType(oneArg.TypeName) {
-					result += ", " + oneArg.TypeName + " memory " + oneArg.ArgName
-				} else {
-					result += ", " + oneArg.TypeName + " " + oneArg.ArgName
-				}
+				result += ", " + declareSolidityType(oneArg.TypeName) + " " + oneArg.ArgName
 			}
 
 			return result
 		},
 		"generateReturn": func(outputType string) string {
-			var result string
-
-			if memoryType(outputType) {
-				result = outputType + " memory"
-			} else {
-				result = outputType
-			}
-
-			return result
+			return declareSolidityType(outputType)
 		},
 		"generateRLPEncodeFuncInputs": func(args []*Argument) string {
 			var result string
@@ -191,12 +186,7 @@ func exportTmpl(contract *Contract) (string, error) {
 				decodeOutputFunc = "RLPReader." + decodeOutputFunc
 			}
 
-			decorate := " result  = "
-			if memoryType(outputType) {
-				decorate = " memory" + decorate
-			}
-
-			result += "\n\t\t" + outputType + decorate + decodeOutputFunc + "(" + parameter + ");"
+			result += "\n\t\t" + declareSolidityType(outputType) + " result  = " + decodeOutputFunc + "(" + parameter + ");"
 
 			return result
 		},

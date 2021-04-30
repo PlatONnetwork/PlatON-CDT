@@ -1,0 +1,254 @@
+[
+    {
+        "constant": false,
+        "input": [],
+        "name": "hello_panic",
+        "output": "void",
+        "type": "Action"
+    },
+    {
+        "anonymous": false,
+        "input": [
+            {
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "name": "arg1",
+                "type": "string"
+            },
+            {
+                "name": "arg2",
+                "type": "uint32"
+            }
+        ],
+        "name": "hello_event",
+        "topic": 1,
+        "type": "Event"
+    },
+    {
+        "baseclass": [],
+        "fields": [
+            {
+                "name": "head",
+                "type": "string"
+            }
+        ],
+        "name": "message",
+        "type": "struct"
+    },
+    {
+        "baseclass": [
+            "message"
+        ],
+        "fields": [
+            {
+                "name": "body",
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "type": "string"
+            }
+        ],
+        "name": "my_message",
+        "type": "struct"
+    },
+    {
+        "constant": false,
+        "input": [
+            {
+                "name": "one_message",
+                "type": "my_message"
+            }
+        ],
+        "name": "init",
+        "output": "void",
+        "type": "Action"
+    },
+    {
+        "constant": false,
+        "input": [
+            {
+                "name": "one_message",
+                "type": "my_message"
+            }
+        ],
+        "name": "add_message",
+        "output": "my_message[]",
+        "type": "Action"
+    },
+    {
+        "constant": true,
+        "input": [
+            {
+                "name": "name",
+                "type": "string"
+            }
+        ],
+        "name": "get_message",
+        "output": "my_message[]",
+        "type": "Action"
+    },
+    {
+        "baseclass": [],
+        "fields": [
+            {
+                "name": "vec_bytes",
+                "type": "uint8[][]"
+            },
+            {
+                "name": "vec_my_message",
+                "type": "my_message[]"
+            },
+            {
+                "name": "vec_array_int",
+                "type": "int32[5][]"
+            },
+            {
+                "name": "vect_arr_map",
+                "type": "map<int32,int32>[10][]"
+            },
+            {
+                "name": "vec_map",
+                "type": "map<int32,string>[]"
+            },
+            {
+                "name": "vec_map_my_message",
+                "type": "map<uint8,my_message>[]"
+            },
+            {
+                "name": "vec_map_vec",
+                "type": "map<int32,FixedHash<20>[]>[]"
+            }
+        ],
+        "name": "my_vector",
+        "type": "struct"
+    },
+    {
+        "constant": false,
+        "input": [
+            {
+                "name": "one",
+                "type": "my_vector"
+            }
+        ],
+        "name": "set_my_vector",
+        "output": "void",
+        "type": "Action"
+    },
+    {
+        "constant": true,
+        "input": [],
+        "name": "get_my_vector",
+        "output": "my_vector",
+        "type": "Action"
+    },
+    {
+        "baseclass": [],
+        "fields": [
+            {
+                "name": "arr",
+                "type": "int32[5]"
+            },
+            {
+                "name": "arr_address",
+                "type": "FixedHash<20>[10]"
+            },
+            {
+                "name": "arr_my_message",
+                "type": "my_message[2]"
+            },
+            {
+                "name": "arr_vec_int",
+                "type": "int32[][6]"
+            },
+            {
+                "name": "arr_map_str",
+                "type": "map<int32,string>[4]"
+            },
+            {
+                "name": "arr_arr_map_str",
+                "type": "map<int32,string>[4][2]"
+            }
+        ],
+        "name": "my_array",
+        "type": "struct"
+    },
+    {
+        "constant": false,
+        "input": [
+            {
+                "name": "one",
+                "type": "my_array"
+            }
+        ],
+        "name": "set_my_array",
+        "output": "void",
+        "type": "Action"
+    },
+    {
+        "constant": true,
+        "input": [],
+        "name": "get_my_array",
+        "output": "my_array",
+        "type": "Action"
+    },
+    {
+        "baseclass": [],
+        "fields": [
+            {
+                "name": "mp",
+                "type": "map<uint32,string>"
+            },
+            {
+                "name": "mp_my_message",
+                "type": "map<uint32,my_message>"
+            },
+            {
+                "name": "mp_vec",
+                "type": "map<uint32,int32[]>"
+            },
+            {
+                "name": "mp_arr",
+                "type": "map<int16,int32[3]>"
+            },
+            {
+                "name": "mp_arr_vect",
+                "type": "map<int16,int32[][2]>"
+            },
+            {
+                "name": "mp_mp",
+                "type": "map<int16,map<int32,int32>>"
+            }
+        ],
+        "name": "my_map",
+        "type": "struct"
+    },
+    {
+        "constant": false,
+        "input": [
+            {
+                "name": "one",
+                "type": "my_map"
+            }
+        ],
+        "name": "set_my_map",
+        "output": "void",
+        "type": "Action"
+    },
+    {
+        "constant": true,
+        "input": [],
+        "name": "get_my_map",
+        "output": "my_map",
+        "type": "Action"
+    },
+    {
+        "constant": false,
+        "input": [],
+        "name": "hello_abort",
+        "output": "void",
+        "type": "Action"
+    }
+]
