@@ -9,32 +9,72 @@ import (
 	"github.com/goombaio/dag"
 )
 
-var mapTypeStruct = make(map[string]*StructDef)
+const (
+	mapHead   string = "map<"
+	tupleHead string = "tuple<"
+)
 
-func splitMap(mapType string) (string, string) {
-	mapHead := "map"
-	left := strings.Index(mapType, "<")
-	middle := strings.Index(mapType, ",")
-	right := strings.LastIndex(mapType, ">")
+var (
+	mapTypeStruct = make(map[string]*StructDef)
+)
 
-	tempMapType := mapType[:middle]
-	count := strings.Count(tempMapType, mapHead)
-	tempMapType = mapType[middle+1 : right]
-
-	for count > 1 {
-		middle = strings.Index(tempMapType, ",")
-		tempMapType = tempMapType[middle+1:]
-		count = count - 1
+func splitTupleAndMap(wasmType string) []string {
+	wasmType = strings.TrimSpace(wasmType)
+	if !strings.HasPrefix(wasmType, mapHead) && !strings.HasPrefix(wasmType, tupleHead) {
+		panic("Not a map or tuple type")
 	}
 
-	second := strings.TrimSpace(tempMapType)
+	left := strings.Index(wasmType, "<")
+	right := strings.LastIndex(wasmType, ">")
+	tempWasmType := wasmType[left+1 : right]
 
-	middle = strings.LastIndex(mapType, second)
-	tempMapType = mapType[left+1 : middle]
-	middle = strings.LastIndex(tempMapType, ",")
-	first := strings.TrimSpace(tempMapType[:middle])
+	iterms := strings.Split(tempWasmType, ",")
+	result := make([]string, 0, len(iterms))
 
-	return first, second
+	match := 0
+	begin := 0
+	next := false
+	for i := 0; i < len(iterms); i = i + 1 {
+		if 0 != strings.Count(iterms[i], mapHead) || 0 != strings.Count(iterms[i], tupleHead) {
+			if !next {
+				next = true
+				begin = i
+			}
+			match += strings.Count(iterms[i], mapHead)
+			match += strings.Count(iterms[i], tupleHead)
+		} else {
+			if !next {
+				result = append(result, strings.TrimSpace(iterms[i]))
+			} else {
+				oneDelete := strings.Count(iterms[i], ">")
+				match -= oneDelete
+
+				if 0 == match {
+					next = false
+					oneCom := strings.Join(iterms[begin:i+1], ",")
+					result = append(result, strings.TrimSpace(oneCom))
+					begin = 0
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+func splitMap(mapType string) (string, string) {
+
+	result := splitTupleAndMap(mapType)
+
+	if 2 != len(result) {
+		panic("Invalid map type")
+	}
+
+	return result[0], result[1]
+}
+
+func splitTuple(tupleType string) []string {
+	return splitTupleAndMap(tupleType)
 }
 
 func solidityMappingName(mapType string) string {
@@ -46,8 +86,16 @@ func solidityMappingName(mapType string) string {
 	return "mapping_" + name
 }
 
+func solidityTupleName(tupleType string) string {
+	hash := sha256.New()
+	hash.Write([]byte(tupleType))
+	sum := hash.Sum(nil)
+
+	name := hex.EncodeToString(sum[:4])
+	return "tuple_" + name
+}
+
 func convertToSolidityType(wasmType string, mapTypeStruct map[string]*StructDef) string {
-	// fmt.Println(wasmType)
 	wasmType = strings.TrimSpace(wasmType)
 	switch {
 	case "uint8[]" == wasmType:
@@ -79,7 +127,23 @@ func convertToSolidityType(wasmType string, mapTypeStruct map[string]*StructDef)
 		}
 
 		return result + "[]"
+	case strings.HasPrefix(wasmType, "tuple<"):
+		result := solidityTupleName(wasmType)
+		if _, ok := mapTypeStruct[result]; !ok {
+			iterms := splitTuple(wasmType)
+			fields := make([]*FieldInfo, len(iterms))
 
+			for i := 0; i < len(iterms); i += 1 {
+				oneItermType := convertToSolidityType(iterms[i], mapTypeStruct)
+				fields[i] = &FieldInfo{fmt.Sprintf("tuple_%d", i), oneItermType}
+			}
+
+			oneStruct := &StructDef{result, fields}
+
+			mapTypeStruct[result] = oneStruct
+		}
+
+		return result
 	case "string" == wasmType:
 		return "string"
 	default:

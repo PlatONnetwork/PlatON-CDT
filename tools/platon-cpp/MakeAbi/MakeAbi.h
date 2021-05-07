@@ -45,6 +45,7 @@ class MakeAbi {
 
     llvm::StringRef handleVector(llvm::DINode* Node, llvm::DICompositeType* CT);
     llvm::StringRef handleArray(llvm::DINode* Node, llvm::DICompositeType* CT);
+    llvm::StringRef handleTuple(llvm::DINode* Node, llvm::DICompositeType* CT);
     llvm::StringRef handleStd1(llvm::DINode* Node, llvm::DICompositeType* CT, const char*);
     llvm::StringRef handleStd2(llvm::DINode* Node, llvm::DICompositeType* CT, const char*);
 

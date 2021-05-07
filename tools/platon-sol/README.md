@@ -39,26 +39,30 @@ platon-sol wasm --wasmAbi <wasm-abi-file> --wasmAbi <output path>
 
 ## Support Wasm Type
 
-|   Wasm Type   |
-|:-----------------:|
-|      bool         |
-|     int8_t     |
-|     int16_t      |
-|     int32_t      |
-|     int64_t     |
-|       int         |
-|       int128_t     |
-|       int256_t     |
-|    uint8_t    |
-|    uint16_t    |
-|      uint32_t       |
-|      uint64_t      |
-|    uint128_t     |
-|     uint256_t     |
-|     std::string       |
-|      platon::Address       |
-|      std::array       |
-|      std::vector       |
-|      std::map       |
-|      struct       |
-|      class       |
+1. All length wasm int types are mapped to solidity int types.
+2. All length wasm uint types are mapped to solidity uint types.
+3. Whether it is a fixed-length array or a vector of dynamic data type of wasm, it is mapped to a dynamic array of solidity.
+
+|   Wasm Type   | Solidity Type |
+|:-----------------:| :-----------------:|
+|      bool         |bool |
+|     int8_t     | int |
+|     int16_t      | int |
+|     int32_t      | int |
+|     int64_t     | int |
+|       int         | int |
+|       int128_t     | int |
+|       int256_t     | int |
+|    uint8_t    | uint |
+|    uint16_t    | uint |
+|      uint32_t       | uint |
+|      uint64_t      | uint |
+|    uint128_t     | uint |
+|     uint256_t     | uint |
+|     std::string       | string |
+|      platon::Address       | address |
+|      std::array<T, N>      | T[] |
+|      std::vector<T>      | T[] |
+|      std::map       | struct[] |
+|      struct       | struct |
+|      class       | struct |
