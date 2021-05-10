@@ -39,9 +39,9 @@ platon-sol wasm --wasmAbi <wasm-abi-file> --wasmAbi <output path>
 
 ## Support Wasm Type
 
-1. All length wasm int types are mapped to solidity int types.
-2. All length wasm uint types are mapped to solidity uint types.
-3. Whether it is a fixed-length array or a vector of dynamic data type of wasm, it is mapped to a dynamic array of solidity.
+1. All length wasm int types are mapped to solidity int types. All length wasm uint types are mapped to solidity uint types.
+2. Pay attention to the size of int and uint assignment. If the value is too large, there may be a risk of overflow on the wasm side.
+
 
 |   Wasm Type   | Solidity Type |
 |:-----------------:| :-----------------:|
@@ -61,7 +61,7 @@ platon-sol wasm --wasmAbi <wasm-abi-file> --wasmAbi <output path>
 |     uint256_t     | uint |
 |     std::string       | string |
 |      platon::Address       | address |
-|      std::array<T, N>      | T[] |
+|      std::array<T, N>      | T[N] |
 |      std::vector<T>      | T[] |
 |      std::map       | struct[] |
 |      struct       | struct |
