@@ -33,12 +33,12 @@ func TestConvertToSolidityType(t *testing.T) {
 		result string
 	}{
 		{"uint8[][]", "bytes[]"},
-		{"int32[5][]", "int[][]"},
-		{"uint16[5][5]", "uint[][]"},
-		{"uint8[][5]", "bytes[]"},
-		{"map<int32,int32>[10][]", solidityMappingName("map<int32,int32>") + "[][][]"},
-		{"map<int32,int32>[][10]", solidityMappingName("map<int32,int32>") + "[][][]"},
-		{"map<int32,int32>[10][10]", solidityMappingName("map<int32,int32>") + "[][][]"},
+		{"int32[5][]", "int[5][]"},
+		{"uint16[5][5]", "uint[5][5]"},
+		{"uint8[][5]", "bytes[5]"},
+		{"map<int32,int32>[10][]", solidityMappingName("map<int32,int32>") + "[][10][]"},
+		{"map<int32,int32>[][10]", solidityMappingName("map<int32,int32>") + "[][][10]"},
+		{"map<int32,int32>[10][10]", solidityMappingName("map<int32,int32>") + "[][10][10]"},
 		{"map<int32,int32>[][]", solidityMappingName("map<int32,int32>") + "[][][]"},
 		{"map<int32,FixedHash<20>[]>[]", solidityMappingName("map<int32,FixedHash<20>[]>") + "[][]"},
 	}
@@ -58,4 +58,28 @@ func TestExportInfo(t *testing.T) {
 
 	_, err = Generate(abiTypes)
 	assert.NilError(t, err)
+}
+
+func TestSplitTupleAndMap(t *testing.T) {
+	cases := []struct {
+		Input  string
+		result []string
+	}{
+		{"map<int,int>", []string{"int", "int"}},
+		{"map<int,map<int,string>>", []string{"int", "map<int,string>"}},
+		{"map<map<int,string>,map<int,int>>", []string{"map<int,string>", "map<int,int>"}},
+		{"tuple<int,int,string>", []string{"int", "int", "string"}},
+		{"tuple<int,map<int,int>>", []string{"int", "map<int,int>"}},
+		{"tuple<int,tuple<string,int,string>>", []string{"int", "tuple<string,int,string>"}},
+		{"tuple<map<int,string>,tuple<int,int,string>>", []string{"map<int,string>", "tuple<int,int,string>"}},
+		{"tuple<map<int,tuple<int,int,string>>, map<int,tuple<int,string>>,tuple<string,map<int,int>,map<int,int>>>", []string{"map<int,tuple<int,int,string>>", "map<int,tuple<int,string>>", "tuple<string,map<int,int>,map<int,int>>"}},
+	}
+
+	for _, oneType := range cases {
+		result := splitTupleAndMap(oneType.Input)
+
+		for i := 0; i < len(result); i++ {
+			assert.Equal(t, result[i], oneType.result[i])
+		}
+	}
 }

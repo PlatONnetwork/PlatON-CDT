@@ -104,7 +104,7 @@ func convertToSolidityType(wasmType string, mapTypeStruct map[string]*StructDef)
 		return "address"
 	case strings.HasSuffix(wasmType, "]"):
 		index := strings.LastIndex(wasmType, "[")
-		return convertToSolidityType(wasmType[:index], mapTypeStruct) + "[]"
+		return convertToSolidityType(wasmType[:index], mapTypeStruct) + wasmType[index:]
 	case "bool" == wasmType:
 		return wasmType
 	case strings.HasPrefix(wasmType, "int"):
@@ -155,7 +155,7 @@ func hasDependency(solidityType string) bool {
 	switch {
 	case "bytes" == solidityType || "bool" == solidityType || "address" == solidityType || "string" == solidityType:
 		return false
-	case strings.Contains(solidityType, "[]") || strings.Contains(solidityType, "mapping_"):
+	case (strings.Contains(solidityType, "[") && strings.Contains(solidityType, "]")) || strings.Contains(solidityType, "mapping_") || strings.Contains(solidityType, "tuple_"):
 		return true
 	case strings.HasPrefix(solidityType, "int") || strings.HasPrefix(solidityType, "uint"):
 		return false
@@ -164,8 +164,8 @@ func hasDependency(solidityType string) bool {
 	}
 }
 
-func soliditySliceChildType(solidityType string) string {
-	end := strings.LastIndex(solidityType, "[]")
+func solidityArrayChildType(solidityType string) string {
+	end := strings.LastIndex(solidityType, "[")
 	return strings.TrimSpace(solidityType[:end])
 }
 
@@ -203,9 +203,9 @@ func analyzeType(solidityType string, analyze *dag.DAG, parent *dag.Vertex) {
 			}
 		}
 
-		// slice
-		if strings.HasSuffix(solidityType, "[]") {
-			childSolidityType := soliditySliceChildType(solidityType)
+		// array
+		if strings.HasSuffix(solidityType, "]") {
+			childSolidityType := solidityArrayChildType(solidityType)
 			analyzeType(childSolidityType, analyze, child)
 			return
 		}
@@ -256,7 +256,7 @@ func solidityRLPEncodeFunction(solidityType string) string {
 	switch {
 	case "bytes" == solidityType:
 		return "encodeBytes"
-	case strings.Contains(solidityType, "[]"):
+	case strings.Contains(solidityType, "[") && strings.Contains(solidityType, "]"):
 		return "encodeList"
 	case "bool" == solidityType:
 		return "encodeUint"
@@ -267,6 +267,8 @@ func solidityRLPEncodeFunction(solidityType string) string {
 	case "address" == solidityType:
 		return "encodeAddress"
 	case strings.Contains(solidityType, "mapping_"):
+		return "encodeList"
+	case strings.Contains(solidityType, "tuple_"):
 		return "encodeList"
 	case "string" == solidityType:
 		return "encodeString"
@@ -279,7 +281,7 @@ func solidityRLPDecodeFunction(solidityType string) string {
 	switch {
 	case "bytes" == solidityType:
 		return "toBytes"
-	case strings.Contains(solidityType, "[]"):
+	case strings.Contains(solidityType, "[") && strings.Contains(solidityType, "]"):
 		return "decodeList"
 	case "bool" == solidityType:
 		return "toBoolean"
@@ -290,6 +292,8 @@ func solidityRLPDecodeFunction(solidityType string) string {
 	case "address" == solidityType:
 		return "toAddress"
 	case strings.Contains(solidityType, "mapping_"):
+		return "decodeList"
+	case strings.Contains(solidityType, "tuple_"):
 		return "decodeList"
 	case "string" == solidityType:
 		return "toString"
@@ -365,7 +369,7 @@ func generateVectorRLPEncode(oneVector *Vector) string {
 	oneResult += "\n\t\tuint length = self.length;"
 	oneResult += "\n\t\tbytes[] memory allRlpPara = new bytes[](length);"
 
-	index := strings.LastIndex(oneVector.Type, "[]")
+	index := strings.LastIndex(oneVector.Type, "[")
 	realEncodeType := strings.TrimSpace(oneVector.Type[:index])
 	switch encodefunc := solidityRLPEncodeFunction(realEncodeType); encodefunc {
 	case "encodeBytes", "encodeInt", "encodeUint", "encodeAddress", "encodeString":
@@ -390,9 +394,13 @@ func generateVectorRLPDecode(oneVector *Vector) string {
 	oneResult += "\n\t\tRLPReader.RLPItem memory rlpItem = RLPReader.toRlpItem(data);"
 	oneResult += "\n\t\tRLPReader.RLPItem[] memory allItem = RLPReader.toList(rlpItem);"
 	oneResult += "\n\t\tuint length = allItem.length;"
-	oneResult += "\n\t\t" + oneVector.Type + " memory result = new " + oneVector.Type + "(length);"
+	if strings.HasSuffix(oneVector.Type, "[]") {
+		oneResult += "\n\t\t" + oneVector.Type + " memory result = new " + oneVector.Type + "(length);"
+	} else {
+		oneResult += "\n\t\t" + oneVector.Type + " memory result;"
+	}
 
-	index := strings.LastIndex(oneVector.Type, "[]")
+	index := strings.LastIndex(oneVector.Type, "[")
 	realDecodeType := strings.TrimSpace(oneVector.Type[:index])
 
 	switch decodefunc := solidityRLPDecodeFunction(realDecodeType); decodefunc {
@@ -416,8 +424,8 @@ func generateOneRLP(oneVertices *dag.Vertex) string {
 	var result string
 	solidityType := oneVertices.ID
 
-	// slice
-	if strings.HasSuffix(solidityType, "[]") {
+	// array
+	if strings.HasSuffix(solidityType, "]") {
 		oneVector := &Vector{solidityType}
 		result += generateVectorRLPEncode(oneVector)
 		result += generateVectorRLPDecode(oneVector)
@@ -469,7 +477,7 @@ func declareSolidityType(solidityType string) string {
 		return solidityType
 	case "bytes" == solidityType || "string" == solidityType:
 		return solidityType + " memory"
-	case strings.Contains(solidityType, "[]") || strings.Contains(solidityType, "mapping_"):
+	case (strings.Contains(solidityType, "[") && strings.Contains(solidityType, "]")) || strings.Contains(solidityType, "mapping_") || strings.Contains(solidityType, "tuple_"):
 		return solidityType + " memory"
 	case strings.HasPrefix(solidityType, "int") || strings.HasPrefix(solidityType, "uint"):
 		return solidityType
