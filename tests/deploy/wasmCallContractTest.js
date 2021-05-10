@@ -1,28 +1,26 @@
 var contract = require("./contract");
 var assert = require('assert');
 
+
 async function wasmCallContractTest(){
-    // deploy simple contract and create contract
+    // deploy wasmCall wasm contract
     var wasmCallContract = await contract.deployContract(true, "wasmCall");
 
-    await contract.actionMethodSend(true, "wasmCall", wasmCallContract, 'set', 0xffff0000);
-
-    var setNum = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get');
-
-    assert.equal(setNum, 0xffff0000, 'wasmCall Contract method get assertion failed!!!');
-
+    // deploy wasmCaller solidity contract
     var wasmCallerContract = await contract.deployContract(false, "wasmCaller");
 
-    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSet', wasmCallContract, 64);
+    // uint type test
+    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetUint', wasmCallContract, 64);
 
-    setNum = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGet', wasmCallContract);
+    setNum = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetUint', wasmCallContract);
 
     assert.equal(setNum, 64, 'wasmCaller Contract method callGet assertion failed!!!');
 
-    setNum = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get');
+    setNum = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get_uint');
 
     assert.equal(setNum, 64, 'wasmCall Contract method get assertion failed!!!');
 
+    // int type test
     await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetInt', wasmCallContract, -12);
 
     setNum = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetInt', wasmCallContract);
@@ -33,6 +31,7 @@ async function wasmCallContractTest(){
 
     assert.equal(setNum, -12, 'wasmCall Contract method get_int assertion failed!!!');
 
+    // string type test
     await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetString', wasmCallContract, "jatel");
 
     var setStr = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetString', wasmCallContract);
@@ -43,31 +42,55 @@ async function wasmCallContractTest(){
 
     assert.ok(JSON.stringify(setStr) === JSON.stringify("jatel"), 'wasmCall Contract method get_string assertion failed!!!');
 
-    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetInfo', wasmCallContract, 456);
+    // address type test
+    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetAddress', wasmCallContract, wasmCallerContract);
 
-    setStr = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetInfo', wasmCallContract);
+    var setAddress = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetAddress', wasmCallContract);
 
-    assert.ok(JSON.stringify(setStr) === JSON.stringify(wasmCallContract), 'wasmCaller Contract method callGetInfo assertion failed!!!');
+    // assert.ok(JSON.stringify(setAddress) === JSON.stringify(wasmCallerContract), 'wasmCaller Contract method callGetString assertion failed!!!');
 
-    var setInfo = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get_info');
+    setAddress = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get_address');
 
-    assert.equal(setInfo[0], 456, 'wasmCall Contract method get_info assertion failed!!!');
+    // assert.ok(JSON.stringify(setAddress) === JSON.stringify(wasmCallerContract), 'wasmCall Contract method get_string assertion failed!!!');
 
-    assert.ok(JSON.stringify(setInfo[1]) === JSON.stringify(wasmCallContract), 'wasmCall Contract method get_info assertion failed!!!');
+    // derived type test
+    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetInfo', wasmCallContract, [123, "jatel"]);
 
-    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'set_my_vector', wasmCallContract, 64, "jatel");
+    var setInfo = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetInfo', wasmCallContract);
 
-    setStr = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'get_my_vector_string', wasmCallContract);
+    // assert.equal(setInfo[0], 123, 'wasmCall Contract method get_info assertion failed!!!');
 
-    assert.ok(JSON.stringify(setStr) === JSON.stringify("jatel"), 'wasmCaller Contract method get_my_vector_string assertion failed!!!');
+    // assert.ok(JSON.stringify(setInfo[1]) === JSON.stringify(wasmCallContract), 'wasmCall Contract method get_info assertion failed!!!');
 
-    setNum = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'get_my_vector_uint', wasmCallContract);
+    setInfo = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get_info');
 
-    assert.equal(setNum, 65, 'wasmCaller Contract method get_my_vector_uint assertion failed!!!');
+    assert.equal(setInfo[0], 123, 'wasmCall Contract method get_info assertion failed!!!');
 
-    setNum = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'get_my_vector_int', wasmCallContract);
+    assert.ok(JSON.stringify(setInfo[1]) === JSON.stringify("jatel"), 'wasmCall Contract method get_info assertion failed!!!');
 
-    assert.equal(setNum, 66, 'wasmCaller Contract method get_my_vector_int assertion failed!!!');
+    // type my vector test
+    var vector_para =  [[[1, 2, 3]], [[4, 5, "jatel"]], [[["6"], "7", "8"]], [[9, 10, 11, 12, 13]], [[[[14, 15]], [[16, 17]]]], [[[18, "jatel"]], [[19, "jatel"]]], [[[20, [["21"], "22", "23"]]]], [[[24, ["jatel"]]]]]
+    await contract.actionMethodSend(false, "wasmCaller", wasmCallerContract, 'callSetMyVector', wasmCallContract, vector_para);
+
+    var vector_result = await contract.constMethodCall(false, "wasmCaller", wasmCallerContract, 'callGetMyVector', wasmCallContract);
+
+    for(var i = 0, len = vector_result.length; i < len; i++){
+        console.log(vector_result[i])
+
+        if(vector_result[i] instanceof Array) {
+            vector_result[i].forEach(function(item) {
+                console.log(item);
+
+                if(item instanceof Array){
+                    item.forEach(function(one) {
+                        console.log(one);
+                    })
+                }
+            })
+        }
+    }
+
+    // setInfo = await contract.constMethodCall(true, "wasmCall", wasmCallContract, 'get_my_vector');
 }
 
 exports.wasmCallContractTest = wasmCallContractTest;
