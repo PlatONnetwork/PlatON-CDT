@@ -1,0 +1,11 @@
+{
+    "deployFrom" : "lax1ghvqzvmpxwarcqhkmd6d5f3lrzept59wvj0feg", 
+    "deployFromPrivateKey" : "ad296b67d8e9bd226189efd9ae2f637645360e784c725bf03d1a1a0fe5d45ec6", 
+    "deployFromPassword" : "123456",
+    "from" : "lax1gutkc403f9fh57xa8skelk43znyjjgp0wn3q4d",
+    "fromPrivateKey" : "e53e05953b3d1992b7d3d27a6ef9554c797088d68eed114d1c8bfe2a80ff29b5",
+    "fromPassword" : "12345",
+    "gas": 4500000,
+    "gasPrice" : 50000000004,
+    "server": "http://10.1.1.10:36789"
+}
