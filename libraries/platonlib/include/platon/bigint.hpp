@@ -54,6 +54,7 @@ class WideInteger {
       negative_ = rhs.negative_;
       std::copy(rhs.arr_.end() - copy_size, rhs.arr_.end(),
                 arr_.end() - copy_size);
+      return;
     }
 
     // Unsigned on the left, signed on the right
@@ -141,7 +142,7 @@ class WideInteger {
   }
 
   constexpr WideInteger(const std::string_view &hex) {
-    platon::fromHex<arr_size>(hex, arr_);
+    platon::fromHex<arr_size>(hex, arr_, false);
   }
 
   // Conversion between byte streams(little endian)
@@ -595,6 +596,7 @@ class WideInteger {
   void Fill(uint8_t value) { arr_.fill(value); }
 
  public:
+  constexpr static std::array<uint8_t, arr_size> zero = {0};
   bool negative_ = false;
   bool overflow_ = false;
   std::array<uint8_t, arr_size> arr_ = {};
@@ -609,6 +611,9 @@ using WideUint = WideInteger<Bits, false>;
 
 using int256_t = WideInt<256>;
 using uint256_t = WideUint<256>;
+
+using int384_t = WideInt<384>;
+using uint384_t = WideUint<384>;
 
 using int512_t = WideInt<512>;
 using uint512_t = WideUint<512>;
@@ -690,6 +695,11 @@ inline std::int256_t operator"" _int256(const char *str_value, size_t n) {
   return result;
 }
 
+inline std::int384_t operator"" _int384(const char *str_value, size_t n) {
+  std::int384_t result(str_value, n);
+  return result;
+}
+
 inline std::int512_t operator"" _int512(const char *str_value, size_t n) {
   std::int512_t result(str_value, n);
   return result;
@@ -697,6 +707,11 @@ inline std::int512_t operator"" _int512(const char *str_value, size_t n) {
 
 inline std::uint256_t operator"" _uint256(const char *str_value, size_t n) {
   std::uint256_t result(str_value, n);
+  return result;
+}
+
+inline std::uint384_t operator"" _uint384(const char *str_value, size_t n) {
+  std::uint384_t result(str_value, n);
   return result;
 }
 

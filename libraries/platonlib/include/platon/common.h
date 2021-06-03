@@ -67,12 +67,15 @@ inline bytes fromHex(std::string const &_s) {
 /**
  * @brief Convert to bytes represented by hex string s.
  * @param _s Hex string.
+ * @param ret Bytes array
+ * @param left_align Alignment
  * @return The bytes represented by the hexadecimal string s.
  */
 template <unsigned N>
-constexpr inline void fromHex(std::string_view const &_s, std::array<byte, N>& ret) {
+constexpr inline void fromHex(std::string_view const &_s, std::array<byte, N>& ret, bool left_align = true) {
   unsigned s = (_s.size() >= 2 && _s[0] == '0' && _s[1] == 'x') ? 2 : 0;
-  size_t index = 0;
+  size_t len = ((_s.size() - s)+1)/2;
+  size_t index = left_align ? 0 : ret.size() - len;
   if (_s.size() % 2) {
     int h = fromHexChar(_s[s++]);
     if (h != -1)
