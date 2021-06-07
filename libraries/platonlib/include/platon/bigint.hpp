@@ -145,6 +145,10 @@ class WideInteger {
     platon::fromHex<arr_size>(hex, arr_, false);
   }
 
+  std::string ToHex() const {
+    return platon::toHex(arr_);
+  }
+
   // Conversion between byte streams(little endian)
   template <typename container>
   constexpr value_type &FromLittleEndian(const container &bytes) {

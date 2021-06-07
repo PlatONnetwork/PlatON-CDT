@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4.3)
 project(platonlib)
 
 
-SET(SRC_FILENAMES RLP.cpp abort.cpp)
+SET(SRC_FILENAMES RLP.cpp abort.cpp poseidon.cpp)
 
 add_library(platonlib ${SRC_FILENAMES})
 
