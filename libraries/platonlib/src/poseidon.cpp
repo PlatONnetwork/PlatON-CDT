@@ -3375,6 +3375,6 @@ std::vector<std::vector<std::uint256_t>> m_eight =
          std::uint256_t(std::string_view("12ded41f8047da3e6c22bfed3ec5bb52d027e560048db4c0f96ca9fa85e17bc3")),
          std::uint256_t(std::string_view("1f47c67a4325672f17b8bd1ddbd80e4e9e6c62419a9c204cc7e8821892431aae"))}};
 
-std::vector<std::vector<std::uint256_t> *> Poseidon::c_ = {&c_one, &c_two, &c_three, &c_four, &c_five, &c_six, &c_seven, &c_eight};
+std::vector<std::vector<std::uint256_t> *> platon::hash::poseidon::Poseidon::c_ = {&c_one, &c_two, &c_three, &c_four, &c_five, &c_six, &c_seven, &c_eight};
 
-std::vector<std::vector<std::vector<std::uint256_t>> *> Poseidon::m_ = {&m_one, &m_two, &m_three, &m_four, &m_five, &m_six, &m_seven, &m_eight};
+std::vector<std::vector<std::vector<std::uint256_t>> *> platon::hash::poseidon::Poseidon::m_ = {&m_one, &m_two, &m_three, &m_four, &m_five, &m_six, &m_seven, &m_eight};

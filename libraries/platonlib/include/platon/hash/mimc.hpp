@@ -5,6 +5,9 @@
 #include <vector>
 #include "platon/bigint.hpp"
 #include "platon/chain.hpp"
+namespace platon {
+namespace hash {
+namespace mimc {
 
 class Mimc {
  private:
@@ -252,3 +255,6 @@ class Mimc {
     return Hash(elements, 0);
   }
 };
+}
+}
+}

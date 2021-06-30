@@ -1,5 +1,10 @@
 #include "platon/fixedhash.hpp"
 #include "platon/chain_impl.hpp"
+#include "platon/hash/mimc.hpp"
+#include "platon/hash/poseidon.hpp"
+#include "platon/hash/rescue.hpp"
+
+#include "platon/bigint.hpp"
 #include <span>
 namespace platon {
 namespace merkle {
@@ -16,8 +21,17 @@ struct Sha256 {
   }
 };
 
-struct MiMC {
-  static h256 Hash(std::span<const h256*> elements) { return h256{}; }
+struct Poseidon {
+  static h256 Hash(std::span<const h256*> elements) {
+    size_t len = elements.size();
+    const uint8_t** inputs = (const uint8_t**)malloc(len);
+    for (int i = 0; i < len; i++) {
+      inputs[i] = elements[i]->data();
+    }
+    h256 hash;
+    ::poseidon_hash(1, inputs, len, hash.data());
+    return hash;
+  }
 };
 
 }

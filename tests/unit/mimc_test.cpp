@@ -4,7 +4,7 @@
 #include "platon/bigint.hpp"
 #include "unit_test.hpp"
 
-
+using namespace platon::hash::mimc;
 TEST_CASE(mimc, hash){
   std::vector<std::uint256_t> input = {12};
   const char *fn = "Mimc::Hash";

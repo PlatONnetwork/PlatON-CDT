@@ -4,6 +4,7 @@
 #include "platon/bigint.hpp"
 #include "unit_test.hpp"
 
+using namespace platon::hash::poseidon;
 TEST_CASE(poseidon, hash){
     std::vector<std::uint256_t> input = {1, 2};
     const char *fn = "Poseidon::Hash";
@@ -19,7 +20,20 @@ TEST_CASE(poseidon, hash){
     ASSERT_EQ(hash_result, result);
 }
 
+TEST_CASE(poseidon, external_func) {
+  std::vector<std::uint256_t> input = {1, 2};
+  const uint8_t** inputs = (const uint8_t**)malloc(2);
+  for (int i = 0; i < 2; i++) {
+    inputs[i] = input[i].Values();
+  }
+  std::uint256_t hash;
+  poseidon_hash(1, inputs, 2, hash.Values());
+  std::uint256_t result = "7853200120776062878684798364095072458815029376092732009249414926327459813530"_uint256;
+  ASSERT_EQ(hash, result);
+}
+
 UNITTEST_MAIN()
 {
   RUN_TEST(poseidon, hash);
+  RUN_TEST(poseidon, external_func);
 }

@@ -448,6 +448,17 @@ int bls12381_map_g1(const uint8_t fp[48], uint8_t x1[48], uint8_t y1[48]);
 
 int bls12381_map_g2(const uint8_t c0[48], const uint8_t c1[48], uint8_t x1[48],
                     uint8_t x2[48], uint8_t y1[48], uint8_t y2[48]);
+
+/**
+ * @brief Poseidon hash function
+ *
+ * @param curve Curve type, 1 bn256
+ * @param input Input array
+ * @param len Array size
+ * @param hash Hash value
+ * @return 0 success, -1 failed.
+ */
+int poseidon_hash(uint8_t curve, const uint8_t* input[], size_t len, uint8_t hash[32]);
 #ifdef __cplusplus
 }
 #endif

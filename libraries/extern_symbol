@@ -58,6 +58,7 @@ bn256_g2_add
 bn256_g2_mul
 bn256_pairing
 
+
 bls12381_g1_add
 bls12381_g1_mul
 bls12381_g1_mul_exp
@@ -67,6 +68,8 @@ bls12381_g2_mul_exp
 bls12381_pairing
 bls12381_map_g1
 bls12381_map_g2
+
+poseidon_hash
 
 platon_nano_time
 platon_debug_gas

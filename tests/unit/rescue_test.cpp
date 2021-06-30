@@ -3,6 +3,8 @@
 #include "platon/hash/rescue.hpp"
 #include "platon/bigint.hpp"
 #include "unit_test.hpp"
+using namespace platon::hash;
+using namespace platon::hash::rescue;
 
 TEST_CASE(rescueBn256, hash){
     std::vector<std::uint256_t> input = {std::uint256_t(std::string_view("00000000000000000000000000000000000000000000000000000000000000f8"))};

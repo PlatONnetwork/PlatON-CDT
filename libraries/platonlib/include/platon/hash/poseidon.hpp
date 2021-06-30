@@ -3,7 +3,9 @@
 #include <array>
 #include <vector>
 #include "platon/bigint.hpp"
-
+namespace platon {
+namespace hash {
+namespace poseidon {
 class Poseidon {
  public:
   using usize = unsigned int;
@@ -11,7 +13,8 @@ class Poseidon {
   static std::uint256_t Hash(const std::vector<std::uint256_t> &input) {
     usize t = input.size() + 1;
     constexpr usize n_rounds_f = 8;
-    constexpr std::array<usize, 8> n_rounds_p_vec = {56, 57, 56, 60, 60, 63, 64, 63};
+    constexpr std::array<usize, 8> n_rounds_p_vec = {56, 57, 56, 60,
+                                                     60, 63, 64, 63};
     usize n_rounds_p = n_rounds_p_vec[t - 2];
 
     std::vector<std::uint256_t> state(t);
@@ -29,9 +32,10 @@ class Poseidon {
   }
 
  private:
-  static constexpr std::uint256_t q = std::uint256_t(std::string_view("30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001"));
-  static std::vector<std::vector<std::uint256_t>*> c_;
-  static std::vector<std::vector<std::vector<std::uint256_t>>*> m_;
+  static constexpr std::uint256_t q = std::uint256_t(std::string_view(
+      "30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001"));
+  static std::vector<std::vector<std::uint256_t> *> c_;
+  static std::vector<std::vector<std::vector<std::uint256_t>> *> m_;
 
   static void Ark(std::vector<std::uint256_t> &state,
                   const std::vector<std::uint256_t> &para_c, usize it) {
@@ -72,5 +76,8 @@ class Poseidon {
     return result;
   }
 
-  static void Exp5(std::uint256_t &a) {  a = Exp(a, std::uint256_t(5), q); }
+  static void Exp5(std::uint256_t &a) { a = Exp(a, std::uint256_t(5), q); }
 };
+}
+}
+}
