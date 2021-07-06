@@ -414,8 +414,51 @@ int bn256_g2_mul(const uint8_t x11[32], const uint8_t x12[32],
                  const uint8_t y11[32], const uint8_t y12[32],
                  const uint8_t bigint[32], uint8_t x21[32], uint8_t x22[32],
                  uint8_t y21[32], uint8_t y22[32]);
-int bn256_pairing(uint8_t *x1[], uint8_t *y1[], uint8_t *x21[], uint8_t *x22[],
-                  uint8_t *y21[], uint8_t *y22[], size_t len);
+int bn256_pairing(const uint8_t *x1[], const uint8_t *y1[], const uint8_t *x21[], const uint8_t *x22[],
+                  const uint8_t *y21[], const uint8_t *y22[], size_t len);
+
+int bls12381_g1_add(const uint8_t x1[48], const uint8_t y1[48],
+                    const uint8_t x2[48], const uint8_t y2[48], uint8_t x3[48],
+                    uint8_t y3[48]);
+
+int bls12381_g1_mul(const uint8_t x1[48], const uint8_t y1[48],
+                    const uint8_t bigint[32], uint8_t x2[48], uint8_t y2[48]);
+
+int bls12381_g1_mul_exp(const uint8_t *x1[], const uint8_t *y1[], const uint8_t *bigint[],
+                        size_t length, uint8_t x2[48], uint8_t y2[48]);
+
+int bls12381_g2_add(const uint8_t x11[48], const uint8_t x12[48], const uint8_t y11[48],
+                    const uint8_t y12[48], const uint8_t x21[48], const uint8_t x22[48],
+                    const uint8_t y21[48], const uint8_t y22[48], uint8_t x31[48],
+                    uint8_t x32[48], uint8_t y31[48], uint8_t y32[48]);
+
+int bls12381_g2_mul(const uint8_t x11[48], const uint8_t x12[48], const uint8_t y11[48],
+                    const uint8_t y12[48], const uint8_t bigint[32], uint8_t x21[48],
+                    uint8_t x22[48], uint8_t y21[48], uint8_t y22[48]);
+
+int bls12381_g2_mul_exp(const uint8_t *x11[], const uint8_t *x12[], const uint8_t *y11[], const uint8_t *y12[],
+                        const uint8_t *bigint[], uint32_t length, uint8_t x21[48],
+                        uint8_t x22[48], uint8_t y21[48], uint8_t y22[48]);
+
+int bls12381_pairing(const uint8_t *x1[], const uint8_t *y1[], const uint8_t *x21[],
+                     const uint8_t *x22[], const uint8_t *y21[], const uint8_t *y22[],
+                     size_t len);
+
+int bls12381_map_g1(const uint8_t fp[48], uint8_t x1[48], uint8_t y1[48]);
+
+int bls12381_map_g2(const uint8_t c0[48], const uint8_t c1[48], uint8_t x1[48],
+                    uint8_t x2[48], uint8_t y1[48], uint8_t y2[48]);
+
+/**
+ * @brief Poseidon hash function
+ *
+ * @param curve Curve type, 1 bn256
+ * @param input Input array
+ * @param len Array size
+ * @param hash Hash value
+ * @return 0 success, -1 failed.
+ */
+int poseidon_hash(uint8_t curve, const uint8_t* input[], size_t len, uint8_t hash[32]);
 #ifdef __cplusplus
 }
 #endif

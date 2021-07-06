@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/PlatONnetwork/PlatON-Go/core/vm"
+	"github.com/AlayaNetwork/Alaya-Go/core/vm"
 	"github.com/PlatONnetwork/wagon/exec"
 	"github.com/PlatONnetwork/wagon/validate"
 	"github.com/PlatONnetwork/wagon/wasm"

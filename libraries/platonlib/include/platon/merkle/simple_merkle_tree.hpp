@@ -63,8 +63,8 @@ class SimpleMerkleTree {
         node_index = (node_index - 1) / 2;
       } else {
         node_value = HashLeftRight(node_value, kZero);
-        prev_node_index = node_index;
-//        node_index = node_index / 2;
+//        prev_node_index = node_index;
+        node_index = node_index / 2;
       }
     }
 

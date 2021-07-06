@@ -32,6 +32,11 @@ class BytesBuffer {
     ++size_;
   }
 
+  void relocate(size_t pos) {
+    if (pos <= capacity_) {
+      size_ = pos;
+    }
+  }
   void clear() { size_ = 0; }
   void resize(size_t num) {
     reserve(num);
@@ -44,6 +49,7 @@ class BytesBuffer {
   uint8_t *data() { return buffer_; }
   const uint8_t *data() const { return buffer_; }
   uint8_t &operator[](size_t pos) { return *(buffer_ + pos); }
+  const uint8_t &operator[](size_t pos) const { return *(buffer_ + pos); }
   void append(const uint8_t *begin, const uint8_t *end) {
     size_t size = end - begin;
     expand(size);

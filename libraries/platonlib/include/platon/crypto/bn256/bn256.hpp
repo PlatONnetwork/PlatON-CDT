@@ -49,6 +49,7 @@ class G1 {
   G1() : x_(0), y_(0) {}
 
   G1(const std::uint256_t& x, const std::uint256_t& y) : x_(x), y_(y) {}
+  G1(const std::uint256_t&& x, const std::uint256_t&& y) : x_(std::move(x)), y_(std::move(y)) {}
 
   G1(const G1& g) : x_(g.x_), y_(g.y_) {}
 
@@ -95,6 +96,11 @@ class G1 {
                           this->x_.Values(), this->y_.Values());
   }
 
+  int AddStatus(const G1& l, const G1& r) {
+    return ::bn256_g1_add(l.x_.Values(), l.y_.Values(),
+                          r.x_.Values(), r.y_.Values(),
+                          this->x_.Values(), this->y_.Values());
+  }
   /**
    * @brief to perform point addition on a crypto defined over prime field
    *
@@ -103,6 +109,11 @@ class G1 {
    */
   G1& Add(const G1& other) {
     platon_assert(AddStatus(other) == 0);
+    return *this;
+  }
+
+  G1& Add(const G1& l, const G1& r) {
+    platon_assert(AddStatus(l, r) == 0);
     return *this;
   }
 
@@ -130,6 +141,11 @@ class G1 {
                           this->x_.Values(), this->y_.Values());
   }
 
+  int ScalarMulStatus(const G1 & g, const std::uint256_t& scalar) {
+    return ::bn256_g1_mul(g.x_.Values(), g.y_.Values(), scalar.Values(),
+                          this->x_.Values(), this->y_.Values());
+  }
+
   /**
    * @brief  to perform point multiplication on a crypto defined over prime
    * field
@@ -139,6 +155,11 @@ class G1 {
    */
   G1& ScalarMul(const std::uint256_t& scalar) {
     platon_assert(ScalarMulStatus(scalar) == 0);
+    return *this;
+  }
+
+  G1& ScalarMul(const G1 & g, const std::uint256_t& scalar) {
+    platon_assert(ScalarMulStatus(g, scalar) == 0);
     return *this;
   }
 
@@ -361,8 +382,8 @@ inline G1 Neg(const G1& p) {
 }
 
 inline G1 Addition(const G1& p1, const G1& p2) {
-  G1 res = p1;
-  return res.Add(p2);
+  G1 res;
+  return res.Add(p1, p2);
 }
 
 inline G2 Addition(const G2& p1, const G2& p2) {
@@ -371,8 +392,8 @@ inline G2 Addition(const G2& p1, const G2& p2) {
 }
 
 inline G1 ScalarMul(const G1& p, const std::uint256_t& s) {
-  G1 r = p;
-  return r.ScalarMul(s);
+  G1 r;
+  return r.ScalarMul(p, s);
 }
 
 inline G2 ScalarMul(const G2& p, const std::uint256_t& s) {
@@ -390,12 +411,12 @@ inline G2 ScalarMul(const G2& p, const std::uint256_t& s) {
 int pairing(const std::span<G1> g1, const std::span<G2> g2) {
   size_t len = g1.size();
   size_t size = sizeof(uint8_t*) * len;
-  uint8_t** x1 = (uint8_t**)malloc(size);
-  uint8_t** y1 = (uint8_t**)malloc(size);
-  uint8_t** x11 = (uint8_t**)malloc(size);
-  uint8_t** y11 = (uint8_t**)malloc(size);
-  uint8_t** x12 = (uint8_t**)malloc(size);
-  uint8_t** y12 = (uint8_t**)malloc(size);
+  const uint8_t** x1 = (const uint8_t**)malloc(size);
+  const uint8_t** y1 = (const uint8_t**)malloc(size);
+  const uint8_t** x11 = (const uint8_t**)malloc(size);
+  const uint8_t** y11 = (const uint8_t**)malloc(size);
+  const uint8_t** x12 = (const uint8_t**)malloc(size);
+  const uint8_t** y12 = (const uint8_t**)malloc(size);
   for (size_t i = 0; i < len; i++) {
     x1[i] = g1[i].x_.Values();
     y1[i] = g1[i].y_.Values();

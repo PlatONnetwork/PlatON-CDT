@@ -40,6 +40,10 @@ bool isList(DICompositeType* CT){
   return CT->getIdentifier().startswith("_ZTSNSt3__14list");
 }
 
+bool isTuple(DICompositeType* CT){
+  return CT->getIdentifier().startswith("_ZTSNSt3__15tuple");
+}
+
 DIType* getTypeParam(DICompositeType* CT, unsigned i){
   if(CT->getTemplateParams().get() == nullptr)
     report_fatal_error("has not type params");
@@ -85,6 +89,44 @@ StringRef MakeAbi::handleArray(DINode* Node, DICompositeType* CT){
   raw_string_ostream OS(str);
   OS << format("%s[%llu]", s.data(), CI->getZExtValue());
   OS.flush();
+  return SSaver.save(str);
+}
+
+StringRef MakeAbi::handleTuple(DINode* Node, DICompositeType* CT){
+
+  std::string str = "tuple<";
+  bool first = true;
+
+  DINode* DN = CT->getElements()[0];
+  if (DIDerivedType* Elem = dyn_cast<DIDerivedType>(DN)) {
+    DIType* BT = Elem->getBaseType();
+    if (DIDerivedType* DevT = dyn_cast<DIDerivedType>(BT)){
+      DIType* BTInner = DevT->getBaseType();
+      if (DICompositeType* CTInner = dyn_cast<DICompositeType>(BTInner)) {
+        for (DINode* DNInner : CTInner->getElements()) {
+          if (DIDerivedType* ElemInner = dyn_cast<DIDerivedType>(DNInner)) {
+            DIType* DevBTInner = ElemInner->getBaseType();
+            if(DICompositeType* CTInnerElem = dyn_cast<DICompositeType>(DevBTInner)){
+              for (DINode* DNElem : CTInnerElem->getElements()) {
+                if (DIDerivedType* OneElem = dyn_cast<DIDerivedType>(DNElem)) {
+                  DIType* OneElemBT = OneElem->getBaseType();
+                  StringRef c = handleType(OneElem, OneElemBT);
+                  if(first){
+                    str += c.str();
+                    first = false;
+                  }else{
+                    str += "," + c.str();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  str += ">";
   return SSaver.save(str);
 }
 
