@@ -1,13 +1,14 @@
 package core
 
 import (
+	"github.com/AlayaNetwork/Alaya-Go/params"
 	"math/big"
 	"reflect"
 
-	"github.com/PlatONnetwork/PlatON-Go/common"
-	"github.com/PlatONnetwork/PlatON-Go/core/types"
-	"github.com/PlatONnetwork/PlatON-Go/crypto/sha3"
-	"github.com/PlatONnetwork/PlatON-Go/rlp"
+	"github.com/AlayaNetwork/Alaya-Go/common"
+	"github.com/AlayaNetwork/Alaya-Go/core/types"
+	"github.com/AlayaNetwork/Alaya-Go/crypto/sha3"
+	"github.com/AlayaNetwork/Alaya-Go/rlp"
 )
 
 type MockStateDB struct {
@@ -34,6 +35,10 @@ func NewMockStateDB() *MockStateDB {
 	db.Balance = make(map[common.Address]*big.Int)
 	db.Logs = make(map[common.Hash][]*types.Log)
 	return &db
+}
+
+func (s *MockStateDB) GetCurrentActiveVersion() uint32 {
+	return params.FORKVERSION_0_16_0
 }
 
 func (s *MockStateDB) Prepare(thash, bhash common.Hash, ti int) {

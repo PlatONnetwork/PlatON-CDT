@@ -3,14 +3,14 @@ package core
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/PlatONnetwork/PlatON-Go/common"
-	"github.com/PlatONnetwork/PlatON-Go/common/hexutil"
-	"github.com/PlatONnetwork/PlatON-Go/core"
-	"github.com/PlatONnetwork/PlatON-Go/core/snapshotdb"
-	"github.com/PlatONnetwork/PlatON-Go/core/types"
-	wvm "github.com/PlatONnetwork/PlatON-Go/core/vm"
-	"github.com/PlatONnetwork/PlatON-Go/crypto"
-	"github.com/PlatONnetwork/PlatON-Go/params"
+	"github.com/AlayaNetwork/Alaya-Go/common"
+	"github.com/AlayaNetwork/Alaya-Go/common/hexutil"
+	"github.com/AlayaNetwork/Alaya-Go/core"
+	"github.com/AlayaNetwork/Alaya-Go/core/snapshotdb"
+	"github.com/AlayaNetwork/Alaya-Go/core/types"
+	wvm "github.com/AlayaNetwork/Alaya-Go/core/vm"
+	"github.com/AlayaNetwork/Alaya-Go/crypto"
+	"github.com/AlayaNetwork/Alaya-Go/params"
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"math/big"
@@ -50,7 +50,7 @@ var (
 		Extra:  make([]byte, 33),
 	}
 	gasLimit       = uint64(100000000)
-	gasPrice       = big.NewInt(10000)
+	gasPrice       = big.NewInt(100000)
 	invokeSig      = hexutil.MustDecode("0xcab7f521") //invoke()
 	defalutBalance = big.NewInt(int64(gasLimit) * gasPrice.Int64()*10)
 	statedb        = NewMockStateDB()
@@ -87,7 +87,7 @@ func ExecSolFile(filePath string) error {
 
 	// Create a new environment which holds all relevant information
 	// about the transaction and calling mechanisms.
-	vmenv := wvm.NewEVM(context, snapshotdb.Instance(), statedb, params.MainnetChainConfig, wvm.Config{})
+	vmenv := wvm.NewEVM(context, snapshotdb.Instance(), statedb, params.TestChainConfig, wvm.Config{})
 
 	gp := new(core.GasPool).AddGas(gasLimit)
 	// Apply the transaction to the current state (included in the env)
@@ -110,7 +110,7 @@ func deploySol(code []byte, statedb *MockStateDB) (common.Address, error) {
 
 	// Create a new environment which holds all relevant information
 	// about the transaction and calling mechanisms.
-	vmenv := wvm.NewEVM(context, snapshotdb.Instance(), statedb, params.MainnetChainConfig, wvm.Config{})
+	vmenv := wvm.NewEVM(context, snapshotdb.Instance(), statedb, params.TestChainConfig, wvm.Config{})
 
 	gp := new(core.GasPool).AddGas(gasLimit)
 	_, err := core.ApplyMessage(vmenv, msg, gp)

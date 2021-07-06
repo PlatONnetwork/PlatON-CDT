@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/PlatONnetwork/PlatON-Go/common"
-	wvm "github.com/PlatONnetwork/PlatON-Go/core/vm"
-	"github.com/PlatONnetwork/PlatON-Go/log"
-	"github.com/PlatONnetwork/PlatON-Go/params"
+	"github.com/AlayaNetwork/Alaya-Go/common"
+	wvm "github.com/AlayaNetwork/Alaya-Go/core/vm"
+	"github.com/AlayaNetwork/Alaya-Go/log"
+	"github.com/AlayaNetwork/Alaya-Go/params"
 	"github.com/PlatONnetwork/wagon/exec"
 	"github.com/urfave/cli"
 	"io/ioutil"
@@ -167,7 +167,7 @@ func ExecFile(filePath string) error {
 	rtrns, err := vm.ExecCode(index)
 
 	// gas result
-	fmt.Fprintf(os.Stdin, "gas cost:%d, opcodes:%d\n", gasCost, opCodes)
+	fmt.Fprintf(os.Stdin, "gas cost:%d, opcodes:%d\n", initGas - contractCtx.Gas, opCodes)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "execute code failed!!! err=%v\n", err)
 		return err
