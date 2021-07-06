@@ -44,8 +44,7 @@ platon_contract_code_length
 platon_contract_code
 platon_deploy
 platon_clone
-platon_confidential_tx_verify
-platon_variable_length_result
+
 bigint_binary_operator
 bigint_exp_mod
 bigint_cmp
