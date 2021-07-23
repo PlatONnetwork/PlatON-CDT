@@ -98,7 +98,7 @@ h256 platon_sha3(const T &data) {
  * @brief It returns the address from the given signature by calculating a
  * recovery function of ECDSA
  *
- * @param hash The hash value after sha3 hash of the raw data
+ * @param hash The hash value of the raw data, both sha3 and sha256 are supported
  * @param signature signature data
  * @param result the signature address
  * @return Getting the signature address returns 0 on success and -1 on failure
