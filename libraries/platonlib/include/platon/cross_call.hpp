@@ -81,6 +81,32 @@ inline bool platon_call(const Address &addr, const bytes &paras,
 }
 
 /**
+ * @brief Normal cross-contract invocation
+ *
+ * @param addr The contract address to be invoked
+ * @param paras A contract parameter constructed using the function
+ * cross_call_args
+ * @param value The amount transferred to the contract
+ * @param gas The called contract method estimates the gas consumed
+ *
+ * @return The contract method returns the value and whether the execution was
+ * successful
+ */
+template <typename return_type, typename value_type, typename gas_type>
+inline auto platon_call_with_return_value(const Address &addr,
+                                          const bytes &paras,
+                                          const value_type &value,
+                                          const gas_type &gas) {
+  bool result = platon_call(addr, paras, value, gas);
+  if (!result) {
+    return std::pair<return_type, bool>(return_type(), false);
+  }
+
+  return_type return_value;
+  get_call_output(return_value);
+  return std::pair<return_type, bool>(return_value, true);
+}
+/**
  * @brief The proxy is invoked across contracts
  *
  * @param addr The contract address to be invoked
@@ -98,6 +124,30 @@ inline bool platon_delegate_call(const Address &addr, const bytes &paras,
                                 gas_bytes.data(), gas_bytes.size()) == 0;
 }
 
+/**
+ * @brief The proxy is invoked across contracts
+ *
+ * @param addr The contract address to be invoked
+ * @param paras A contract parameter constructed using the function
+ * cross_call_args
+ * @param gas The called contract method estimates the gas consumed
+ *
+ * @return The contract method returns the value and whether the execution was
+ * successful
+ */
+template <typename return_type, typename gas_type>
+inline auto platon_delegate_call_with_return_value(const Address &addr,
+                                                   const bytes &paras,
+                                                   const gas_type &gas) {
+  bool result = platon_delegate_call(addr, paras, gas);
+  if (!result) {
+    return std::pair<return_type, bool>(return_type(), false);
+  }
+
+  return_type return_value;
+  get_call_output(return_value);
+  return std::pair<return_type, bool>(return_value, true);
+}
 // template<typename gas_type>
 // int32_t platon_static_call(const std::string &str_address, const bytes paras,
 // const gas_type &gas) {
