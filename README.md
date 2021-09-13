@@ -16,6 +16,7 @@ contract writing for the PlatON platform.
 - Git
 - Tar
 - Wget
+- Golang 1.14+
 
 ### Ubuntu
 

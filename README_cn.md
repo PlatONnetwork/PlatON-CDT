@@ -15,6 +15,7 @@
 - Git
 - Tar
 - Wget
+- Golang 1.14+
 
 ### Ubuntu
 

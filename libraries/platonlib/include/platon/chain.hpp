@@ -186,7 +186,7 @@ void platon_revert(void);
 /**
  * @brief Destory contract
  *
- * @param to Address of the contract
+ * @param send funds to the given address
  * @return 0 if destroy successfully
  */
 int32_t platon_destroy(const uint8_t to[20]);
