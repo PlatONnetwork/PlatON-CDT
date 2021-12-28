@@ -260,6 +260,33 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
   return decode(str_address, hrp);
 }
 
+string getEIP55ChecksummedAddress(string const& _addr)
+{
+	string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
+	if(s.length() != 40)
+	{
+		return "";
+	}
+	if(s.find_first_not_of("0123456789abcdefABCDEF") != string::npos)
+	{
+		return "";
+	}
+	
+	h256 hash = platon_sha3(_addr);
+
+	string ret = "0x";
+	for (unsigned i = 0; i < 40; ++i)
+	{
+		char addressCharacter = s[i];
+		uint8_t nibble = hash[i / 2u] >> (4u * (1u - (i % 2u))) & 0xf;
+		if (nibble >= 8)
+			ret += static_cast<char>(toupper(addressCharacter));
+		else
+			ret += static_cast<char>(tolower(addressCharacter));
+	}
+	return ret;
+}
+
 /**
  * @brief Converts an address in string format to an address of type Address.
  * The default is the address format of the main network.
