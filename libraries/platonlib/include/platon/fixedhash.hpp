@@ -69,7 +69,7 @@ class FixedHash {
     }
   }
 
-  explicit FixedHash(const std::string &s, bool isHex = true)
+  explicit FixedHash(const std::string &s, bool isHex)
       : FixedHash(isHex ? fromHex(s) : asBytes(s)) {
     static_assert(
         20 != N,
@@ -81,6 +81,11 @@ class FixedHash {
   }
 
   std::string toString() const { return "0x" + toHex(m_data); }
+
+  std::string toEthString() const {
+    static_assert( 20 == N, "Converting hexadecimal strings to addresses is not supported");
+    return "0x" + toHex(m_data); 
+  }
 
   bytes toBytes() const { return bytes(data(), data() + N); }
   byte const *data() const { return m_data.data(); }
@@ -251,6 +256,15 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
   // The address string must begin with 0x and be 43 bytes in size
   static_assert(M - 1 == 42, "Incorrect string length");
 
+  if('0' == str_address[0] && 'x' == str_address[1]){
+    bytes bytes_address = fromHex(str_address);
+    if(20 == bytes_address.size()){
+      return std::make_pair(Address(bytes_address), true);
+    } else {
+      return std::make_pair(Address(), false);
+    }
+  }
+
 #ifdef TESTNET
   std::string hrp = "atx";
 #else
@@ -271,6 +285,15 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
  * and the second indicates whether the conversion was successful.
  */
 inline std::pair<Address, bool> make_address(const std::string &str_address) {
+  if('0' == str_address[0] && 'x' == str_address[1]){
+    bytes bytes_address = fromHex(str_address);
+    if(20 == bytes_address.size()){
+      return std::make_pair(Address(bytes_address), true);
+    } else {
+      return std::make_pair(Address(), false);
+    }
+  }
+
 #ifdef TESTNET
   std::string hrp = "atx";
 #else
