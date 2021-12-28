@@ -83,11 +83,12 @@ class FixedHash {
 
   std::string toString() const { return "0x" + toHex(m_data); }
 
-  std::string toEthString() const {
+  std::string toHexString() const {
     static_assert( 20 == N, "Converting hexadecimal strings to addresses is not supported");
-	std::string hexAddr = "0x" + toHex(m_data);
-	return getEIP55ChecksummedAddress(hexAddr);
+	return "0x" + toHex(m_data);
   }
+
+  std::string toEthAddress() const;
 
   bytes toBytes() const { return bytes(data(), data() + N); }
   byte const *data() const { return m_data.data(); }
@@ -340,4 +341,12 @@ std::string FixedHash<20>::toString() const {
 #endif
   return encode(*this, hrp);
 }
+
+template <>
+std::string FixedHash<20>::toEthAddress() const {
+    std::string hexStr = this->toHexString();
+	return getEIP55ChecksummedAddress(hexStr)
+}
+
+
 }  // namespace platon

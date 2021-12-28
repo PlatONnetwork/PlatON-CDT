@@ -72,8 +72,8 @@ TEST_CASE(print, address) {
   platon::println("check result:", address_info.second ? "true" : "false");
   platon::println("address:", address_info.first.toString());
 
-  std::string eth_str_address = address_info.first.toEthString();
-  platon::println("address:", address_info.first.toEthString());
+  std::string eth_str_address = address_info.first.toEthAddress();
+  platon::println("address:", address_info.first.toEthAddress());
 
   auto address_same_info =
       make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
@@ -106,8 +106,8 @@ TEST_CASE(print, address) {
   platon::println("check result:", address_info.second ? "true" : "false");
   platon::println("address:", address_info.first.toString());
 
-  std::string eth_str_address = address_info.first.toEthString();
-  platon::println("address:", address_info.first.toEthString());
+  std::string eth_str_address = address_info.first.toEthAddress();
+  platon::println("address:", address_info.first.toEthAddress());
 
   auto address_same_info =
       make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
