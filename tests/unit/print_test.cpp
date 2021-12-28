@@ -71,6 +71,10 @@ TEST_CASE(print, address) {
       make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
   platon::println("check result:", address_info.second ? "true" : "false");
   platon::println("address:", address_info.first.toString());
+
+  std::string eth_str_address = address_info.first.toEthString();
+  platon::println("address:", address_info.first.toEthString());
+
   auto address_same_info =
       make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgc77ep6ahhap");
   platon::println("check same:", address_info.first == address_same_info.first
@@ -79,6 +83,15 @@ TEST_CASE(print, address) {
   platon::println(
       "check not same:",
       address_info.first != address_same_info.first ? "true" : "false");
+
+  auto address_same_info_eth = make_address(eth_str_address);
+  platon::println("check same:", address_info.first == address_same_info_eth.first
+                                     ? "true"
+                                     : "false");
+  platon::println(
+      "check not same:",
+      address_info.first != address_same_info_eth.first ? "true" : "false");
+
   auto address_other_info =
       make_address("atx10jc0t4ndqarj4q6ujl3g3ycmufgec7epra7lt8");
   platon::println("check same:", address_info.first == address_other_info.first
@@ -92,6 +105,10 @@ TEST_CASE(print, address) {
       make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
   platon::println("check result:", address_info.second ? "true" : "false");
   platon::println("address:", address_info.first.toString());
+
+  std::string eth_str_address = address_info.first.toEthString();
+  platon::println("address:", address_info.first.toEthString());
+
   auto address_same_info =
       make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
   platon::println("check same:", address_info.first == address_same_info.first
@@ -100,6 +117,15 @@ TEST_CASE(print, address) {
   platon::println(
       "check not same:",
       address_info.first != address_same_info.first ? "true" : "false");
+
+  auto address_same_info_eth = make_address(eth_str_address);
+  platon::println("check same:", address_info.first == address_same_info_eth.first
+                                     ? "true"
+                                     : "false");
+  platon::println(
+      "check not same:",
+      address_info.first != address_same_info_eth.first ? "true" : "false");
+
   auto address_other_info =
       make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgec7epfmz4cd");
   platon::println("check same:", address_info.first == address_other_info.first

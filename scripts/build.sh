@@ -15,5 +15,6 @@ if [ -d $BUILD ]; then
 fi
 
 # mkdir and build
+git checkout alaya
 mkdir -p build && cd build && cmake .. && make -j$CPUS
 
