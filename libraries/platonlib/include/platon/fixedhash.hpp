@@ -6,6 +6,7 @@
 #include <vector>
 #include "bech32.hpp"
 #include "common.h"
+#include "chain.hpp"
 
 namespace platon {
 
@@ -275,26 +276,30 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
   return decode(str_address, hrp);
 }
 
-string getEIP55ChecksummedAddress(string const& _addr)
+std::string getEIP55ChecksummedAddress(std::string const& _addr)
 {
-	string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
-	
-    static_assert( s.length() == 40, "address length error");
-    static_assert( s.find_first_not_of("0123456789abcdefABCDEF") == string::npos, "address format error");
-	
-	h256 hash = platon_sha3(_addr);
+    std::string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
 
-	string ret = "0x";
-	for (unsigned i = 0; i < 40; ++i)
-	{
-		char addressCharacter = s[i];
-		uint8_t nibble = hash[i / 2u] >> (4u * (1u - (i % 2u))) & 0xf;
-		if (nibble >= 8)
-			ret += static_cast<char>(toupper(addressCharacter));
-		else
-			ret += static_cast<char>(tolower(addressCharacter));
-	}
-	return ret;
+    if(s.length() != 40 || s.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+    {
+        return "";
+    }
+	
+	byte byteshash[32];
+	platon_sha3(reinterpret_cast<const byte*>(s.data()), s.size(), byteshash, sizeof(byteshash));
+    h256 hash = h256(byteshash, sizeof(byteshash));
+
+    std::string ret = "0x";
+    for (unsigned i = 0; i < 40; ++i)
+    {
+        char addressCharacter = s[i];
+        uint8_t nibble = hash[i / 2u] >> (4u * (1u - (i % 2u))) & 0xf;
+        if (nibble >= 8)
+            ret += static_cast<char>(toupper(addressCharacter));
+        else
+            ret += static_cast<char>(tolower(addressCharacter));
+        }
+        return ret;
 }
 
 /**
