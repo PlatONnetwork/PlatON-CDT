@@ -345,7 +345,7 @@ std::string FixedHash<20>::toString() const {
 template <>
 std::string FixedHash<20>::toEthAddress() const {
     std::string hexStr = this->toHexString();
-	return getEIP55ChecksummedAddress(hexStr)
+    return getEIP55ChecksummedAddress(hexStr);
 }
 
 
