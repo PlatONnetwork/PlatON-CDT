@@ -39,7 +39,6 @@ TEST_CASE(constexpr, Address) {
   auto arrr_1 = make_address("atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt");
   ASSERT_EQ(arrr_1.first.toString(),
             "atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt")
-
   char test_add[] = "atp10jc0t4ndqarj4q6ujl3g3ycmufgc77epsmtawt";
   auto arrr_2 = make_address(test_add);
   ASSERT_EQ(arrr_2.first, arrr_1.first)
