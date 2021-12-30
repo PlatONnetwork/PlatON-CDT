@@ -150,7 +150,7 @@ func ExecFile(filePath string) error {
 	}
 	evm := wvm.NewEVM(ct, nil, db, &params.ChainConfig{}, wvm.Config{})
 	evm.Ctx = context.Background()
-	ctx := wvm.NewVMContext(evm, contractCtx, wvm.Config{}, params.GasTableConstantinople, db)
+	ctx := wvm.NewVMContext(evm, contractCtx, wvm.Config{}, db)
 
 	logger := log.WasmRoot()
 	logger.SetHandler(log.LvlFilterHandler(log.LvlDebug,
