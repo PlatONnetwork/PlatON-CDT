@@ -85,7 +85,7 @@ class FixedHash {
 
   std::string toHexString() const {
     static_assert( 20 == N, "Converting hexadecimal strings to addresses is not supported");
-	return "0x" + toHex(m_data);
+    return "0x" + toHex(m_data);
   }
 
   std::string toEthAddress() const;
@@ -286,8 +286,8 @@ std::string getEIP55ChecksummedAddress(std::string const& _addr)
         return "";
     }
 	
-	byte byteshash[32];
-	platon_sha3(reinterpret_cast<const byte*>(s.data()), s.size(), byteshash, sizeof(byteshash));
+    byte byteshash[32];
+    platon_sha3(reinterpret_cast<const byte*>(s.data()), s.size(), byteshash, sizeof(byteshash));
     h256 hash = h256(byteshash, sizeof(byteshash));
 
     std::string ret = "0x";
