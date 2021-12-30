@@ -158,7 +158,7 @@ void platon_debug(const std::string &data) {
 /**
  * @brief Destory contract
  *
- * @param addr Address of the contract
+ * @param send funds to the given address
  * @return true if destroy successfully, false otherwise
  */
 bool platon_destroy(const Address &addr) {

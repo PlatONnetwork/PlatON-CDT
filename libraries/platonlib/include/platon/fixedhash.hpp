@@ -6,6 +6,7 @@
 #include <vector>
 #include "bech32.hpp"
 #include "common.h"
+#include "chain.hpp"
 
 namespace platon {
 
@@ -82,10 +83,12 @@ class FixedHash {
 
   std::string toString() const { return "0x" + toHex(m_data); }
 
-  std::string toEthString() const {
+  std::string toHexString() const {
     static_assert( 20 == N, "Converting hexadecimal strings to addresses is not supported");
-    return "0x" + toHex(m_data); 
+    return "0x" + toHex(m_data);
   }
+
+  std::string toEthAddress() const;
 
   bytes toBytes() const { return bytes(data(), data() + N); }
   byte const *data() const { return m_data.data(); }
@@ -274,6 +277,32 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
   return decode(str_address, hrp);
 }
 
+std::string getEIP55ChecksummedAddress(std::string const& _addr)
+{
+    std::string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
+
+    if(s.length() != 40 || s.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+    {
+        return "";
+    }
+	
+    byte byteshash[32];
+    platon_sha3(reinterpret_cast<const byte*>(s.data()), s.size(), byteshash, sizeof(byteshash));
+    h256 hash = h256(byteshash, sizeof(byteshash));
+
+    std::string ret = "0x";
+    for (unsigned i = 0; i < 40; ++i)
+    {
+        char addressCharacter = s[i];
+        uint8_t nibble = hash[i / 2u] >> (4u * (1u - (i % 2u))) & 0xf;
+        if (nibble >= 8)
+            ret += static_cast<char>(toupper(addressCharacter));
+        else
+            ret += static_cast<char>(tolower(addressCharacter));
+        }
+        return ret;
+}
+
 /**
  * @brief Converts an address in string format to an address of type Address.
  * The default is the address format of the main network.
@@ -312,4 +341,12 @@ std::string FixedHash<20>::toString() const {
 #endif
   return encode(*this, hrp);
 }
+
+template <>
+std::string FixedHash<20>::toEthAddress() const {
+    std::string hexStr = this->toHexString();
+    return getEIP55ChecksummedAddress(hexStr);
+}
+
+
 }  // namespace platon

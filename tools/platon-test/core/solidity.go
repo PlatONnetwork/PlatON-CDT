@@ -46,7 +46,7 @@ var (
 	from   = common.BigToAddress(big.NewInt(102))
 	header = &types.Header{
 		Number: big.NewInt(1),
-		Time:   big.NewInt(time.Now().Unix()),
+		Time:   uint64(time.Now().Unix()),
 		Extra:  make([]byte, 33),
 	}
 	gasLimit       = uint64(100000000)
