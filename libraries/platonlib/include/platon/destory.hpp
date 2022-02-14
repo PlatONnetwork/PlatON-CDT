@@ -7,8 +7,8 @@
 
 namespace platon {
 
-template <typename value_type, typename gas_type>
-bool platon_migrate_contract(Address &addr, const bytes &init_args,
+template <typename args_type, typename value_type, typename gas_type>
+bool platon_migrate_contract(Address &addr, const args_type &init_args,
                              value_type value, gas_type gas) {
   // value and gas
   bytes value_bytes = value_to_bytes(value);
@@ -20,9 +20,9 @@ bool platon_migrate_contract(Address &addr, const bytes &init_args,
                           gas_bytes.data(), gas_bytes.size()) == 0;
 }
 
-template <typename value_type, typename gas_type>
+template <typename args_type, typename value_type, typename gas_type>
 bool platon_migrate_contract(Address &addr, const Address &new_addr,
-                             const bytes &init_args, value_type value,
+                             const args_type &init_args, value_type value,
                              gas_type gas) {
   // value and gas
   bytes value_bytes = value_to_bytes(value);

@@ -56,5 +56,12 @@ example/*.json
 # test contract
 tests/deploy/build/
 
+# solidity compiler
+tests/deploy/solc-static-linux
+
 # node modules
 tests/deploy/node_modules/
+
+# go dependencies
+tools/platon-test/node/
+tools/platon-test/.idea/
