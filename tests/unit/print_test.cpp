@@ -105,19 +105,19 @@ TEST_CASE(print, address) {
       make_address("lat10jc0t4ndqarj4q6ujl3g3ycmufgc77epfda93y");
   platon::println("check result:", address_info.second ? "true" : "false");
   platon::println("address:", address_info.first.toString());
-  auto eip55_addr = "0x7cb0f5d66d07472a835c97e288931be2518f7b21";
+  auto eip55_addr = "0x7cB0f5D66D07472A835C97e288931BE2518f7b21";
+  std::string eth_str_address = address_info.first.toEthAddress();
   platon::println("address:", address_info.first.toEthAddress());
   ASSERT_EQ(address_info.second, true);
   ASSERT_EQ(address_info.first.toEthAddress(), eip55_addr);
-
-  std::string eth_str_address = address_info.first.toEthAddress();
-  platon::println("address:", address_info.first.toEthAddress());
 
   auto address_same_info =
       make_address("lat10jc0t4ndqarj4q6ujl3g3ycmufgc77epfda93y");
   platon::println("check same:", address_info.first == address_same_info.first
                                      ? "true"
                                      : "false");
+  
+  ASSERT_EQ(address_info.first, address_same_info.first);
   platon::println(
       "check not same:",
       address_info.first != address_same_info.first ? "true" : "false");
@@ -126,6 +126,8 @@ TEST_CASE(print, address) {
   platon::println("check same:", address_info.first == address_same_info_eth.first
                                      ? "true"
                                      : "false");
+  
+  ASSERT_EQ(address_info.first, address_same_info_eth.first);
   platon::println(
       "check not same:",
       address_info.first != address_same_info_eth.first ? "true" : "false");
@@ -135,6 +137,7 @@ TEST_CASE(print, address) {
   platon::println("check same:", address_info.first == address_other_info.first
                                      ? "true"
                                      : "false");
+  ASSERT_NE(address_info.first, address_other_info.first);
   platon::println(
       "check not same:",
       address_info.first != address_other_info.first ? "true" : "false");
