@@ -39,7 +39,7 @@ func NewMockStateDB() *MockStateDB {
 }
 
 func (s *MockStateDB) GetCurrentActiveVersion() uint32 {
-	return params.FORKVERSION_0_16_0
+	return params.FORKVERSION_1_1_0
 }
 
 func (s *MockStateDB) Prepare(thash, bhash common.Hash, ti int) {
