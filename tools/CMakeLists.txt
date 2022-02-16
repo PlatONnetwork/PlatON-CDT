@@ -1,7 +1,6 @@
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/)
 
 add_subdirectory(platon-cpp)
-add_subdirectory(platon-sol)
 
 option(TEST "This is a default option for TEST" OFF)
 message(STATUS "build platon test switch TEST: ${TEST}")
