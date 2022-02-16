@@ -105,6 +105,10 @@ TEST_CASE(print, address) {
       make_address("lat10jc0t4ndqarj4q6ujl3g3ycmufgc77epfda93y");
   platon::println("check result:", address_info.second ? "true" : "false");
   platon::println("address:", address_info.first.toString());
+  auto eip55_addr = "0x7cb0f5d66d07472a835c97e288931be2518f7b21";
+  platon::println("address:", address_info.first.toEthAddress());
+  ASSERT_EQ(address_info.second, true);
+  ASSERT_EQ(address_info.first.toEthAddress(), eip55_addr);
 
   std::string eth_str_address = address_info.first.toEthString();
   platon::println("address:", address_info.first.toEthString());

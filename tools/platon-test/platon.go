@@ -15,7 +15,6 @@ func init()  {
 		core.CompileCmd,
 		core.ExecCmd,
 		core.TestCmd,
-		core.ExecSolCmd,
 	}
 }
 func main() {

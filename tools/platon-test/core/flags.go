@@ -12,11 +12,6 @@ var WasmFileFlag = cli.StringFlag{
 	Usage: "wasm test file",
 }
 
-var SolFileFlag = cli.StringFlag{
-	Name:  "file",
-	Usage: "solidity test file",
-}
-
 var OutputFlag = cli.StringFlag{
 	Name:  "output",
 	Usage: "compile wasm test directory",
