@@ -26,7 +26,8 @@ namespace platon {
  * @return Parameter byte array
  */
 template <typename... Args>
-inline bytes cross_call_args(const std::string &method, const Args &... args) {
+inline bytes cross_call_args(const std::string &method,
+                                     const Args &... args) {
   uint64_t t_method = Name(method).value;
   RLPStream stream;
   std::tuple<Args...> tuple_args = std::make_tuple(args...);
@@ -38,7 +39,7 @@ inline bytes cross_call_args(const std::string &method, const Args &... args) {
   stream.reserve(rlps.size());
   stream << t_method;
   boost::fusion::for_each(tuple_args, [&](const auto &i) { stream << i; });
-  return bytes(stream.out().begin(), stream.out().end());
+  return stream.out().toBytes();
 }
 
 /**
@@ -187,9 +188,11 @@ inline bool platon_call(const Address &addr, const value_type &value,
  */
 template <typename return_type, typename value_type, typename gas_type,
           typename... Args>
-inline auto platon_call_with_return_value(const Address &addr, const value_type &value,
-                        const gas_type &gas, const std::string &method,
-                        const Args &... args) {
+inline auto platon_call_with_return_value(const Address &addr,
+                                          const value_type &value,
+                                          const gas_type &gas,
+                                          const std::string &method,
+                                          const Args &... args) {
   bool result = platon_call(addr, value, gas, method, args...);
   if (!result) {
     return std::pair<return_type, bool>(return_type(), false);
@@ -260,9 +263,10 @@ inline bool platon_delegate_call(const Address &addr, const gas_type &gas,
  * @endcode
  */
 template <typename return_type, typename gas_type, typename... Args>
-inline auto platon_delegate_call_with_return_value(const Address &addr, const gas_type &gas,
-                                 const std::string &method,
-                                 const Args &... args) {
+inline auto platon_delegate_call_with_return_value(const Address &addr,
+                                                   const gas_type &gas,
+                                                   const std::string &method,
+                                                   const Args &... args) {
   bool result = platon_delegate_call(addr, gas, method, args...);
   if (!result) {
     return std::pair<return_type, bool>(return_type(), false);
