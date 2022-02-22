@@ -15,6 +15,7 @@
 - Git
 - Tar
 - Wget
+- Golang 1.14+
 
 ### Ubuntu
 
@@ -48,19 +49,30 @@ git checkout feature/wasm
 
     ``` sh
     mkdir build && cd build
-
+    cmake ..
     make -j
     sudo make install
     ```
 
-    一些常用选项:
+    一些常用 cmake 选项:
     - `-DTEST=ON` 构建单元测试模块，你需要首先安装go1.13及以上版本（默认不构建单元测试模块）。
     - `-DCMAKE_INSTALL_PREFIX=directory` 指定目录安装cdt相关工具和依赖库（默认`/usr/local`）。
     - `-DCDT_BUILD_TYPE=type` 构建类型的有效选项是Debug，Release。Debug模式断言检查会被启用，日志文件会打印调试和错误信息。（默认是Release）。
 
+    如果构建单元测试模块，需要在 ./tools/platon-test/node 目录中下载 Alaya-Go，并在下载完成后编译。
+
+    ```shell
+    cd tools/platon-test && mkdir node && cd node
+    git clone git@github.com:AlayaNetwork/Alaya-Go.git --recursive
+    cd Alaya-Go
+    git checkout ${BRANCH}
+    make all
+    ```
+
+
 ## 使用
 
-在使用PlatON-CDT之前必须将PlatON-CDT编译生成的执行文件路径加到PATH环境变量中.
+如果使用 CMAKE_INSTALL_PREFIX 选项指定安装目录，在使用PlatON-CDT之前必须将PlatON-CDT编译生成的执行文件路径加到PATH环境变量中（默认安装在 /usr/local/bin 目录）。
 
 ``` sh
 platon-cpp test.cpp

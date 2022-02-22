@@ -65,6 +65,31 @@ inline bytes fromHex(std::string const &_s) {
 }
 
 /**
+ * @brief Convert to bytes represented by hex string s.
+ * @param _s Hex string.
+ * @param ret Bytes array
+ * @param left_align Alignment
+ * @return The bytes represented by the hexadecimal string s.
+ */
+template <unsigned N>
+constexpr inline void fromHex(std::string_view const &_s, std::array<byte, N>& ret, bool left_align = true) {
+  unsigned s = (_s.size() >= 2 && _s[0] == '0' && _s[1] == 'x') ? 2 : 0;
+  size_t len = ((_s.size() - s)+1)/2;
+  size_t index = left_align ? 0 : ret.size() - len;
+  if (_s.size() % 2) {
+    int h = fromHexChar(_s[s++]);
+    if (h != -1)
+      ret[index++] = h;
+  }
+  for (unsigned i = s; i < _s.size(); i += 2) {
+    int h = fromHexChar(_s[i]);
+    int l = fromHexChar(_s[i + 1]);
+    if (h != -1 && l != -1)
+      ret[index++] = (byte)(h * 16 + l);
+  }
+}
+
+/**
  * @brief Converts a string to a byte array containing the string's (byte) data.
  * @param _b A string.
  * @return Byte array of stringsByte array of strings.
