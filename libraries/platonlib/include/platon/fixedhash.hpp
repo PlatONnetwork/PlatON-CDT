@@ -6,6 +6,7 @@
 #include <vector>
 #include "bech32.hpp"
 #include "common.h"
+#include "chain.hpp"
 
 namespace platon {
 
@@ -13,8 +14,8 @@ template <unsigned N>
 class FixedHash {
  public:
   using iterator = typename std::array<byte, N>::iterator;
-  iterator begin() noexcept { return m_data.begin(); }
-  iterator end() noexcept { return m_data.end(); }
+  iterator begin() const noexcept { return m_data.begin(); }
+  iterator end() const noexcept { return m_data.end(); }
 
   using const_iterator = typename std::array<byte, N>::const_iterator;
   const_iterator cbegin() const noexcept { return m_data.cbegin(); }
@@ -29,10 +30,10 @@ class FixedHash {
 
   template <unsigned M>
   explicit FixedHash(FixedHash<M> const &h) {
-    m_data.fill(0);
     unsigned c = std::min(M, N);
-    for (unsigned i = 0; i < c; ++i) {
-      m_data[i] = h[i];
+    memcpy(m_data.data(), h.m_data.data(), c);
+    for (; c < N; ++c) {
+      m_data[c] = 0;
     }
   }
 
@@ -69,14 +70,25 @@ class FixedHash {
     }
   }
 
-  explicit FixedHash(const std::string &s, bool isHex = true)
+  explicit FixedHash(const std::string &s, bool isHex)
       : FixedHash(isHex ? fromHex(s) : asBytes(s)) {
     static_assert(
         20 != N,
         "Converting hexadecimal strings to addresses is not supported");
   }
 
+  constexpr explicit FixedHash(const std::string_view &s) {
+    fromHex<N>(s, m_data);
+  }
+
   std::string toString() const { return "0x" + toHex(m_data); }
+
+  std::string toHexString() const {
+    static_assert( 20 == N, "Converting hexadecimal strings to addresses is not supported");
+    return "0x" + toHex(m_data);
+  }
+
+  std::string toEthAddress() const;
 
   bytes toBytes() const { return bytes(data(), data() + N); }
   byte const *data() const { return m_data.data(); }
@@ -247,6 +259,15 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
   // The address string must begin with 0x and be 43 bytes in size
   static_assert(M - 1 == 42, "Incorrect string length");
 
+  if('0' == str_address[0] && 'x' == str_address[1]){
+    bytes bytes_address = fromHex(str_address);
+    if(20 == bytes_address.size()){
+      return std::make_pair(Address(bytes_address), true);
+    } else {
+      return std::make_pair(Address(), false);
+    }
+  }
+
 #ifdef TESTNET
   std::string hrp = "atx";
 #else
@@ -254,6 +275,32 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
 #endif
 
   return decode(str_address, hrp);
+}
+
+std::string getEIP55ChecksummedAddress(std::string const& _addr)
+{
+    std::string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
+
+    if(s.length() != 40 || s.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+    {
+        return "";
+    }
+	
+    byte byteshash[32];
+    platon_sha3(reinterpret_cast<const byte*>(s.data()), s.size(), byteshash, sizeof(byteshash));
+    h256 hash = h256(byteshash, sizeof(byteshash));
+
+    std::string ret = "0x";
+    for (unsigned i = 0; i < 40; ++i)
+    {
+        char addressCharacter = s[i];
+        uint8_t nibble = hash[i / 2u] >> (4u * (1u - (i % 2u))) & 0xf;
+        if (nibble >= 8)
+            ret += static_cast<char>(toupper(addressCharacter));
+        else
+            ret += static_cast<char>(tolower(addressCharacter));
+        }
+        return ret;
 }
 
 /**
@@ -267,6 +314,15 @@ std::pair<Address, bool> make_address(const char (&str_address)[M]) {
  * and the second indicates whether the conversion was successful.
  */
 inline std::pair<Address, bool> make_address(const std::string &str_address) {
+  if('0' == str_address[0] && 'x' == str_address[1]){
+    bytes bytes_address = fromHex(str_address);
+    if(20 == bytes_address.size()){
+      return std::make_pair(Address(bytes_address), true);
+    } else {
+      return std::make_pair(Address(), false);
+    }
+  }
+
 #ifdef TESTNET
   std::string hrp = "atx";
 #else
@@ -285,4 +341,12 @@ std::string FixedHash<20>::toString() const {
 #endif
   return encode(*this, hrp);
 }
+
+template <>
+std::string FixedHash<20>::toEthAddress() const {
+    std::string hexStr = this->toHexString();
+    return getEIP55ChecksummedAddress(hexStr);
+}
+
+
 }  // namespace platon

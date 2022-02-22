@@ -6,7 +6,7 @@ cd $( dirname "${BASH_SOURCE[0]}" )/..
 
 ROOT=`pwd`
 BUILD=$ROOT/build
-CPUS=`nproc --all`
+CPUS=`grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu`
 
 echo $ROOT
 
@@ -15,5 +15,6 @@ if [ -d $BUILD ]; then
 fi
 
 # mkdir and build
+git checkout alaya-master
 mkdir -p build && cd build && cmake .. && make -j$CPUS
 
